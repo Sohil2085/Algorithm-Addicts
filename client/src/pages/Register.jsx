@@ -81,43 +81,43 @@ const Register = () => {
             {/* Role selection */}
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
                 {ROLES.map(({ value, label, description, Icon }) => {
-                            const isSelected = formData.role === value;
-                            return (
-                                <button
-                                    key={value}
-                                    type="button"
-                                    onClick={() => setFormData({ ...formData, role: value })}
-                                    style={{
-                                        flex: 1,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        gap: '0.4rem',
-                                        padding: '0.85rem 0.5rem',
-                                        borderRadius: '12px',
-                                        border: isSelected
-                                            ? '1.5px solid #6366f1'
-                                            : '1.5px solid rgba(255,255,255,0.08)',
-                                        background: isSelected
-                                            ? 'rgba(99,102,241,0.12)'
-                                            : 'rgba(255,255,255,0.03)',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s ease',
-                                        boxShadow: isSelected ? '0 0 12px rgba(99,102,241,0.3)' : 'none',
-                                    }}
-                                >
-                                    {Icon && <Icon
-                                        size={22}
-                                        style={{ color: isSelected ? '#6366f1' : 'rgba(255,255,255,0.5)' }}
-                                    />}
+                    const isSelected = formData.role === value;
+                    return (
+                        <button
+                            key={value}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, role: value })}
+                            style={{
+                                flex: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                padding: '0.85rem 0.5rem',
+                                borderRadius: '12px',
+                                border: isSelected
+                                    ? '1.5px solid var(--accent)'
+                                    : '1.5px solid var(--cardBorder)',
+                                background: isSelected
+                                    ? 'rgba(99,102,241,0.12)'
+                                    : 'transparent',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                boxShadow: isSelected ? '0 0 12px rgba(99,102,241,0.3)' : 'none',
+                            }}
+                        >
+                            {Icon && <Icon
+                                size={22}
+                                style={{ color: isSelected ? 'var(--accent)' : 'var(--muted)' }}
+                            />}
                             <span style={{
                                 fontSize: '0.85rem',
                                 fontWeight: 600,
-                                color: isSelected ? '#ffffff' : 'rgba(255,255,255,0.6)',
+                                color: isSelected ? 'var(--text)' : 'var(--muted)',
                             }}>{label}</span>
                             <span style={{
                                 fontSize: '0.68rem',
-                                color: 'rgba(255,255,255,0.4)',
+                                color: 'var(--muted)',
                                 textAlign: 'center',
                                 lineHeight: 1.3,
                             }}>{description}</span>

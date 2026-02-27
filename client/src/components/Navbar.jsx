@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FeatureGuard } from '../context/FeatureContext';
 import ProfileBadge from './ProfileBadge';
+import ThemeToggle from './ThemeToggle';
 import { Menu, X, ShieldCheck } from 'lucide-react';
 import '../styles/landing.css';
 
@@ -38,19 +39,21 @@ const Navbar = () => {
                     onClick={() => navigate('/')}
                     className="cursor-pointer flex items-center gap-0"
                 >
-                    <span className="font-bold text-lg tracking-tight text-blue-400">Fin</span>
-                    <span className="font-bold text-lg tracking-tight text-white">Bridge</span>
+                    <span className="font-bold text-lg tracking-tight text-theme-accent">Fin</span>
+                    <span className="font-bold text-lg tracking-tight text-theme-text">Bridge</span>
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <div className="md:hidden">
-                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white p-1">
+                <div className="md:hidden flex items-center gap-3">
+                    <ThemeToggle />
+                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-theme-text p-1">
                         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                     </button>
                 </div>
 
                 {/* Right Buttons - Desktop */}
-                <div className="hidden md:flex gap-3 items-center">
+                <div className="hidden md:flex gap-4 items-center">
+                    <ThemeToggle />
                     {!user ? (
                         <>
                             <button
@@ -78,7 +81,7 @@ const Navbar = () => {
 
                 {/* Mobile Dropdown */}
                 {isMobileMenuOpen && (
-                    <div className="absolute top-[50px] left-0 right-0 border-b p-5 flex flex-col gap-3 md:hidden shadow-2xl" style={{ background: 'rgba(11,18,32,0.97)', borderColor: 'rgba(59,130,246,0.14)', backdropFilter: 'blur(18px)' }}>
+                    <div className="absolute top-[50px] left-0 right-0 border-b border-theme-border p-5 flex flex-col gap-3 md:hidden shadow-theme-md bg-theme-glass backdrop-blur-md">
                         {!user ? (
                             <>
                                 <button
@@ -113,24 +116,25 @@ const Navbar = () => {
 
     const linkClass = ({ isActive }) =>
         isActive
-            ? 'px-3 py-2 rounded-lg text-sm font-medium text-white bg-white/10 border border-white/10 transition-all block w-full text-left md:w-auto md:inline-block'
-            : 'px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all block w-full text-left md:w-auto md:inline-block';
+            ? 'px-3 py-2 rounded-lg text-sm font-medium text-theme-text bg-theme-elevated/40 border border-theme-border transition-all block w-full text-left md:w-auto md:inline-block'
+            : 'px-3 py-2 rounded-lg text-sm font-medium text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated/20 transition-all block w-full text-left md:w-auto md:inline-block';
 
     return (
-        <nav className="sticky top-0 z-50 w-full backdrop-blur-xl bg-slate-950/60 border-b border-white/10 px-6 py-3">
+        <nav className="sticky top-0 z-50 w-full backdrop-blur-xl bg-theme-bg/80 border-b border-theme-border px-6 py-3">
             <div className="flex justify-between items-center">
                 <div
                     className="cursor-pointer flex items-center gap-0"
                     onClick={() => navigate('/msme')}
                 >
-                    <span className="font-bold text-lg tracking-tight text-blue-400">Fin</span>
-                    <span className="font-bold text-lg tracking-tight text-white">Bridge</span>
+                    <span className="font-bold text-lg tracking-tight text-blue-500">Fin</span>
+                    <span className="font-bold text-lg tracking-tight text-theme-text">Bridge</span>
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <div className="md:hidden flex items-center gap-4">
+                <div className="md:hidden flex items-center gap-3">
+                    <ThemeToggle />
                     <ProfileBadge user={user} onLogout={handleLogout} profilePath="/profile" />
-                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white p-1">
+                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-theme-text p-1 hover:bg-theme-elevated/20 rounded-md">
                         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                     </button>
                 </div>
@@ -176,7 +180,8 @@ const Navbar = () => {
                             </NavLink>
                         </>
                     )}
-                    <div className="ml-3">
+                    <div className="ml-3 flex items-center gap-4">
+                        <ThemeToggle />
                         <ProfileBadge user={user} onLogout={handleLogout} profilePath="/profile" />
                     </div>
                 </div>
@@ -184,7 +189,7 @@ const Navbar = () => {
 
             {/* Mobile Dropdown */}
             {isMobileMenuOpen && (
-                <div className="md:hidden pt-4 pb-2 border-t border-white/10 mt-3 flex flex-col gap-2">
+                <div className="md:hidden pt-4 pb-2 border-t border-theme-border mt-3 flex flex-col gap-2">
                     {user.role === 'MSME' && (
                         <>
                             <NavLink to="/msme" end className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</NavLink>

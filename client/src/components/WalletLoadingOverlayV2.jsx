@@ -18,7 +18,7 @@ const WalletLoadingOverlayV2 = () => {
 
     return (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[1px]">
-            <div className="bg-slate-900/55 border border-white/10 rounded-2xl px-7 py-6 shadow-[0_0_70px_rgba(0,0,0,0.55)] backdrop-blur-xl flex flex-col items-center text-center w-[92%] max-w-md">
+            <div className="bg-slate-900/55 border border-theme-border rounded-2xl px-7 py-6 shadow-[0_0_70px_rgba(0,0,0,0.55)] backdrop-blur-xl flex flex-col items-center text-center w-[92%] max-w-md">
                 
                 {/* Loader Icon Block */}
                 <div className="relative h-20 w-20 mb-6">
@@ -47,7 +47,7 @@ const WalletLoadingOverlayV2 = () => {
                 </div>
                 
                 {/* Text Content */}
-                <h3 className="text-lg font-semibold text-white mb-1 flex items-center justify-center gap-1">
+                <h3 className="text-lg font-semibold text-theme-text mb-1 flex items-center justify-center gap-1">
                     Syncing Wallet Ledger
                     <span className="inline-flex w-4 text-left">
                         <span className="animate-[ping_1.4s_infinite] inline-block">.</span>
@@ -56,7 +56,7 @@ const WalletLoadingOverlayV2 = () => {
                     </span>
                 </h3>
                 
-                <p className="text-sm text-white/60 mb-3">
+                <p className="text-sm text-theme-text-muted mb-3">
                     Securing transactions • Updating balances
                 </p>
 
