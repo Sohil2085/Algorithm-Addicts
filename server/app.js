@@ -17,7 +17,11 @@ const app = express();
 // Middleware
 app.set("trust proxy", 1); // 🔥 Required for Render
 app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173", // Use environment variable for frontend origin
+    origin: [
+        "http://localhost:5173",
+        "https://algorithm-addicts.vercel.app",
+        process.env.CLIENT_URL
+    ].filter(Boolean), // Allow localhost, vercel, and any custom env URL
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true
 }));
