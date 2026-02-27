@@ -69,18 +69,18 @@ const Profile = () => {
     /* Smart GSTIN display logic */
     const gstinDisplay = (() => {
         if (u.gstin) return u.gstin;
-        if (u.kycStatus === 'VERIFIED') return 'Verified (on file)';
-        if (u.kycStatus === 'IN_PROGRESS') return 'Pending admin review';
-        if (u.kycStatus === 'REJECTED') return 'Not accepted — resubmit KYC';
+        if (u.kycStatus === 'VERIFIED')     return 'Verified (on file)';
+        if (u.kycStatus === 'IN_PROGRESS')  return 'Pending admin review';
+        if (u.kycStatus === 'REJECTED')     return 'Not accepted — resubmit KYC';
         return 'Not Provided';
     })();
 
     const gstinColor = u.gstin
         ? 'text-white'
-        : u.kycStatus === 'VERIFIED' ? 'text-emerald-400'
-            : u.kycStatus === 'IN_PROGRESS' ? 'text-amber-400'
-                : u.kycStatus === 'REJECTED' ? 'text-red-400'
-                    : 'text-white/40';
+        : u.kycStatus === 'VERIFIED'    ? 'text-emerald-400'
+        : u.kycStatus === 'IN_PROGRESS' ? 'text-amber-400'
+        : u.kycStatus === 'REJECTED'    ? 'text-red-400'
+        : 'text-white/40';
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-slate-950 py-12 px-4 sm:px-6">

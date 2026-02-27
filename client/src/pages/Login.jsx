@@ -41,6 +41,8 @@ const Login = () => {
                 navigate('/lender');
             } else if (response.user.role === 'ADMIN') {
                 navigate('/admin');
+            } else if (response.user.role === 'CONTROLLER') {
+                navigate('/system-control');
             } else {
                 toast.error('Unknown role encountered');
             }

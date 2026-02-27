@@ -241,8 +241,8 @@ const LenderOnboardingPage = () => {
                                                 key={type.value}
                                                 onClick={() => handleLenderTypeSelection(type.value)}
                                                 className={`p-5 rounded-2xl border text-left transition-all group hover:-translate-y-1 hover:shadow-lg ${formData.lenderType === type.value
-                                                    ? 'bg-blue-600/10 border-blue-500 shadow-blue-500/20'
-                                                    : 'bg-slate-950 border-white/10 hover:border-white/30'
+                                                        ? 'bg-blue-600/10 border-blue-500 shadow-blue-500/20'
+                                                        : 'bg-slate-950 border-white/10 hover:border-white/30'
                                                     }`}
                                             >
                                                 <div className="flex items-center justify-between">
