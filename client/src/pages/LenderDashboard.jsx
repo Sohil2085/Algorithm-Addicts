@@ -19,8 +19,8 @@ import RiskBadge from '../components/RiskBadge';
 import { useAuth } from '../context/AuthContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
 import toast from 'react-hot-toast';
+import { getAvailableInvoices } from '../api/invoiceApi';
 import '../styles/landing.css';
-
 // ─── Static Dummy Data ────────────────────────────────────────────────────────
 // TODO: Replace with API calls when backend bidding endpoints are ready
 
@@ -156,7 +156,30 @@ const TABS = [
 
 const InvoiceDetailPanel = ({ invoice, onClose }) => {
     if (!invoice) return null;
-    const details = DUMMY_INVOICE_DETAILS[invoice.id] || DUMMY_INVOICE_DETAILS['a3f9b1']; // Fallback for demo
+
+    const isMock = invoice.expectedReturn !== undefined && !invoice.original;
+    const dummyDetails = isMock ? (DUMMY_INVOICE_DETAILS[invoice.id] || DUMMY_INVOICE_DETAILS['a3f9b1']) : null;
+
+    // Extract real info based on backend structure
+    const kyc = !isMock && invoice.original?.user?.kyc ? invoice.original.user.kyc : {};
+    const msmeName = kyc.businessName || kyc.legalName || invoice.msmeName || 'Unknown MSME';
+    const sector = !isMock ? 'General Sector' : dummyDetails.sector;
+    const location = kyc.stateCode ? `State Code: ${kyc.stateCode}` : (isMock ? dummyDetails.location : 'India');
+    const revenueStr = kyc.turnover ? `₹${(kyc.turnover / 100000).toFixed(1)}L` : (isMock ? dummyDetails.financials.revenue : 'N/A');
+    const expectedReturnStr = invoice.expectedReturn || (invoice.riskLevel === 'HIGH' ? 18.5 : invoice.riskLevel === 'MEDIUM' ? 14.0 : 9.5);
+
+    // Fraud checks formatting
+    const isFraudWarning = invoice.fraudScore > 20;
+    const fraudStatusText = isFraudWarning ? 'WARNING' : 'PASSED';
+
+    let fraudFlags = isMock ? dummyDetails.fraudCheck.flags : [];
+    if (!isMock && invoice.breakdown?.fraudChecks) {
+        fraudFlags = Object.entries(invoice.breakdown.fraudChecks)
+            .filter(([k, v]) => !v)
+            .map(([k]) => k.replace(/_/g, ' '));
+    }
+
+    const docs = isMock ? dummyDetails.documents : ['Invoice_Copy.pdf', 'GST_Certificate.pdf'];
 
     return (
         <div className="fixed inset-0 z-50 flex justify-end">
@@ -167,12 +190,12 @@ const InvoiceDetailPanel = ({ invoice, onClose }) => {
                 <div className="p-6 border-b border-cardBorder flex items-start justify-between bg-bg0/50 backdrop-blur-md sticky top-0 z-10">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            <span className="text-xs font-mono text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20">#{invoice.id}</span>
+                            <span className="text-xs font-mono text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20">#{invoice.id.substring(0, 8)}</span>
                             <span className="text-xs text-muted flex items-center gap-1"><Clock size={12} /> Due {new Date(invoice.dueDate).toLocaleDateString()}</span>
                         </div>
-                        <h2 className="text-2xl font-bold text-white leading-tight">{invoice.msmeName}</h2>
+                        <h2 className="text-2xl font-bold text-white leading-tight">{msmeName}</h2>
                         <div className="flex items-center gap-2 mt-2 text-sm text-muted">
-                            <Building size={14} /> {details.sector} • {details.location}
+                            <Building size={14} /> {sector} • {location}
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-muted hover:text-white transition-colors">
@@ -190,7 +213,7 @@ const InvoiceDetailPanel = ({ invoice, onClose }) => {
                         </div>
                         <div className="p-4 rounded-xl bg-success/5 border border-success/20">
                             <p className="text-xs text-muted uppercase tracking-wider mb-1">Expected Return</p>
-                            <p className="text-2xl font-bold text-success">{invoice.expectedReturn}%</p>
+                            <p className="text-2xl font-bold text-success">{expectedReturnStr}%</p>
                         </div>
                     </div>
 
@@ -211,15 +234,19 @@ const InvoiceDetailPanel = ({ invoice, onClose }) => {
                             </div>
                             <div className="flex items-center justify-between border-t border-cardBorder pt-4">
                                 <span className="text-sm text-muted">Fraud Check</span>
-                                <span className={`flex items-center gap-1.5 text-sm font-semibold ${details.fraudCheck.status === 'PASSED' ? 'text-success' : 'text-warning'}`}>
-                                    {details.fraudCheck.status === 'PASSED' ? <CheckCircle size={14} /> : <AlertOctagon size={14} />}
-                                    {details.fraudCheck.status}
+                                <span className={`flex items-center gap-1.5 text-sm font-semibold ${fraudStatusText === 'PASSED' ? 'text-success' : 'text-warning'}`}>
+                                    {fraudStatusText === 'PASSED' ? <CheckCircle size={14} /> : <AlertOctagon size={14} />}
+                                    {fraudStatusText}
                                 </span>
                             </div>
-                            {details.fraudCheck.flags.length > 0 && (
+                            {fraudFlags.length > 0 && (
                                 <div className="bg-warning/10 border border-warning/20 p-3 rounded-lg flex items-start gap-2">
-                                    <AlertTriangle size={14} className="text-warning mt-0.5" />
-                                    <p className="text-xs text-warning/90">{details.fraudCheck.flags[0]}</p>
+                                    <AlertTriangle size={14} className="text-warning mt-0.5 min-w-fit" />
+                                    <div className="flex flex-col gap-1">
+                                        {fraudFlags.map((flag, idx) => (
+                                            <p key={idx} className="text-xs text-warning/90 capitalize">{flag}</p>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -233,15 +260,15 @@ const InvoiceDetailPanel = ({ invoice, onClose }) => {
                         <div className="grid grid-cols-3 gap-4">
                             <div className="p-3 bg-bg0 rounded-lg border border-cardBorder text-center">
                                 <p className="text-xs text-muted mb-1">Annual Revenue</p>
-                                <p className="text-sm font-semibold text-white">{details.financials.revenue}</p>
+                                <p className="text-sm font-semibold text-white">{revenueStr}</p>
                             </div>
-                            <div className="p-3 bg-bg0 rounded-lg border border-cardBorder text-center">
+                            <div className="p-3 bg-bg0 rounded-lg border border-cardBorder text-center line-through opacity-50" title="Not available in current integration">
                                 <p className="text-xs text-muted mb-1">Net Profit</p>
-                                <p className="text-sm font-semibold text-white">{details.financials.profit}</p>
+                                <p className="text-sm font-semibold text-white">N/A</p>
                             </div>
-                            <div className="p-3 bg-bg0 rounded-lg border border-cardBorder text-center">
+                            <div className="p-3 bg-bg0 rounded-lg border border-cardBorder text-center line-through opacity-50" title="Not available in current integration">
                                 <p className="text-xs text-muted mb-1">YoY Growth</p>
-                                <p className="text-sm font-semibold text-success">{details.financials.yoyGrowth}</p>
+                                <p className="text-sm font-semibold text-success">N/A</p>
                             </div>
                         </div>
                     </div>
@@ -252,7 +279,7 @@ const InvoiceDetailPanel = ({ invoice, onClose }) => {
                             <FileText size={16} className="text-accent" /> Verified Documents
                         </h3>
                         <div className="space-y-2">
-                            {details.documents.map((doc, i) => (
+                            {docs.map((doc, i) => (
                                 <div key={i} className="flex items-center justify-between p-3 bg-card border border-cardBorder rounded-lg hover:border-accent/40 transition-colors cursor-pointer group">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-accent/10 rounded-lg text-accent">
@@ -392,13 +419,14 @@ const OverviewSection = ({ onExploreMarketplace }) => (
     </div>
 );
 
-const MarketplaceSection = ({ onSelectInvoice }) => {
+const MarketplaceSection = ({ onSelectInvoice, availableInvoices = [] }) => {
     const [search, setSearch] = useState('');
     const [riskFilter, setRiskFilter] = useState('ALL');
 
-    const filtered = DUMMY_AVAILABLE_INVOICES.filter(inv => {
+    const filtered = availableInvoices.filter(inv => {
+        const msmeName = inv.original?.user?.kyc?.businessName || inv.original?.user?.kyc?.legalName || inv.msmeName || 'Unknown MSME';
         const matchSearch =
-            inv.msmeName.toLowerCase().includes(search.toLowerCase()) ||
+            msmeName.toLowerCase().includes(search.toLowerCase()) ||
             inv.id.includes(search.toLowerCase());
         const matchRisk = riskFilter === 'ALL' || inv.riskLevel === riskFilter;
         return matchSearch && matchRisk;
@@ -458,47 +486,51 @@ const MarketplaceSection = ({ onSelectInvoice }) => {
                                         No invoices match your search.
                                     </td>
                                 </tr>
-                            ) : filtered.map((inv) => (
-                                <tr key={inv.id} className="hover:bg-accent/5 transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">#{inv.id}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{inv.msmeName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
-                                        ₹{Number(inv.amount).toLocaleString('en-IN')}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                                        {new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-16 bg-bg1 rounded-full h-1.5 overflow-hidden">
-                                                <div
-                                                    className={`h-1.5 rounded-full ${inv.creditScore >= 80 ? 'bg-success' : inv.creditScore >= 55 ? 'bg-warning' : 'bg-danger'}`}
-                                                    style={{ width: `${inv.creditScore}%` }}
-                                                />
+                            ) : filtered.map((inv) => {
+                                const msmeName = inv.original?.user?.kyc?.businessName || inv.original?.user?.kyc?.legalName || inv.msmeName || 'Unknown MSME';
+                                const expReturn = inv.expectedReturn || (inv.riskLevel === 'HIGH' ? 18.5 : inv.riskLevel === 'MEDIUM' ? 14.0 : 9.5);
+                                return (
+                                    <tr key={inv.id} className="hover:bg-accent/5 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">#{inv.id.substring(0, 6)}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{msmeName}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                                            ₹{Number(inv.amount).toLocaleString('en-IN')}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                            {new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-16 bg-bg1 rounded-full h-1.5 overflow-hidden">
+                                                    <div
+                                                        className={`h-1.5 rounded-full ${inv.creditScore >= 80 ? 'bg-success' : inv.creditScore >= 55 ? 'bg-warning' : 'bg-danger'}`}
+                                                        style={{ width: `${inv.creditScore}%` }}
+                                                    />
+                                                </div>
+                                                <span className="text-xs text-muted">{inv.creditScore}</span>
                                             </div>
-                                            <span className="text-xs text-muted">{inv.creditScore}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <RiskBadge level={inv.riskLevel} />
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm font-semibold text-success">{inv.expectedReturn}%</span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={() => onSelectInvoice(inv)}
-                                                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-cardBorder text-muted hover:text-white hover:border-accent/40 transition-all flex items-center gap-1">
-                                                <Eye size={13} /> View
-                                            </button>
-                                            <button className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
-                                                <Zap size={13} /> Fund Now
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <RiskBadge level={inv.riskLevel} />
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-sm font-semibold text-success">{expReturn}%</span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => onSelectInvoice(inv)}
+                                                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-cardBorder text-muted hover:text-white hover:border-accent/40 transition-all flex items-center gap-1">
+                                                    <Eye size={13} /> View
+                                                </button>
+                                                <button className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
+                                                    <Zap size={13} /> Fund Now
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
@@ -780,6 +812,7 @@ const LenderDashboard = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('overview');
     const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const [availableInvoices, setAvailableInvoices] = useState([]);
 
     const kycStatus = user?.kycStatus || 'NOT_SUBMITTED';
     const isKycVerified = kycStatus === 'VERIFIED';
@@ -816,6 +849,21 @@ const LenderDashboard = () => {
         }
     }, [kycStatus]);
 
+    useEffect(() => {
+        const fetchMarketplace = async () => {
+            if (isKycVerified) {
+                try {
+                    const invoices = await getAvailableInvoices();
+                    setAvailableInvoices(invoices);
+                } catch (error) {
+                    toast.error('Failed to load available invoices');
+                    console.error(error);
+                }
+            }
+        };
+        fetchMarketplace();
+    }, [isKycVerified]);
+
     // ── Marketplace KYC Gate Banner ───────────────────────────────────────────
     const MarketplaceKycBanner = () => (
         <div className="flex flex-col items-center justify-center py-20 space-y-6 text-center">
@@ -828,8 +876,8 @@ const LenderDashboard = () => {
                     {kycStatus === 'IN_PROGRESS'
                         ? 'Your KYC is currently under review. Marketplace access will be unlocked once verified by our team.'
                         : kycStatus === 'REJECTED'
-                        ? 'Your KYC was rejected. Please resubmit your details to regain marketplace access.'
-                        : 'Please complete your KYC verification to access the invoice marketplace.'}
+                            ? 'Your KYC was rejected. Please resubmit your details to regain marketplace access.'
+                            : 'Please complete your KYC verification to access the invoice marketplace.'}
                 </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -854,7 +902,7 @@ const LenderDashboard = () => {
         switch (activeTab) {
             case 'overview': return <OverviewSection onExploreMarketplace={() => setActiveTab('marketplace')} />;
             case 'marketplace': return isKycVerified
-                ? <MarketplaceSection onSelectInvoice={setSelectedInvoice} />
+                ? <MarketplaceSection onSelectInvoice={setSelectedInvoice} availableInvoices={availableInvoices} />
                 : <MarketplaceKycBanner />;
             case 'investments': return <InvestmentsSection />;
             case 'meetings': return <MeetingsSection />;
@@ -882,74 +930,74 @@ const LenderDashboard = () => {
                         display: loading ? 'none' : undefined,
                     }}
                 >
-            {/* Invoice Detail Panel Overlay */}
-            {selectedInvoice && (
-                <InvoiceDetailPanel
-                    invoice={selectedInvoice}
-                    onClose={() => setSelectedInvoice(null)}
-                />
-            )}
-            {/* Page Header — same pattern as MSMEDashboard */}
-            <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
-                <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-medium mb-4">
-                        <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
-                        Lender Dashboard
-                    </div>
-                    <h1 className="text-4xl font-semibold text-white tracking-tight">
-                        Welcome back,{' '}
-                        <span className="text-blue-400">{user?.name || 'Lender'}</span>
-                    </h1>
-                    <p className="text-white/60 mt-2 text-sm">Here's what's happening with your investments today.</p>
-                </div>
+                    {/* Invoice Detail Panel Overlay */}
+                    {selectedInvoice && (
+                        <InvoiceDetailPanel
+                            invoice={selectedInvoice}
+                            onClose={() => setSelectedInvoice(null)}
+                        />
+                    )}
+                    {/* Page Header — same pattern as MSMEDashboard */}
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-medium mb-4">
+                                <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+                                Lender Dashboard
+                            </div>
+                            <h1 className="text-4xl font-semibold text-white tracking-tight">
+                                Welcome back,{' '}
+                                <span className="text-blue-400">{user?.name || 'Lender'}</span>
+                            </h1>
+                            <p className="text-white/60 mt-2 text-sm">Here's what's happening with your investments today.</p>
+                        </div>
 
-                {/* KYC CTA — amber pulsing button identical to MSME */}
-                {!isKycVerified ? (
-                    <div className="shrink-0 flex flex-col items-end gap-2 text-right">
-                        <button
-                            onClick={() => navigate('/lender/kyc')}
-                            className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-medium px-6 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm animate-pulse"
-                        >
-                            <Briefcase size={16} />
-                            Complete KYC to Unlock Marketplace
-                        </button>
-                        <span className="text-amber-400/80 text-xs font-medium bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">
-                            Current Status: {kycStatus?.replace('_', ' ') || 'NOT SUBMITTED'}
-                        </span>
+                        {/* KYC CTA — amber pulsing button identical to MSME */}
+                        {!isKycVerified ? (
+                            <div className="shrink-0 flex flex-col items-end gap-2 text-right">
+                                <button
+                                    onClick={() => navigate('/lender/kyc')}
+                                    className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-medium px-6 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm animate-pulse"
+                                >
+                                    <Briefcase size={16} />
+                                    Complete KYC to Unlock Marketplace
+                                </button>
+                                <span className="text-amber-400/80 text-xs font-medium bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">
+                                    Current Status: {kycStatus?.replace('_', ' ') || 'NOT SUBMITTED'}
+                                </span>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold shrink-0">
+                                <ShieldCheck size={14} />
+                                KYC Verified
+                            </div>
+                        )}
                     </div>
-                ) : (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold shrink-0">
-                        <ShieldCheck size={14} />
-                        KYC Verified
+
+                    {/* Tab Navigation */}
+                    <div className="border-b border-cardBorder">
+                        <div className="flex gap-0 overflow-x-auto">
+                            {TABS.map(tab => {
+                                const Icon = tab.icon;
+                                const isActive = activeTab === tab.id;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${isActive
+                                            ? 'border-accent text-accent'
+                                            : 'border-transparent text-muted hover:text-white hover:border-muted/30'
+                                            }`}
+                                    >
+                                        <Icon size={15} />
+                                        {tab.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                )}
-            </div>
 
-            {/* Tab Navigation */}
-            <div className="border-b border-cardBorder">
-                <div className="flex gap-0 overflow-x-auto">
-                    {TABS.map(tab => {
-                        const Icon = tab.icon;
-                        const isActive = activeTab === tab.id;
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${isActive
-                                    ? 'border-accent text-accent'
-                                    : 'border-transparent text-muted hover:text-white hover:border-muted/30'
-                                    }`}
-                            >
-                                <Icon size={15} />
-                                {tab.label}
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Active Section */}
-            {renderSection()}
+                    {/* Active Section */}
+                    {renderSection()}
                 </div>
             </div>
         </div>

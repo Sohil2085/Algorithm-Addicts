@@ -152,3 +152,30 @@ export const getInvoiceById = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
+/**
+ * Get available VERIFIED invoices for Lenders
+ */
+export const getAvailableInvoices = async (req, res) => {
+    try {
+        const invoices = await prisma.invoice.findMany({
+            where: { status: 'VERIFIED' },
+            include: {
+                user: {
+                    include: {
+                        kyc: true
+                    }
+                },
+                risk_analysis: true,
+                credit_score: true, // Legacy compatibility
+                fraud_flags: true   // Legacy compatibility
+            },
+            orderBy: { created_at: 'desc' }
+        });
+
+        res.json(invoices);
+    } catch (error) {
+        console.error("Get Available Invoices Error:", error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
