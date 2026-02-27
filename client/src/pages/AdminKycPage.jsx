@@ -79,28 +79,28 @@ const AdminKycPage = () => {
             <div className="flex items-center gap-4 mb-6">
                 <button
                     onClick={() => navigate('/admin')}
-                    className="p-2 hover:bg-white/5 rounded-lg text-white/60 hover:text-white transition-colors border border-white/10 bg-slate-900"
+                    className="p-2 hover:bg-theme-surface-hover rounded-lg text-theme-text-muted hover:text-theme-text transition-colors border border-theme-border bg-theme-surface"
                 >
                     <ArrowLeft size={18} />
                 </button>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">KYC Verification Inbox</h1>
-                    <p className="text-sm text-white/50">Review and manage MSME business KYC records.</p>
+                    <h1 className="text-2xl font-bold text-theme-text">KYC Verification Inbox</h1>
+                    <p className="text-sm text-theme-text-muted">Review and manage MSME business KYC records.</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-180px)] min-h-[600px]">
                 {/* Left Panel - List */}
-                <div className="lg:col-span-1 bg-slate-900 border border-white/5 rounded-2xl flex flex-col overflow-hidden">
+                <div className="lg:col-span-1 bg-theme-surface border border-white/5 rounded-2xl flex flex-col overflow-hidden">
                     <div className="p-4 border-b border-white/5 bg-white/[0.02]">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-muted" size={16} />
                             <input
                                 type="text"
                                 placeholder="Search by name, GSTIN..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-slate-950 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
+                                className="w-full bg-theme-bg border border-theme-border rounded-xl pl-9 pr-4 py-2 text-sm text-theme-text focus:outline-none focus:border-blue-500 transition-colors"
                             />
                         </div>
                     </div>
@@ -111,7 +111,7 @@ const AdminKycPage = () => {
                                 <div className="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full" />
                             </div>
                         ) : filteredRequests.length === 0 ? (
-                            <div className="p-8 text-center text-white/40">
+                            <div className="p-8 text-center text-theme-text-muted">
                                 <ShieldCheck size={32} className="mx-auto mb-3 opacity-20" />
                                 <p className="text-sm">No KYC records found.</p>
                             </div>
@@ -124,13 +124,13 @@ const AdminKycPage = () => {
                                         className={`w-full text-left p-4 transition-colors hover:bg-white/[0.04] ${selectedRequest?.id === req.id ? 'bg-blue-500/10 border-l-2 border-blue-500' : 'border-l-2 border-transparent'}`}
                                     >
                                         <div className="flex justify-between items-start mb-1">
-                                            <span className="font-semibold text-white truncate max-w-[180px]">{req.businessName}</span>
+                                            <span className="font-semibold text-theme-text truncate max-w-[180px]">{req.businessName}</span>
                                             {req.status === 'IN_PROGRESS' && <span className="text-xs bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded-full whitespace-nowrap">Pending</span>}
                                             {req.status === 'VERIFIED' && <span className="text-xs bg-emerald-500/20 text-emerald-500 px-2 py-0.5 rounded-full whitespace-nowrap">Verified</span>}
                                             {req.status === 'REJECTED' && <span className="text-xs bg-red-500/20 text-red-500 px-2 py-0.5 rounded-full whitespace-nowrap">Rejected</span>}
                                         </div>
-                                        <div className="text-xs text-white/50 truncate">{req.legalName}</div>
-                                        <div className="text-xs text-white/40 mt-2 font-mono">{req.gstNumber}</div>
+                                        <div className="text-xs text-theme-text-muted truncate">{req.legalName}</div>
+                                        <div className="text-xs text-theme-text-muted mt-2 font-mono">{req.gstNumber}</div>
                                     </button>
                                 ))}
                             </div>
@@ -139,9 +139,9 @@ const AdminKycPage = () => {
                 </div>
 
                 {/* Right Panel - Details */}
-                <div className="lg:col-span-2 bg-slate-900 border border-white/5 rounded-2xl flex flex-col overflow-hidden relative">
+                <div className="lg:col-span-2 bg-theme-surface border border-white/5 rounded-2xl flex flex-col overflow-hidden relative">
                     {!selectedRequest ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-white/30 h-full">
+                        <div className="flex-1 flex flex-col items-center justify-center text-theme-text-muted h-full">
                             <FileText size={48} className="mb-4 opacity-20" />
                             <p>Select a KYC request from the list to view details.</p>
                         </div>
@@ -155,27 +155,27 @@ const AdminKycPage = () => {
                                             <Building2 size={24} />
                                         </div>
                                         <div>
-                                            <h2 className="text-2xl font-bold text-white">{selectedRequest.businessName}</h2>
-                                            <p className="text-white/60 text-sm">Legal Entity: {selectedRequest.legalName}</p>
+                                            <h2 className="text-2xl font-bold text-theme-text">{selectedRequest.businessName}</h2>
+                                            <p className="text-theme-text-muted text-sm">Legal Entity: {selectedRequest.legalName}</p>
                                         </div>
                                     </div>
 
                                     {selectedRequest.status === 'IN_PROGRESS' && (
                                         <>
                                             {rejectingId === selectedRequest.id ? (
-                                                <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-lg border border-red-500/30">
+                                                <div className="flex items-center gap-2 bg-theme-bg p-1.5 rounded-lg border border-red-500/30">
                                                     <input
                                                         type="text"
                                                         placeholder="Reason for rejection..."
-                                                        className="bg-transparent border-none text-sm text-white focus:outline-none w-48 px-2"
+                                                        className="bg-transparent border-none text-sm text-theme-text focus:outline-none w-48 px-2"
                                                         value={rejectReason}
                                                         onChange={(e) => setRejectReason(e.target.value)}
                                                         autoFocus
                                                     />
-                                                    <button onClick={() => { setRejectingId(null); setRejectReason(''); }} className="text-white/40 hover:text-white/80 p-1">
+                                                    <button onClick={() => { setRejectingId(null); setRejectReason(''); }} className="text-theme-text-muted hover:text-theme-text-muted p-1">
                                                         <XCircle size={16} />
                                                     </button>
-                                                    <button onClick={() => handleReject(selectedRequest.id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">
+                                                    <button onClick={() => handleReject(selectedRequest.id)} className="bg-red-500 hover:bg-red-600 text-theme-text px-3 py-1.5 rounded text-sm font-medium transition-colors">
                                                         Confirm
                                                     </button>
                                                 </div>
@@ -183,13 +183,13 @@ const AdminKycPage = () => {
                                                 <>
                                                     <button
                                                         onClick={() => setRejectingId(selectedRequest.id)}
-                                                        className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all font-medium text-sm border border-red-500/20"
+                                                        className="flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-theme-text rounded-xl transition-all font-medium text-sm border border-red-500/20"
                                                     >
                                                         <XCircle size={16} /> Reject
                                                     </button>
                                                     <button
                                                         onClick={() => handleApprove(selectedRequest.id)}
-                                                        className="flex items-center gap-2 px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all font-medium text-sm shadow-lg shadow-emerald-500/20"
+                                                        className="flex items-center gap-2 px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-theme-text rounded-xl transition-all font-medium text-sm shadow-lg shadow-emerald-500/20"
                                                     >
                                                         <CheckCircle size={16} /> Approve Context
                                                     </button>
@@ -220,12 +220,12 @@ const AdminKycPage = () => {
                                     <ShieldCheck className="text-blue-400 mt-1 shrink-0" size={20} />
                                     <div>
                                         <h3 className="text-blue-400 font-semibold mb-1">Mandatory Background Check</h3>
-                                        <p className="text-white/70 text-sm mb-3">Please cross-reference the submitted GSTIN and PAN details with the official government portal before approving.</p>
+                                        <p className="text-theme-text-muted text-sm mb-3">Please cross-reference the submitted GSTIN and PAN details with the official government portal before approving.</p>
                                         <a
                                             href="https://services.gst.gov.in/services/searchtp"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 text-sm bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition-colors font-medium shadow-lg"
+                                            className="inline-flex items-center gap-2 text-sm bg-blue-600 hover:bg-blue-500 text-theme-text px-4 py-2 rounded-lg transition-colors font-medium shadow-lg"
                                         >
                                             Verify on GST Portal <ExternalLink size={14} />
                                         </a>
@@ -234,46 +234,46 @@ const AdminKycPage = () => {
 
                                 {/* Submitted Details Grid */}
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">Business Documentation</h3>
+                                    <h3 className="text-lg font-semibold text-theme-text mb-4 border-b border-theme-border pb-2">Business Documentation</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                         <div className="space-y-1">
-                                            <span className="text-white/40 text-xs flex items-center gap-1.5"><Hash size={12} /> GST Number</span>
-                                            <p className="text-white font-mono text-lg tracking-wider">{selectedRequest.gstNumber}</p>
+                                            <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><Hash size={12} /> GST Number</span>
+                                            <p className="text-theme-text font-mono text-lg tracking-wider">{selectedRequest.gstNumber}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-white/40 text-xs flex items-center gap-1.5"><Hash size={12} /> PAN Number</span>
-                                            <p className="text-white font-mono text-lg tracking-wider">{selectedRequest.panNumber}</p>
+                                            <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><Hash size={12} /> PAN Number</span>
+                                            <p className="text-theme-text font-mono text-lg tracking-wider">{selectedRequest.panNumber}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-white/40 text-xs flex items-center gap-1.5"><Calendar size={12} /> Business Start Date</span>
-                                            <p className="text-white">{new Date(selectedRequest.businessStartDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                            <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><Calendar size={12} /> Business Start Date</span>
+                                            <p className="text-theme-text">{new Date(selectedRequest.businessStartDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-white/40 text-xs flex items-center gap-1.5"><Building2 size={12} /> Annual Turnover</span>
-                                            <p className="text-white font-semibold text-emerald-400">₹{selectedRequest.turnover.toLocaleString()}</p>
+                                            <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><Building2 size={12} /> Annual Turnover</span>
+                                            <p className="text-theme-text font-semibold text-emerald-400">₹{selectedRequest.turnover.toLocaleString()}</p>
                                         </div>
                                         <div className="space-y-1 md:col-span-2">
-                                            <span className="text-white/40 text-xs flex items-center gap-1.5"><MapPin size={12} /> Registered Address (State Code: {selectedRequest.stateCode})</span>
-                                            <p className="text-white/90 bg-white/5 p-3 rounded-lg border border-white/5 mt-1">{selectedRequest.businessAddress}</p>
+                                            <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><MapPin size={12} /> Registered Address (State Code: {selectedRequest.stateCode})</span>
+                                            <p className="text-theme-text-muted bg-theme-surface-hover p-3 rounded-lg border border-white/5 mt-1">{selectedRequest.businessAddress}</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* User Meta Data */}
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">Account Meta</h3>
+                                    <h3 className="text-lg font-semibold text-theme-text mb-4 border-b border-theme-border pb-2">Account Meta</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                         <div className="space-y-1">
-                                            <span className="text-white/40 text-xs flex items-center gap-1.5"><User size={12} /> User Account Name</span>
-                                            <p className="text-white">{selectedRequest.user?.name}</p>
+                                            <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><User size={12} /> User Account Name</span>
+                                            <p className="text-theme-text">{selectedRequest.user?.name}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-white/40 text-xs">Registered Email</span>
-                                            <p className="text-white">{selectedRequest.user?.email}</p>
+                                            <span className="text-theme-text-muted text-xs">Registered Email</span>
+                                            <p className="text-theme-text">{selectedRequest.user?.email}</p>
                                         </div>
                                         <div className="space-y-1">
-                                            <span className="text-white/40 text-xs flex items-center gap-1.5"><Calendar size={12} /> Request Submitted On</span>
-                                            <p className="text-white">{new Date(selectedRequest.createdAt).toLocaleString()}</p>
+                                            <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><Calendar size={12} /> Request Submitted On</span>
+                                            <p className="text-theme-text">{new Date(selectedRequest.createdAt).toLocaleString()}</p>
                                         </div>
                                     </div>
                                 </div>

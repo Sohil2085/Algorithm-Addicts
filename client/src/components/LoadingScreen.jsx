@@ -24,7 +24,7 @@ const LoadingScreen = ({ isLoading }) => {
                         className="text-center"
                     >
                         {/* Title - Text Only */}
-                        <h1 className="text-6xl font-extrabold text-white tracking-tight mb-4" style={{ letterSpacing: '-0.02em' }}>
+                        <h1 className="text-6xl font-extrabold text-theme-text tracking-tight mb-4" style={{ letterSpacing: '-0.02em' }}>
                             FinBridge
                         </h1>
 

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FeatureProvider, FeatureGuard } from './context/FeatureContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -81,83 +82,100 @@ const PublicRoute = ({ children }) => {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <FeatureProvider>
-          <Navbar />
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: '#1e293b',
-                color: '#fff',
-                border: '1px solid rgba(148, 163, 184, 0.1)',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#22c55e',
-                  secondary: '#fff',
+      <ThemeProvider>
+        <AuthProvider>
+          <FeatureProvider>
+            <Navbar />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: {
+                  background: '#1e293b',
+                  color: '#fff',
+                  border: '1px solid rgba(148, 163, 184, 0.1)',
                 },
-              },
-              error: {
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: '#fff',
+                success: {
+                  iconTheme: {
+                    primary: '#22c55e',
+                    secondary: '#fff',
+                  },
                 },
-              },
-            }}
-          />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={
-              <PublicRoute>
-                <Landing />
-              </PublicRoute>
-            } />
-            <Route path="/login" element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            } />
-            <Route path="/register" element={
-              <PublicRoute>
-                <Register />
-              </PublicRoute>
-            } />
+                error: {
+                  iconTheme: {
+                    primary: '#ef4444',
+                    secondary: '#fff',
+                  },
+                },
+              }}
+            />
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={
+                <PublicRoute>
+                  <Landing />
+                </PublicRoute>
+              } />
+              <Route path="/login" element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              } />
+              <Route path="/register" element={
+                <PublicRoute>
+                  <Register />
+                </PublicRoute>
+              } />
 
-            {/* Protected Routes - MSME */}
-            <Route path="/msme" element={
-              <ProtectedRoute allowedRoles={['MSME']}>
-                <MSMEDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/upload-invoice" element={
-              <ProtectedRoute allowedRoles={['MSME']}>
-                <UploadInvoice />
-              </ProtectedRoute>
-            } />
-            <Route path="/invoices" element={
-              <ProtectedRoute allowedRoles={['MSME']}>
-                <InvoiceList />
-              </ProtectedRoute>
-            } />
-            <Route path="/kyc" element={
-              <ProtectedRoute allowedRoles={['MSME']}>
-                <KycForm />
-              </ProtectedRoute>
-            } />
+              {/* Protected Routes - MSME */}
+              <Route path="/msme" element={
+                <ProtectedRoute allowedRoles={['MSME']}>
+                  <MSMEDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/upload-invoice" element={
+                <ProtectedRoute allowedRoles={['MSME']}>
+                  <UploadInvoice />
+                </ProtectedRoute>
+              } />
+              <Route path="/invoices" element={
+                <ProtectedRoute allowedRoles={['MSME']}>
+                  <InvoiceList />
+                </ProtectedRoute>
+              } />
+              <Route path="/kyc" element={
+                <ProtectedRoute allowedRoles={['MSME']}>
+                  <KycForm />
+                </ProtectedRoute>
+              } />
 
-            {/* Protected Routes - Lender */}
-            <Route path="/lender" element={
-              <ProtectedRoute allowedRoles={['LENDER']}>
-                <LenderDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/lender/kyc" element={
-              <ProtectedRoute allowedRoles={['LENDER']}>
-                <LenderOnboardingPage />
-              </ProtectedRoute>
-            } />
+              {/* Protected Routes - Lender */}
+              <Route path="/lender" element={
+                <ProtectedRoute allowedRoles={['LENDER']}>
+                  <LenderDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/lender/kyc" element={
+                <ProtectedRoute allowedRoles={['LENDER']}>
+                  <LenderOnboardingPage />
+                </ProtectedRoute>
+              } />
 
+              {/* Protected Routes - Admin */}
+              <Route path="/admin" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/kyc" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <AdminKycPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/lender-kyc" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <AdminLenderKycPage />
+                </ProtectedRoute>
+              } />
             {/* Protected Routes - Admin */}
             <Route path="/admin" element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
@@ -180,37 +198,38 @@ function App() {
               </ProtectedRoute>
             } />
 
-            {/* Protected Route - Controller */}
-            <Route path="/system-control" element={
-              <ProtectedRoute allowedRoles={['CONTROLLER']}>
-                <SystemControl />
-              </ProtectedRoute>
-            } />
-
-            {/* Shared Protected Routes */}
-            <Route path="/wallet" element={
-              <FeatureGuard featureKey="WALLET_MODULE">
-                <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
-                  <WalletPage />
+              {/* Protected Route - Controller */}
+              <Route path="/system-control" element={
+                <ProtectedRoute allowedRoles={['CONTROLLER']}>
+                  <SystemControl />
                 </ProtectedRoute>
-              </FeatureGuard>
-            } />
-            <Route path="/analytics" element={
-              <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
-                <Analytics />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
-                <Profile />
-              </ProtectedRoute>
-            } />
+              } />
 
-            {/* Default Redirect */}
-            <Route path="*" element={<Navigate to="/login" />} />
-          </Routes>
-        </FeatureProvider>
-      </AuthProvider>
+              {/* Shared Protected Routes */}
+              <Route path="/wallet" element={
+                <FeatureGuard featureKey="WALLET_MODULE">
+                  <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
+                    <WalletPage />
+                  </ProtectedRoute>
+                </FeatureGuard>
+              } />
+              <Route path="/analytics" element={
+                <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
+                  <Analytics />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+
+              {/* Default Redirect */}
+              <Route path="*" element={<Navigate to="/login" />} />
+            </Routes>
+          </FeatureProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

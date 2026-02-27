@@ -119,8 +119,10 @@ const Fake3DSphere = () => {
             height = rect.height;
 
             // Clear canvas
-            ctx.fillStyle = 'rgba(15, 23, 42, 0)';
             ctx.clearRect(0, 0, width, height);
+
+            // Read current theme from HTML element
+            const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
 
             // Pause rotation update during scroll for better performance
             if (!isScrollingRef.current) {
@@ -154,7 +156,7 @@ const Fake3DSphere = () => {
 
             // Draw connecting lines between nearby points (subtle)
             ctx.lineWidth = 1;
-            ctx.strokeStyle = 'rgba(59, 130, 246, 0.06)';
+            ctx.strokeStyle = isDark ? 'rgba(59, 130, 246, 0.06)' : 'rgba(59, 130, 246, 0.25)';
 
             // Sparse line drawing for performance (every 4th point)
             for (let i = 0; i < projectedPoints.length; i += 4) {
@@ -198,7 +200,11 @@ const Fake3DSphere = () => {
                 );
 
                 // Draw dot with blue color
-                ctx.fillStyle = `rgba(96, 165, 250, ${opacity.toFixed(3)})`;
+                const r = isDark ? 96 : 37;
+                const g = isDark ? 165 : 99;
+                const b = isDark ? 250 : 235;
+                const finalOpacity = isDark ? opacity : Math.min(opacity * 1.5, 1);
+                ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${finalOpacity.toFixed(3)})`;
                 ctx.beginPath();
                 ctx.arc(point.x, point.y, dotSize, 0, Math.PI * 2);
                 ctx.fill();

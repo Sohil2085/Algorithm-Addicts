@@ -39,7 +39,7 @@ const InvoiceList = () => {
     );
 
     return (
-        <div className="min-h-screen relative overflow-hidden bg-slate-950">
+        <div className="min-h-screen relative overflow-hidden bg-theme-bg">
             <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-600 rounded-full -z-10 blur-3xl opacity-[0.10] pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/40 to-slate-950 -z-10 pointer-events-none" />
 
@@ -48,13 +48,13 @@ const InvoiceList = () => {
                 {/* ── Header ─ always visible ──────────────────────────────── */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
                     <div>
-                        <h1 className="text-4xl font-semibold text-white tracking-tight">Invoices</h1>
-                        <p className="text-white/60 mt-1 text-sm">Manage and track your invoice submissions</p>
+                        <h1 className="text-4xl font-semibold text-theme-text tracking-tight">Invoices</h1>
+                        <p className="text-theme-text-muted mt-1 text-sm">Manage and track your invoice submissions</p>
                     </div>
                     <button
                         disabled={loading}
                         onClick={() => navigate('/upload-invoice')}
-                        className="shrink-0 inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+                        className="shrink-0 inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-theme-text font-medium px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
                     >
                         <Plus size={15} />
                         <span>Create Invoice</span>
@@ -64,19 +64,19 @@ const InvoiceList = () => {
                 {/* ── Toolbar ─ always visible ─────────────────────────────── */}
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" size={15} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-muted" size={15} />
                         <input
                             type="text"
                             placeholder="Search by ID or Buyer GSTIN..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             disabled={loading}
-                            className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400/60 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-theme-surface-hover border border-theme-border rounded-xl pl-9 pr-4 py-2.5 text-theme-text text-sm placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400/60 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
                     <button
                         disabled={loading}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-theme-border bg-theme-surface-hover text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-active transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
                     >
                         <Filter size={15} />
                         <span>Filter</span>

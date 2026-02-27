@@ -115,7 +115,7 @@ const AdminDashboard = () => {
                             <ShieldCheck size={32} />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-white mb-2">MSME Verification Center</h2>
+                            <h2 className="text-2xl font-bold text-theme-text mb-2">MSME Verification Center</h2>
                             <p className="text-white/60 text-sm max-w-lg leading-relaxed">
                                 Review new MSME onboarding requests, verify GST & PAN details against official databases, and manage approvals in a dedicated workspace.
                             </p>
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
                     </div>
                     <Link
                         to="/admin/kyc"
-                        className="shrink-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-500/20 active:scale-95 group z-10"
+                        className="shrink-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-theme-text px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-500/20 active:scale-95 group z-10"
                     >
                         Launch Verification System
                         <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -140,7 +140,7 @@ const AdminDashboard = () => {
                             <Briefcase size={32} />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-bold text-white mb-2">Lender Verification Center</h2>
+                            <h2 className="text-2xl font-bold text-theme-text mb-2">Lender Verification Center</h2>
                             <p className="text-white/60 text-sm max-w-lg leading-relaxed">
                                 Review new Lender profiles, cross-reference RBI and corporate identities, and grant marketplace access securely.
                             </p>
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
                     </div>
                     <Link
                         to="/admin/lender-kyc"
-                        className="shrink-0 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-emerald-500/20 active:scale-95 group z-10"
+                        className="shrink-0 flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-theme-text px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-emerald-500/20 active:scale-95 group z-10"
                     >
                         Launch Lender Verification
                         <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />

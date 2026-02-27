@@ -119,20 +119,20 @@ const DUMMY_INVOICE_DETAILS = {
 
 const PremiumStatCard = ({ title, value, icon: Icon, trend, trendValue }) => {
     return (
-        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between">
+        <div className="rounded-2xl bg-theme-elevated/20 backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-theme-elevated/40 hover:border-theme-border-focus hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between">
             <div className="flex justify-between items-start mb-4">
-                <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                    <Icon size={20} className="text-blue-400" />
+                <div className="w-11 h-11 rounded-xl bg-theme-elevated/40 border border-theme-border flex items-center justify-center">
+                    <Icon size={20} className="text-theme-accent" />
                 </div>
                 {trendValue && (
-                    <span className="text-emerald-300 bg-emerald-400/10 border border-emerald-400/20 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                    <span className="text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                         <ArrowUpRight size={12} /> {trendValue}
                     </span>
                 )}
             </div>
             <div>
-                <p className="text-xs tracking-widest text-white/45 uppercase mb-1">{title}</p>
-                <p className="text-3xl font-semibold text-white">{value}</p>
+                <p className="text-xs tracking-widest text-theme-text-muted uppercase mb-1">{title}</p>
+                <p className="text-3xl font-semibold text-theme-text">{value}</p>
             </div>
         </div>
     );
@@ -209,21 +209,21 @@ const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
-            <div className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex flex-col animate-in fade-in zoom-in-95 overflow-hidden">
+            <div className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900/60 backdrop-blur-xl border border-theme-border rounded-2xl shadow-2xl flex flex-col animate-in fade-in zoom-in-95 overflow-hidden">
 
                 {/* Header */}
-                <div className="p-6 border-b border-white/10 flex items-start justify-between bg-white/5">
+                <div className="p-6 border-b border-theme-border flex items-start justify-between bg-theme-surface-hover">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">#{invoice.id.substring(0, 8)}</span>
-                            <span className="text-xs text-white/45 flex items-center gap-1"><Clock size={12} /> Due {new Date(invoice.dueDate).toLocaleDateString()}</span>
+                            <span className="text-xs text-theme-text-muted flex items-center gap-1"><Clock size={12} /> Due {new Date(invoice.dueDate).toLocaleDateString()}</span>
                         </div>
-                        <h2 className="text-2xl font-bold text-white leading-tight">{msmeName}</h2>
-                        <div className="flex items-center gap-2 mt-2 text-sm text-white/70">
+                        <h2 className="text-2xl font-bold text-theme-text leading-tight">{msmeName}</h2>
+                        <div className="flex items-center gap-2 mt-2 text-sm text-theme-text-muted">
                             <Building size={14} /> {sector} • {location}
                         </div>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-white/45 hover:text-white transition-colors">
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-theme-surface-hover text-theme-text-muted hover:text-theme-text transition-colors">
                         <X size={24} />
                     </button>
                 </div>
@@ -236,28 +236,28 @@ const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
                             {/* Key Stats */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
-                                    <p className="text-xs text-white/45 uppercase tracking-wider mb-1">Invoice Amount</p>
-                                    <p className="text-2xl font-bold text-white">₹{Number(invoice.amount).toLocaleString('en-IN')}</p>
+                                    <p className="text-xs text-theme-text-muted uppercase tracking-wider mb-1">Invoice Amount</p>
+                                    <p className="text-2xl font-bold text-theme-text">₹{Number(invoice.amount).toLocaleString('en-IN')}</p>
                                 </div>
                                 <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                                    <p className="text-xs text-white/45 uppercase tracking-wider mb-1">Expected Return</p>
+                                    <p className="text-xs text-theme-text-muted uppercase tracking-wider mb-1">Expected Return</p>
                                     <p className="text-2xl font-bold text-emerald-400">{expectedReturnStr}%</p>
                                 </div>
                             </div>
 
                             {/* Company Financials */}
                             <div>
-                                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <h3 className="text-sm font-semibold text-theme-text uppercase tracking-wider mb-4 flex items-center gap-2">
                                     <PieChartIcon size={16} className="text-blue-400" /> Financial Snapshot
                                 </h3>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-center">
-                                        <p className="text-xs text-white/45 mb-1">Annual Revenue</p>
-                                        <p className="text-sm font-semibold text-white">{revenueStr}</p>
+                                    <div className="p-3 bg-theme-surface-hover rounded-lg border border-theme-border text-center">
+                                        <p className="text-xs text-theme-text-muted mb-1">Annual Revenue</p>
+                                        <p className="text-sm font-semibold text-theme-text">{revenueStr}</p>
                                     </div>
-                                    <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-center line-through opacity-50" title="Not available in current integration">
-                                        <p className="text-xs text-white/45 mb-1">Net Profit</p>
-                                        <p className="text-sm font-semibold text-white">N/A</p>
+                                    <div className="p-3 bg-theme-surface-hover rounded-lg border border-theme-border text-center line-through opacity-50" title="Not available in current integration">
+                                        <p className="text-xs text-theme-text-muted mb-1">Net Profit</p>
+                                        <p className="text-sm font-semibold text-theme-text">N/A</p>
                                     </div>
                                 </div>
                             </div>
@@ -267,21 +267,21 @@ const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
                         <div className="space-y-6">
                             {/* Risk & Fraud Check */}
                             <div>
-                                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <h3 className="text-sm font-semibold text-theme-text uppercase tracking-wider mb-4 flex items-center gap-2">
                                     <ShieldAlert size={16} className="text-blue-400" /> Risk Assessment
                                 </h3>
-                                <div className="rounded-xl bg-white/5 border border-white/10 p-5 space-y-4">
+                                <div className="rounded-xl bg-theme-surface-hover border border-theme-border p-5 space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-sm text-white/45">Credit Score</span>
+                                        <span className="text-sm text-theme-text-muted">Credit Score</span>
                                         <div className="flex items-center gap-3">
                                             <div className="w-32 h-2 bg-slate-900 rounded-full overflow-hidden">
                                                 <div className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-emerald-500" style={{ width: `${invoice.creditScore}%` }} />
                                             </div>
-                                            <span className="text-sm font-bold text-white">{invoice.creditScore}/100</span>
+                                            <span className="text-sm font-bold text-theme-text">{invoice.creditScore}/100</span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                                        <span className="text-sm text-white/45">Fraud Check</span>
+                                    <div className="flex items-center justify-between border-t border-theme-border pt-4">
+                                        <span className="text-sm text-theme-text-muted">Fraud Check</span>
                                         <span className={`flex items-center gap-1.5 text-sm font-semibold ${fraudStatusText === 'PASSED' ? 'text-emerald-400' : 'text-yellow-400'}`}>
                                             {fraudStatusText === 'PASSED' ? <CheckCircle size={14} /> : <AlertOctagon size={14} />}
                                             {fraudStatusText}
@@ -302,19 +302,19 @@ const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
 
                             {/* Documents */}
                             <div>
-                                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                                <h3 className="text-sm font-semibold text-theme-text uppercase tracking-wider mb-4 flex items-center gap-2">
                                     <FileText size={16} className="text-blue-400" /> Verified Documents
                                 </h3>
                                 <div className="space-y-2">
                                     {docs.map((doc, i) => (
-                                        <div key={i} className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg hover:border-blue-500/40 transition-colors cursor-pointer group">
+                                        <div key={i} className="flex items-center justify-between p-3 bg-theme-surface-hover border border-theme-border rounded-lg hover:border-blue-500/40 transition-colors cursor-pointer group">
                                             <div className="flex items-center gap-3">
                                                 <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
                                                     <FileText size={16} />
                                                 </div>
-                                                <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{doc}</span>
+                                                <span className="text-sm text-gray-300 group-hover:text-theme-text transition-colors">{doc}</span>
                                             </div>
-                                            <Download size={16} className="text-white/45 group-hover:text-blue-400 transition-colors" />
+                                            <Download size={16} className="text-theme-text-muted group-hover:text-blue-400 transition-colors" />
                                         </div>
                                     ))}
                                 </div>
@@ -324,18 +324,18 @@ const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-6 border-t border-white/10 bg-white/5 mt-auto">
+                <div className="p-6 border-t border-theme-border bg-theme-surface-hover mt-auto">
                     <button
                         onClick={() => {
                             if (onFundInvoice) {
                                 onFundInvoice(invoice);
                             }
                         }}
-                        className="w-full py-3.5 text-base font-semibold rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+                        className="w-full py-3.5 text-base font-semibold rounded-xl bg-blue-600 hover:bg-blue-500 text-theme-text transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
                     >
                         Fund This Invoice <ArrowUpRight size={18} />
                     </button>
-                    <p className="text-xs text-center text-white/45 mt-3 flex items-center justify-center gap-1">
+                    <p className="text-xs text-center text-theme-text-muted mt-3 flex items-center justify-center gap-1">
                         <ShieldAlert size={12} /> FinBridge Guarantee applies to Low Risk invoices
                     </p>
                 </div>
@@ -364,13 +364,13 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Investment Over Time */}
-                <div className="lg:col-span-2 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl min-w-0">
+                <div className="lg:col-span-2 rounded-2xl bg-theme-elevated/20 backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-theme-elevated/40 hover:border-theme-border-focus hover:-translate-y-0.5 hover:shadow-xl min-w-0">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h2 className="text-lg font-semibold text-white">Investment Over Time</h2>
-                            <p className="text-xs text-white/45 mt-0.5">6-month investment growth trend</p>
+                            <h2 className="text-lg font-semibold text-theme-text">Investment Over Time</h2>
+                            <p className="text-xs text-theme-text-muted mt-0.5">6-month investment growth trend</p>
                         </div>
-                        <span className="text-xs px-2.5 py-1 rounded-full bg-white/5 text-white/70 border border-white/10">+8.7% avg</span>
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-theme-elevated/40 text-theme-text-muted border border-theme-border">+8.7% avg</span>
                     </div>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
@@ -399,15 +399,15 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
                         </ResponsiveContainer>
                     </div>
                     <div className="flex items-center gap-5 mt-3">
-                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-blue-500 rounded" /><span className="text-xs text-white/45">Invested</span></div>
-                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-emerald-500 rounded" /><span className="text-xs text-white/45">Returns</span></div>
+                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-blue-500 rounded" /><span className="text-xs text-theme-text-muted">Invested</span></div>
+                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-emerald-500 rounded" /><span className="text-xs text-theme-text-muted">Returns</span></div>
                     </div>
                 </div>
 
                 {/* Risk Distribution Doughnut */}
-                <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl min-w-0">
-                    <h2 className="text-lg font-semibold text-white mb-1">Risk Distribution</h2>
-                    <p className="text-xs text-white/45 mb-6">Current portfolio breakdown</p>
+                <div className="rounded-2xl bg-theme-elevated/20 backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-theme-elevated/40 hover:border-theme-border-focus hover:-translate-y-0.5 hover:shadow-xl min-w-0">
+                    <h2 className="text-lg font-semibold text-theme-text mb-1">Risk Distribution</h2>
+                    <p className="text-xs text-theme-text-muted mb-6">Current portfolio breakdown</p>
                     <div className="h-52 relative">
                         <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                             <PieChart>
@@ -428,8 +428,8 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-xl font-bold text-white">54%</span>
-                            <span className="text-xs text-white/45">Low Risk</span>
+                            <span className="text-xl font-bold text-theme-text">54%</span>
+                            <span className="text-xs text-theme-text-muted">Low Risk</span>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2 mt-2">
@@ -437,9 +437,9 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
                             <div key={item.name} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                                    <span className="text-xs text-white/70">{item.name}</span>
+                                    <span className="text-xs text-theme-text-muted">{item.name}</span>
                                 </div>
-                                <span className="text-xs font-semibold text-white">{item.value}%</span>
+                                <span className="text-xs font-semibold text-theme-text">{item.value}%</span>
                             </div>
                         ))}
                     </div>
@@ -450,7 +450,7 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
             <div className="flex justify-center pt-2 pb-4">
                 <button
                     onClick={onExploreMarketplace}
-                    className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white font-semibold flex items-center gap-2.5 shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:shadow-[0_0_30px_rgba(56,189,248,0.5)] hover:-translate-y-0.5 transition-all duration-300"
+                    className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-theme-text font-semibold flex items-center gap-2.5 shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:shadow-[0_0_30px_rgba(56,189,248,0.5)] hover:-translate-y-0.5 transition-all duration-300"
                 >
                     <Zap size={18} />
                     Explore Marketplace
@@ -477,31 +477,31 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">Available Invoices</h2>
-                <p className="text-white/45 mt-1">Browse and fund verified MSME invoices</p>
+                <h2 className="text-2xl font-bold text-theme-text tracking-tight">Available Invoices</h2>
+                <p className="text-theme-text-muted mt-1">Browse and fund verified MSME invoices</p>
             </div>
 
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/45" size={17} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-muted" size={17} />
                     <input
                         type="text"
                         placeholder="Search by MSME name or Invoice ID..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                        className="w-full bg-theme-surface-hover border border-theme-border rounded-xl py-2.5 pl-10 pr-4 text-theme-text placeholder:text-theme-text-muted focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
                     />
                 </div>
                 <div className="flex items-center gap-2">
-                    <Filter size={16} className="text-white/45" />
+                    <Filter size={16} className="text-theme-text-muted" />
                     {['ALL', 'LOW', 'MEDIUM', 'HIGH'].map(r => (
                         <button
                             key={r}
                             onClick={() => setRiskFilter(r)}
                             className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all duration-300 ${riskFilter === r
                                 ? 'bg-blue-500/20 border-blue-500/50 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
-                                : 'border-white/10 bg-white/5 text-white/45 hover:text-white hover:border-white/20 hover:bg-white/10'
+                                : 'border-theme-border bg-theme-surface-hover text-theme-text-muted hover:text-theme-text hover:border-theme-border hover:bg-theme-surface-hover'
                                 }`}
                         >
                             {r}
@@ -511,20 +511,20 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
             </div>
 
             {/* Table */}
-            <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
+            <div className="rounded-2xl bg-theme-surface-hover backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b border-white/10 bg-white/5">
+                            <tr className="border-b border-theme-border bg-theme-surface-hover">
                                 {['Invoice ID', 'MSME Name', 'Amount', 'Due Date', 'Credit Score', 'Risk Level', 'Exp. Return', 'Actions'].map(h => (
-                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-theme-border">
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-12 text-center text-white/45">
+                                    <td colSpan={8} className="px-6 py-12 text-center text-theme-text-muted">
                                         No invoices match your search.
                                     </td>
                                 </tr>
@@ -532,24 +532,24 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
                                 const msmeName = inv.original?.user?.kyc?.businessName || inv.original?.user?.kyc?.legalName || inv.msmeName || 'Unknown MSME';
                                 const expReturn = inv.expectedReturn || (inv.riskLevel === 'HIGH' ? 18.5 : inv.riskLevel === 'MEDIUM' ? 14.0 : 9.5);
                                 return (
-                                    <tr key={inv.id} className="hover:bg-white/5 transition-colors group">
+                                    <tr key={inv.id} className="hover:bg-theme-surface-hover transition-colors group">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">#{inv.id.substring(0, 6)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{msmeName}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-theme-text">{msmeName}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-theme-text">
                                             ₹{Number(inv.amount).toLocaleString('en-IN')}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-text-muted">
                                             {new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-16 bg-white/10 rounded-full h-1.5 overflow-hidden">
+                                                <div className="w-16 bg-theme-surface-hover rounded-full h-1.5 overflow-hidden">
                                                     <div
                                                         className={`h-1.5 rounded-full ${inv.creditScore >= 80 ? 'bg-emerald-500' : inv.creditScore >= 55 ? 'bg-amber-500' : 'bg-rose-500'}`}
                                                         style={{ width: `${inv.creditScore}%` }}
                                                     />
                                                 </div>
-                                                <span className="text-xs text-white/70">{inv.creditScore}</span>
+                                                <span className="text-xs text-theme-text-muted">{inv.creditScore}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -566,7 +566,7 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
                                                         e.stopPropagation();
                                                         onViewInvoice(inv);
                                                     }}
-                                                    className="h-9 px-3 rounded-lg text-sm font-medium border border-white/10 text-white/70 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all flex items-center gap-1">
+                                                    className="h-9 px-3 rounded-lg text-sm font-medium border border-theme-border text-theme-text-muted hover:text-theme-text hover:border-theme-border hover:bg-theme-surface-hover transition-all flex items-center gap-1">
                                                     <Eye size={13} /> View
                                                 </button>
                                                 <button
@@ -575,7 +575,7 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
                                                         e.stopPropagation();
                                                         onFundInvoice(inv);
                                                     }}
-                                                    className="h-9 px-3 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-sky-500 text-white flex items-center gap-1 shadow-[0_0_10px_rgba(56,189,248,0.2)] hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all">
+                                                    className="h-9 px-3 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-sky-500 text-theme-text flex items-center gap-1 shadow-[0_0_10px_rgba(56,189,248,0.2)] hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all">
                                                     <Zap size={13} /> Fund
                                                 </button>
                                             </div>
@@ -601,8 +601,8 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal }) => {
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">My Investments</h2>
-                <p className="text-white/45 mt-1">Track all your funded invoices and expected returns</p>
+                <h2 className="text-2xl font-bold text-theme-text tracking-tight">My Investments</h2>
+                <p className="text-theme-text-muted mt-1">Track all your funded invoices and expected returns</p>
             </div>
 
             {/* Summary Row */}
@@ -610,31 +610,31 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal }) => {
                 {[
                     { label: 'Total Invested', value: `₹${Number(totalInvested).toLocaleString('en-IN')}`, color: 'text-blue-400' },
                     { label: 'Expected Returns', value: `₹${Number(expectedReturns).toLocaleString('en-IN')}`, color: 'text-emerald-400' },
-                    { label: 'Active Positions', value: activePositions.toString(), color: 'text-white' },
-                    { label: 'Settled / Defaulted', value: `${settledPositions} / ${defaultedPositions}`, color: 'text-white/45' },
+                    { label: 'Active Positions', value: activePositions.toString(), color: 'text-theme-text' },
+                    { label: 'Settled / Defaulted', value: `${settledPositions} / ${defaultedPositions}`, color: 'text-theme-text-muted' },
                 ].map(item => (
-                    <div key={item.label} className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-4 transition-all duration-300 hover:bg-white/7 hover:border-white/20">
-                        <p className="text-xs text-white/45 font-medium uppercase tracking-wider mb-1">{item.label}</p>
+                    <div key={item.label} className="rounded-2xl bg-theme-surface-hover backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-4 transition-all duration-300 hover:bg-theme-surface-hover hover:border-theme-border">
+                        <p className="text-xs text-theme-text-muted font-medium uppercase tracking-wider mb-1">{item.label}</p>
                         <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
                     </div>
                 ))}
             </div>
 
             {/* Table */}
-            <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
+            <div className="rounded-2xl bg-theme-surface-hover backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b border-white/10 bg-white/5">
+                            <tr className="border-b border-theme-border bg-theme-surface-hover">
                                 {['Invoice ID', 'MSME Name', 'Invested', 'Expected Return', 'Due Date', 'Days Left', 'Action'].map(h => (
-                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-theme-border">
                             {myDeals.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-white/45">No investments found</td>
+                                    <td colSpan={7} className="px-6 py-12 text-center text-theme-text-muted">No investments found</td>
                                 </tr>
                             ) : myDeals.map((deal) => {
                                 const dueDate = new Date(deal.dueDate);
@@ -644,24 +644,24 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal }) => {
                                 const maxDaysLeft = Math.max(0, diffDays);
 
                                 return (
-                                    <tr key={deal.id} className="hover:bg-white/5 transition-colors group">
+                                    <tr key={deal.id} className="hover:bg-theme-surface-hover transition-colors group">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">
                                             {deal.invoice?.invoice_number ? `#${deal.invoice.invoice_number}` : `#${deal.invoiceId.substring(0, 6)}`}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{deal.msme?.name || 'Unknown MSME'}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-theme-text">{deal.msme?.name || 'Unknown MSME'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-theme-text">
                                             ₹{Number(deal.fundedAmount).toLocaleString('en-IN')}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-400">
                                             ₹{Number(deal.interestAmount).toLocaleString('en-IN')}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-text-muted">
                                             {dueDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             {deal.status === 'ACTIVE'
-                                                ? <span className="font-semibold text-white">{maxDaysLeft}d</span>
-                                                : <span className="text-white/45">—</span>}
+                                                ? <span className="font-semibold text-theme-text">{maxDaysLeft}d</span>
+                                                : <span className="text-theme-text-muted">—</span>}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {deal.status === 'ACTIVE' ? (
@@ -690,41 +690,41 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal }) => {
 const MeetingsSection = () => (
     <div className="space-y-6">
         <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">Meeting Records</h2>
-            <p className="text-white/45 mt-1">Zoom verification sessions with MSME partners</p>
+            <h2 className="text-2xl font-bold text-theme-text tracking-tight">Meeting Records</h2>
+            <p className="text-theme-text-muted mt-1">Zoom verification sessions with MSME partners</p>
         </div>
 
         {/* Info Banner */}
         <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
             <Video size={18} className="text-blue-400 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-white/70">
+            <p className="text-sm text-theme-text-muted">
                 All meetings are recorded for compliance purposes. Recordings are available for 90 days post-session.
                 <span className="text-blue-400 ml-1 cursor-pointer hover:underline">Contact support</span> for extended access.
             </p>
         </div>
 
         {/* Table */}
-        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
+        <div className="rounded-2xl bg-theme-surface-hover backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="border-b border-white/10 bg-white/5">
+                        <tr className="border-b border-theme-border bg-theme-surface-hover">
                             {['Invoice ID', 'MSME Name', 'Meeting Date', 'Duration', 'Recording', 'Action'].map(h => (
-                                <th key={h} className="px-6 py-4 text-xs font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                <th key={h} className="px-6 py-4 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-theme-border">
                         {DUMMY_MEETINGS.map((m) => (
-                            <tr key={m.invoiceId + m.meetingDate} className="hover:bg-white/5 transition-colors group">
+                            <tr key={m.invoiceId + m.meetingDate} className="hover:bg-theme-surface-hover transition-colors group">
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">#{m.invoiceId}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{m.msmeName}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-theme-text">{m.msmeName}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-text-muted">
                                     {new Date(m.meetingDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-text-muted">
                                     <div className="flex items-center gap-1.5">
-                                        <Clock size={13} className="text-white/45" />
+                                        <Clock size={13} className="text-theme-text-muted" />
                                         {m.duration}
                                     </div>
                                 </td>
@@ -736,7 +736,7 @@ const MeetingsSection = () => (
                                         disabled={m.recordingStatus !== 'AVAILABLE'}
                                         className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 opacity-0 group-hover:opacity-100 ${m.recordingStatus === 'AVAILABLE'
                                             ? 'border-blue-500/50 text-blue-400 hover:bg-blue-500/10 cursor-pointer'
-                                            : 'border-white/10 text-white/30 cursor-not-allowed'
+                                            : 'border-theme-border text-theme-text-muted cursor-not-allowed'
                                             }`}
                                     >
                                         <Video size={13} />
@@ -751,15 +751,15 @@ const MeetingsSection = () => (
         </div>
 
         {/* Empty state note */}
-        <p className="text-xs text-white/45 text-center">Showing {DUMMY_MEETINGS.length} meeting records. New sessions are logged automatically upon completion.</p>
+        <p className="text-xs text-theme-text-muted text-center">Showing {DUMMY_MEETINGS.length} meeting records. New sessions are logged automatically upon completion.</p>
     </div>
 );
 
 const AnalyticsSection = () => (
     <div className="space-y-8">
         <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">Risk Analytics</h2>
-            <p className="text-white/45 mt-1">Portfolio health metrics and risk intelligence</p>
+            <h2 className="text-2xl font-bold text-theme-text tracking-tight">Risk Analytics</h2>
+            <p className="text-theme-text-muted mt-1">Portfolio health metrics and risk intelligence</p>
         </div>
 
         {/* Summary Stat Blocks */}
@@ -769,10 +769,10 @@ const AnalyticsSection = () => (
                 { label: 'Default Rate', value: '8.3%', sub: 'Historical portfolio average', color: '#ef4444' },
                 { label: 'Avg. Return Rate', value: '11.2%', sub: 'Annualised across all investments', color: '#10b981' },
             ].map(stat => (
-                <div key={stat.label} className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 text-center transition-all duration-300 hover:bg-white/7 hover:border-white/20 hover:-translate-y-0.5">
+                <div key={stat.label} className="rounded-2xl bg-theme-surface-hover backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 text-center transition-all duration-300 hover:bg-theme-surface-hover hover:border-theme-border hover:-translate-y-0.5">
                     <div className="text-3xl font-extrabold mb-2" style={{ color: stat.color }}>{stat.value}</div>
-                    <div className="text-sm font-semibold text-white mb-1">{stat.label}</div>
-                    <div className="text-xs text-white/45">{stat.sub}</div>
+                    <div className="text-sm font-semibold text-theme-text mb-1">{stat.label}</div>
+                    <div className="text-xs text-theme-text-muted">{stat.sub}</div>
                 </div>
             ))}
         </div>
@@ -780,9 +780,9 @@ const AnalyticsSection = () => (
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Default Probability Bar Chart */}
-            <div className="lg:col-span-2 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 min-w-0">
-                <h3 className="text-lg font-semibold text-white mb-1">Default Probability by Risk Tier</h3>
-                <p className="text-xs text-white/45 mb-6">Historical default rates per risk classification</p>
+            <div className="lg:col-span-2 rounded-2xl bg-theme-surface-hover backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-theme-surface-hover hover:border-theme-border min-w-0">
+                <h3 className="text-lg font-semibold text-theme-text mb-1">Default Probability by Risk Tier</h3>
+                <p className="text-xs text-theme-text-muted mb-6">Historical default rates per risk classification</p>
                 <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                         <BarChart data={DUMMY_DEFAULT_PROB} barSize={48}>
@@ -805,9 +805,9 @@ const AnalyticsSection = () => (
             </div>
 
             {/* Portfolio Allocation Pie - NOW SECTOR WISE */}
-            <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 min-w-0">
-                <h3 className="text-lg font-semibold text-white mb-1">Sector Allocation</h3>
-                <p className="text-xs text-white/45 mb-6">Investment distribution by industry</p>
+            <div className="rounded-2xl bg-theme-elevated/20 backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-theme-elevated/40 hover:border-theme-border-focus min-w-0">
+                <h3 className="text-lg font-semibold text-theme-text mb-1">Sector Allocation</h3>
+                <p className="text-xs text-theme-text-muted mb-6">Investment distribution by industry</p>
                 <div className="h-56 relative">
                     <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                         <PieChart>
@@ -834,7 +834,7 @@ const AnalyticsSection = () => (
                     {DUMMY_SECTOR_DATA.map(item => (
                         <div key={item.name} className="flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                            <span className="text-xs text-white/70">{item.name}</span>
+                            <span className="text-xs text-theme-text-muted">{item.name}</span>
                         </div>
                     ))}
                 </div>
@@ -842,15 +842,15 @@ const AnalyticsSection = () => (
         </div>
 
         {/* ROI Benchmark Chart */}
-        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20">
+        <div className="rounded-2xl bg-theme-elevated/20 backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-theme-elevated/40 hover:border-theme-border-focus">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h3 className="text-lg font-semibold text-white">ROI vs Market Benchmark</h3>
-                    <p className="text-xs text-white/45 mt-0.5">Your portfolio performance vs standard FD rates</p>
+                    <h3 className="text-lg font-semibold text-theme-text">ROI vs Market Benchmark</h3>
+                    <p className="text-xs text-theme-text-muted mt-0.5">Your portfolio performance vs standard FD rates</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-blue-500 rounded" /><span className="text-xs text-white/70">My Portfolio</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-white/30 rounded" /><span className="text-xs text-white/70">Market Benchmark</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-blue-500 rounded" /><span className="text-xs text-theme-text-muted">My Portfolio</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-white/30 rounded" /><span className="text-xs text-theme-text-muted">Market Benchmark</span></div>
                 </div>
             </div>
             <div className="h-64">
@@ -872,8 +872,8 @@ const AnalyticsSection = () => (
         </div>
 
         {/* Risk Guidance */}
-        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Risk Guidelines</h3>
+        <div className="rounded-2xl bg-theme-surface-hover backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6">
+            <h3 className="text-lg font-semibold text-theme-text mb-4">Risk Guidelines</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                     { level: 'LOW', desc: 'Credit Score ≥ 80. Businesses with 5+ years history. Minimal default risk. Returns 7–10%.', color: 'border-emerald-500/30 bg-emerald-500/5', badge: 'bg-emerald-500/10 text-emerald-400' },
@@ -882,7 +882,7 @@ const AnalyticsSection = () => (
                 ].map(g => (
                     <div key={g.level} className={`rounded-xl border p-4 ${g.color}`}>
                         <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold mb-3 ${g.badge}`}>{g.level} RISK</span>
-                        <p className="text-xs text-white/70 leading-relaxed">{g.desc}</p>
+                        <p className="text-xs text-theme-text-muted leading-relaxed">{g.desc}</p>
                     </div>
                 ))}
             </div>
@@ -1042,7 +1042,7 @@ const LenderDashboard = () => {
                 <LockKeyhole size={36} className="text-amber-500" />
             </div>
             <div>
-                <h2 className="text-2xl font-bold text-white mb-2">Marketplace Access Restricted</h2>
+                <h2 className="text-2xl font-bold text-theme-text mb-2">Marketplace Access Restricted</h2>
                 <p className="text-muted max-w-md">
                     {kycStatus === 'IN_PROGRESS'
                         ? 'Your KYC is currently under review. Marketplace access will be unlocked once verified by our team.'
@@ -1098,11 +1098,11 @@ const LenderDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen relative overflow-hidden bg-slate-950">
+        <div className="min-h-screen relative overflow-hidden bg-theme-bg">
             {/* Glow blobs — same as MSMEDashboard */}
             <div className="absolute top-0 right-1/4 w-[480px] h-[480px] bg-blue-600 rounded-full -z-10 blur-3xl opacity-[0.12] pointer-events-none" />
             <div className="absolute bottom-1/4 -left-24 w-[400px] h-[400px] bg-cyan-500 rounded-full -z-10 blur-3xl opacity-[0.08] pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/40 to-slate-950 -z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-theme-bg via-theme-elevated/40 to-theme-bg -z-10 pointer-events-none" />
 
             <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 {/* Skeleton loader — same as MSMEDashboard */}
@@ -1131,18 +1131,18 @@ const LenderDashboard = () => {
                     {fundInvoice && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setFundInvoice(null)}></div>
-                            <div className="relative bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in-up">
+                            <div className="relative bg-slate-900/90 backdrop-blur-xl border border-theme-border rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in-up">
                                 <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-xl font-bold text-white">Make Funding Offer</h3>
-                                    <button onClick={() => setFundInvoice(null)} className="text-white/45 hover:text-white transition-colors">
+                                    <h3 className="text-xl font-bold text-theme-text">Make Funding Offer</h3>
+                                    <button onClick={() => setFundInvoice(null)} className="text-theme-text-muted hover:text-theme-text transition-colors">
                                         <X size={20} />
                                     </button>
                                 </div>
 
-                                <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
-                                    <p className="text-xs text-white/45 mb-1">Invoice #{fundInvoice.id.substring(0, 6)}</p>
-                                    <p className="text-lg font-semibold text-white">₹{Number(fundInvoice.amount).toLocaleString('en-IN')}</p>
-                                    <p className="text-xs text-white/45 mt-2 flex justify-between">
+                                <div className="mb-6 p-4 rounded-xl bg-theme-surface-hover border border-theme-border">
+                                    <p className="text-xs text-theme-text-muted mb-1">Invoice #{fundInvoice.id.substring(0, 6)}</p>
+                                    <p className="text-lg font-semibold text-theme-text">₹{Number(fundInvoice.amount).toLocaleString('en-IN')}</p>
+                                    <p className="text-xs text-theme-text-muted mt-2 flex justify-between">
                                         <span>Wallet Available:</span>
                                         <span className="text-blue-400 font-medium">₹{Number(wallet.availableBalance).toLocaleString('en-IN')}</span>
                                     </p>
@@ -1150,7 +1150,7 @@ const LenderDashboard = () => {
 
                                 <form onSubmit={handleCreateOffer} className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-white/70 mb-1.5">Offer Amount (₹)</label>
+                                        <label className="block text-sm font-medium text-theme-text-muted mb-1.5">Offer Amount (₹)</label>
                                         <input
                                             type="number"
                                             required
@@ -1158,12 +1158,12 @@ const LenderDashboard = () => {
                                             max={fundInvoice.amount}
                                             value={offerForm.amount}
                                             onChange={(e) => setOfferForm({ ...offerForm, amount: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                            className="w-full bg-theme-surface-hover border border-theme-border rounded-xl py-2.5 px-4 text-theme-text placeholder:text-theme-text-muted focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
                                             placeholder="Enter amount to fund..."
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-white/70 mb-1.5">Interest Rate (% p.a.)</label>
+                                        <label className="block text-sm font-medium text-theme-text-muted mb-1.5">Interest Rate (% p.a.)</label>
                                         <input
                                             type="number"
                                             step="0.01"
@@ -1172,18 +1172,18 @@ const LenderDashboard = () => {
                                             max="36"
                                             value={offerForm.rate}
                                             onChange={(e) => setOfferForm({ ...offerForm, rate: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                                            className="w-full bg-theme-surface-hover border border-theme-border rounded-xl py-2.5 px-4 text-theme-text placeholder:text-theme-text-muted focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
                                             placeholder="E.g. 12.5"
                                         />
                                     </div>
-                                    <div className="pt-4 border-t border-white/10">
+                                    <div className="pt-4 border-t border-theme-border">
                                         <button
                                             type="submit"
                                             disabled={isSubmittingOffer}
-                                            className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white font-semibold flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(56,189,248,0.3)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all"
+                                            className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-theme-text font-semibold flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(56,189,248,0.3)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all"
                                         >
                                             {isSubmittingOffer ? (
-                                                <><div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Sending...</>
+                                                <><div className="h-4 w-4 border-2 border-theme-border border-t-white rounded-full animate-spin"></div> Sending...</>
                                             ) : (
                                                 <><Zap size={18} /> Send Offer</>
                                             )}
@@ -1201,11 +1201,11 @@ const LenderDashboard = () => {
                                 <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
                                 Lender Dashboard
                             </div>
-                            <h1 className="text-4xl font-semibold text-white tracking-tight">
+                            <h1 className="text-4xl font-semibold text-theme-text tracking-tight">
                                 Welcome back,{' '}
                                 <span className="bg-gradient-to-r from-sky-400 to-blue-600 bg-clip-text text-transparent">{user?.name || 'Test Lender'}</span>
                             </h1>
-                            <p className="text-white/60 mt-2 text-sm">Here's what's happening with your investments today.</p>
+                            <p className="text-theme-text-muted mt-2 text-sm">Here's what's happening with your investments today.</p>
                         </div>
 
                         {/* KYC CTA — amber pulsing button identical to MSME */}
@@ -1213,7 +1213,7 @@ const LenderDashboard = () => {
                             <div className="shrink-0 flex flex-col items-end gap-2 text-right">
                                 <button
                                     onClick={() => navigate('/lender/kyc')}
-                                    className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-medium px-6 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm animate-pulse"
+                                    className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-theme-text font-medium px-6 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm animate-pulse"
                                 >
                                     <Briefcase size={16} />
                                     Complete KYC to Unlock Marketplace
@@ -1231,7 +1231,7 @@ const LenderDashboard = () => {
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="border-b border-white/10 pb-2">
+                    <div className="border-b border-theme-border pb-2">
                         <div className="flex gap-2 overflow-x-auto">
                             {TABS.map(tab => {
                                 const Icon = tab.icon;
@@ -1241,8 +1241,8 @@ const LenderDashboard = () => {
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap relative ${isActive
-                                            ? 'text-white bg-white/10 border border-white/10'
-                                            : 'text-white/70 hover:text-white hover:bg-white/5 border border-transparent'
+                                            ? 'text-theme-text bg-theme-elevated/40 border border-theme-border'
+                                            : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated/20 border border-transparent'
                                             }`}
                                     >
                                         <Icon size={15} />

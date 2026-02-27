@@ -52,7 +52,7 @@ const ProfileBadge = ({ user, onLogout, profilePath = '/profile' }) => {
                     relative w-9 h-9 rounded-full overflow-hidden cursor-pointer
                     flex items-center justify-center
                     bg-gradient-to-tr from-blue-600 to-indigo-500
-                    text-white font-bold text-sm select-none
+                    text-theme-text font-bold text-sm select-none
                     ring-2 ring-white/10 hover:ring-indigo-400/50
                     transition-all duration-200
                     group
@@ -80,13 +80,13 @@ const ProfileBadge = ({ user, onLogout, profilePath = '/profile' }) => {
             {open && (
                 <div className="
                     absolute right-0 top-[calc(100%+10px)] w-52
-                    rounded-xl bg-slate-900 border border-white/10
+                    rounded-xl bg-slate-900 border border-theme-border
                     shadow-2xl shadow-black/60
                     overflow-hidden z-50
                 ">
                     {/* User info header */}
-                    <div className="px-4 py-3 border-b border-white/10">
-                        <p className="text-white font-semibold text-sm truncate">{user?.name}</p>
+                    <div className="px-4 py-3 border-b border-theme-border">
+                        <p className="text-theme-text font-semibold text-sm truncate">{user?.name}</p>
                         <p className="text-white/45 text-xs mt-0.5 capitalize">{user?.role?.toLowerCase()}</p>
                     </div>
 
@@ -94,9 +94,9 @@ const ProfileBadge = ({ user, onLogout, profilePath = '/profile' }) => {
                     <div className="p-1">
                         <button
                             onClick={() => { setOpen(false); navigate(profilePath); }}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white/75 hover:text-white hover:bg-white/[0.07] rounded-lg transition-all text-left group/item"
+                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white/75 hover:text-theme-text hover:bg-white/[0.07] rounded-lg transition-all text-left group/item"
                         >
-                            <User size={15} className="text-white/40 group-hover/item:text-indigo-400 transition-colors" />
+                            <User size={15} className="text-theme-text-muted group-hover/item:text-indigo-400 transition-colors" />
                             Profile Settings
                         </button>
 
@@ -106,14 +106,14 @@ const ProfileBadge = ({ user, onLogout, profilePath = '/profile' }) => {
                         >
                             <Settings size={15} className="text-white/20" />
                             Settings
-                            <span className="ml-auto text-[10px] bg-white/8 text-white/25 px-1.5 py-0.5 rounded border border-white/10">
+                            <span className="ml-auto text-[10px] bg-white/8 text-white/25 px-1.5 py-0.5 rounded border border-theme-border">
                                 Soon
                             </span>
                         </button>
                     </div>
 
                     {/* Logout */}
-                    <div className="p-1 border-t border-white/10">
+                    <div className="p-1 border-t border-theme-border">
                         <button
                             onClick={() => { setOpen(false); onLogout(); }}
                             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-rose-400/75 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all text-left"
