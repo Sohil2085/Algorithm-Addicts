@@ -6,7 +6,7 @@ import signToken from '../config/jwt.js';
 // @route   POST /api/auth/register
 // @access  Public
 const register = async (req, res) => {
-    let { name, email, password, role, gstin, business_started_date } = req.body;
+    let { name, email, password, role, gstin, business_age } = req.body;
 
     try {
         // Automatic Admin Role Assignment
@@ -41,7 +41,7 @@ const register = async (req, res) => {
                 password: hashedPassword,
                 role,
                 gstin,
-                business_started_date: business_started_date ? new Date(business_started_date) : null,
+                business_age: business_age ? parseInt(business_age) : null,
             },
         });
 
@@ -56,7 +56,7 @@ const register = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 gstin: user.gstin,
-                business_started_date: user.business_started_date
+                business_age: user.business_age,
             },
         });
     } catch (error) {
@@ -101,7 +101,7 @@ const login = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 gstin: user.gstin,
-                business_started_date: user.business_started_date
+                business_age: user.business_age,
             },
         });
     } catch (error) {
@@ -123,7 +123,7 @@ const getMe = async (req, res) => {
                 email: true,
                 role: true,
                 gstin: true,
-                business_started_date: true,
+                business_age: true,
                 created_at: true,
             },
         });

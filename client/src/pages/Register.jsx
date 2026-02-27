@@ -1,10 +1,24 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { User, Mail, Lock, Briefcase, FileText, Activity, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Building2, Landmark } from 'lucide-react';
 import { register } from '../api/authApi';
 import AuthLayout from '../components/AuthLayout';
 import toast from 'react-hot-toast';
+
+const ROLES = [
+    {
+        value: 'MSME',
+        label: 'MSME',
+        description: 'Upload invoices & get funded',
+        Icon: Building2,
+    },
+    {
+        value: 'LENDER',
+        label: 'Lender',
+        description: 'Browse & bid on invoices',
+        Icon: Landmark,
+    },
+];
 
 const Register = () => {
     const navigate = useNavigate();
@@ -14,8 +28,6 @@ const Register = () => {
         password: '',
         confirmPassword: '',
         role: 'MSME',
-        gstin: '',
-        businessAge: '',
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -30,11 +42,6 @@ const Register = () => {
         if (!/\S+@\S+\.\S+/.test(formData.email)) return 'Invalid email format';
         if (formData.password.length < 6) return 'Password must be at least 6 characters';
         if (formData.password !== formData.confirmPassword) return 'Passwords do not match';
-        if (formData.role === 'MSME') {
-            if (formData.gstin.length !== 15) return 'GSTIN must be 15 characters';
-        }
-        const age = Number(formData.businessAge);
-        if (isNaN(age) || age < 0 || age > 100) return 'Business Age must be between 0 and 100';
         return null;
     };
 
@@ -54,12 +61,7 @@ const Register = () => {
                 email: formData.email,
                 password: formData.password,
                 role: formData.role,
-                businessAge: Number(formData.businessAge),
             };
-
-            if (formData.role === 'MSME') {
-                payload.gstin = formData.gstin;
-            }
 
             await register(payload);
             toast.success('Account created successfully! Please sign in.');
@@ -76,7 +78,55 @@ const Register = () => {
             title="Create Account"
             subtitle="Join tailored financing for MSMEs & Lenders"
         >
-            <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+            {/* Role selection */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+                {ROLES.map(({ value, label, description, Icon }) => {
+                            const isSelected = formData.role === value;
+                            return (
+                                <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, role: value })}
+                                    style={{
+                                        flex: 1,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: '0.4rem',
+                                        padding: '0.85rem 0.5rem',
+                                        borderRadius: '12px',
+                                        border: isSelected
+                                            ? '1.5px solid #6366f1'
+                                            : '1.5px solid rgba(255,255,255,0.08)',
+                                        background: isSelected
+                                            ? 'rgba(99,102,241,0.12)'
+                                            : 'rgba(255,255,255,0.03)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: isSelected ? '0 0 12px rgba(99,102,241,0.3)' : 'none',
+                                    }}
+                                >
+                                    {Icon && <Icon
+                                        size={22}
+                                        style={{ color: isSelected ? '#6366f1' : 'rgba(255,255,255,0.5)' }}
+                                    />}
+                            <span style={{
+                                fontSize: '0.85rem',
+                                fontWeight: 600,
+                                color: isSelected ? '#ffffff' : 'rgba(255,255,255,0.6)',
+                            }}>{label}</span>
+                            <span style={{
+                                fontSize: '0.68rem',
+                                color: 'rgba(255,255,255,0.4)',
+                                textAlign: 'center',
+                                lineHeight: 1.3,
+                            }}>{description}</span>
+                        </button>
+                    );
+                })}
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
 
                 <div className="input-wrapper">
                     <User size={18} />
@@ -144,57 +194,6 @@ const Register = () => {
                     </button>
                 </div>
 
-                <div className="input-wrapper">
-                    <Briefcase size={18} />
-                    <select
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="form-input"
-                    >
-                        <option value="MSME" style={{ color: 'black' }}>MSME (Borrower)</option>
-                        <option value="LENDER" style={{ color: 'black' }}>Lender (Investor)</option>
-                    </select>
-                </div>
-
-                <AnimatePresence>
-                    {formData.role === 'MSME' && (
-                        <motion.div
-                            className="input-wrapper"
-                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                            animate={{ opacity: 1, height: 'auto', marginTop: 0 }}
-                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                        >
-                            <FileText size={18} />
-                            <input
-                                type="text"
-                                name="gstin"
-                                className="form-input"
-                                placeholder="GSTIN (15 characters)"
-                                value={formData.gstin}
-                                onChange={handleChange}
-                                required
-                                maxLength={15}
-                            />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                <div className="input-wrapper">
-                    <Activity size={18} />
-                    <input
-                        type="number"
-                        name="businessAge"
-                        className="form-input"
-                        placeholder="Business Age (Years)"
-                        value={formData.businessAge}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                        max="100"
-                    />
-                </div>
-
                 <button
                     type="submit"
                     className="btn-primary"
@@ -212,3 +211,4 @@ const Register = () => {
 };
 
 export default Register;
+

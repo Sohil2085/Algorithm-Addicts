@@ -1,8 +1,957 @@
-const LenderDashboard = () => {
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+    LineChart, Line, BarChart, Bar,
+    PieChart, Pie, Cell,
+    XAxis, YAxis, CartesianGrid, Tooltip,
+    ResponsiveContainer
+} from 'recharts';
+import {
+    DollarSign, TrendingUp, Briefcase, ShieldAlert,
+    AlertTriangle, Search, Filter, Eye, Zap,
+    Video, Clock, CheckCircle, XCircle, BarChart2,
+    ChevronRight, X, FileText, Download, ExternalLink,
+    Building, AlertOctagon, Calendar, PieChart as PieChartIcon,
+    ArrowUpRight, ArrowDownRight, ShieldCheck, LockKeyhole
+} from 'lucide-react';
+import StatCard from '../components/StatCard';
+import RiskBadge from '../components/RiskBadge';
+import { useAuth } from '../context/AuthContext';
+import FinbridgeLoading from '../components/FinbridgeLoading';
+import toast from 'react-hot-toast';
+import '../styles/landing.css';
+
+// ─── Static Dummy Data ────────────────────────────────────────────────────────
+// TODO: Replace with API calls when backend bidding endpoints are ready
+
+const DUMMY_PORTFOLIO_TREND = [
+    { month: 'Sep', invested: 180000, returns: 12600 },
+    { month: 'Oct', invested: 240000, returns: 18200 },
+    { month: 'Nov', invested: 310000, returns: 24800 },
+    { month: 'Dec', invested: 275000, returns: 22000 },
+    { month: 'Jan', invested: 420000, returns: 35700 },
+    { month: 'Feb', invested: 510000, returns: 45900 },
+];
+
+const DUMMY_RISK_DISTRIBUTION = [
+    { name: 'Low Risk', value: 54, color: '#22c55e' },
+    { name: 'Medium Risk', value: 31, color: '#f59e0b' },
+    { name: 'High Risk', value: 15, color: '#ef4444' },
+];
+
+const DUMMY_DEFAULT_PROB = [
+    { tier: 'LOW', probability: 2.1 },
+    { tier: 'MEDIUM', probability: 8.4 },
+    { tier: 'HIGH', probability: 21.7 },
+];
+
+const DUMMY_AVAILABLE_INVOICES = [
+    { id: 'a3f9b1', msmeName: 'Apex Textiles Pvt. Ltd.', amount: 480000, dueDate: '2026-03-15', creditScore: 84, riskLevel: 'LOW', expectedReturn: 9.2 },
+    { id: 'b7d2c4', msmeName: 'Nova Steel Works', amount: 125000, dueDate: '2026-03-08', creditScore: 61, riskLevel: 'MEDIUM', expectedReturn: 13.5 },
+    { id: 'c1e8a5', msmeName: 'Sunrise Agro Foods', amount: 92000, dueDate: '2026-02-28', creditScore: 43, riskLevel: 'HIGH', expectedReturn: 19.8 },
+    { id: 'd6f3b9', msmeName: 'BlueLine Logistics', amount: 670000, dueDate: '2026-04-01', creditScore: 91, riskLevel: 'LOW', expectedReturn: 8.1 },
+    { id: 'e2a7d1', msmeName: 'Crestwood Electronics', amount: 215000, dueDate: '2026-03-22', creditScore: 73, riskLevel: 'MEDIUM', expectedReturn: 11.9 },
+    { id: 'f9c4e6', msmeName: 'Vega Pharma Supplies', amount: 340000, dueDate: '2026-03-30', creditScore: 88, riskLevel: 'LOW', expectedReturn: 8.7 },
+];
+
+const DUMMY_MY_INVESTMENTS = [
+    { id: 'a3f9b1', msmeName: 'Apex Textiles Pvt. Ltd.', invested: 200000, interestRate: 9.2, expectedReturn: 18400, dueDate: '2026-03-15', daysRemaining: 23, status: 'ACTIVE' },
+    { id: 'd6f3b9', msmeName: 'BlueLine Logistics', invested: 350000, interestRate: 8.1, expectedReturn: 28350, dueDate: '2026-04-01', daysRemaining: 40, status: 'ACTIVE' },
+    { id: 'g4h2i7', msmeName: 'Kiran Auto Parts', invested: 90000, interestRate: 14.5, expectedReturn: 13050, dueDate: '2026-01-20', daysRemaining: 0, status: 'SETTLED' },
+    { id: 'h5j3k8', msmeName: 'Delta Garments', invested: 60000, interestRate: 22.0, expectedReturn: 13200, dueDate: '2026-01-05', daysRemaining: 0, status: 'DEFAULTED' },
+];
+
+const DUMMY_MEETINGS = [
+    { invoiceId: 'a3f9b1', msmeName: 'Apex Textiles Pvt. Ltd.', meetingDate: '2026-02-18', duration: '32 min', recordingStatus: 'AVAILABLE' },
+    { invoiceId: 'b7d2c4', msmeName: 'Nova Steel Works', meetingDate: '2026-02-19', duration: '21 min', recordingStatus: 'PROCESSING' },
+    { invoiceId: 'e2a7d1', msmeName: 'Crestwood Electronics', meetingDate: '2026-02-15', duration: '45 min', recordingStatus: 'AVAILABLE' },
+];
+
+const DUMMY_SECTOR_DATA = [
+    { name: 'Textiles', value: 35, color: '#3b82f6' },
+    { name: 'Logistics', value: 25, color: '#10b981' },
+    { name: 'Pharma', value: 20, color: '#f59e0b' },
+    { name: 'Manufacturing', value: 15, color: '#6366f1' },
+    { name: 'Agro', value: 5, color: '#8b5cf6' },
+];
+
+const DUMMY_ROI_BENCHMARK = [
+    { month: 'Sep', portfolio: 8.2, benchmark: 6.5 },
+    { month: 'Oct', portfolio: 9.1, benchmark: 6.5 },
+    { month: 'Nov', portfolio: 10.4, benchmark: 6.8 },
+    { month: 'Dec', portfolio: 11.2, benchmark: 7.0 },
+    { month: 'Jan', portfolio: 10.8, benchmark: 7.1 },
+    { month: 'Feb', portfolio: 12.4, benchmark: 7.2 },
+];
+
+const DUMMY_INVOICE_DETAILS = {
+    'a3f9b1': {
+        founded: '2015',
+        employees: '120-150',
+        location: 'Surat, Gujarat',
+        gstin: '24AAACA1234A1Z5',
+        sector: 'Textiles',
+        description: 'Manufacturer of high-quality cotton and synthetic fabrics for export markets.',
+        financials: { revenue: '₹42 Cr', profit: '₹3.8 Cr', yoyGrowth: '+12%' },
+        documents: ['Invoice-INV-2026-001.pdf', 'E-Way-Bill-827364.pdf', 'Purchase-Order.pdf'],
+        fraudCheck: { status: 'PASSED', score: 98, flags: [] },
+        repaymentHistory: { onTime: 95, late: 5, default: 0 }
+    },
+    'b7d2c4': {
+        founded: '2018',
+        employees: '40-60',
+        location: 'Pune, Maharashtra',
+        gstin: '27AABCN5678B1Z2',
+        sector: 'Manufacturing',
+        description: 'Specialized steel components for automotive industry.',
+        financials: { revenue: '₹18 Cr', profit: '₹1.2 Cr', yoyGrowth: '+8%' },
+        documents: ['Invoice-9928.pdf', 'Delivery-Challan.pdf'],
+        fraudCheck: { status: 'WARNING', score: 82, flags: ['Address verification pending'] },
+        repaymentHistory: { onTime: 88, late: 12, default: 0 }
+    }
+};
+
+// ─── Helper Components ────────────────────────────────────────────────────────
+
+const InvestmentStatusBadge = ({ status }) => {
+    const styles = {
+        ACTIVE: 'bg-success/10 text-success border border-success/20',
+        SETTLED: 'bg-gray-500/10 text-gray-400 border border-gray-500/20',
+        DEFAULTED: 'bg-danger/10 text-danger border border-danger/20',
+    };
     return (
-        <div style={{ padding: '2rem' }}>
-            <h1>Lender Dashboard</h1>
-            <p>Welcome to your dashboard.</p>
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || styles.SETTLED}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+            {status}
+        </span>
+    );
+};
+
+const RecordingStatusBadge = ({ status }) => {
+    if (status === 'AVAILABLE') {
+        return (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
+                <CheckCircle size={11} /> Available
+            </span>
+        );
+    }
+    return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
+            <Clock size={11} /> Processing
+        </span>
+    );
+};
+
+// ─── Tab Definitions ──────────────────────────────────────────────────────────
+
+const TABS = [
+    { id: 'overview', label: 'Overview', icon: BarChart2 },
+    { id: 'marketplace', label: 'Available Invoices', icon: Zap },
+    { id: 'investments', label: 'My Investments', icon: Briefcase },
+    { id: 'meetings', label: 'Meeting Records', icon: Video },
+    { id: 'analytics', label: 'Risk Analytics', icon: ShieldAlert },
+];
+
+// ─── Component: Invoice Detail Panel ──────────────────────────────────────────
+
+const InvoiceDetailPanel = ({ invoice, onClose }) => {
+    if (!invoice) return null;
+    const details = DUMMY_INVOICE_DETAILS[invoice.id] || DUMMY_INVOICE_DETAILS['a3f9b1']; // Fallback for demo
+
+    return (
+        <div className="fixed inset-0 z-50 flex justify-end">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
+            <div className="relative w-full max-w-2xl h-full bg-[#0F172A] border-l border-cardBorder shadow-2xl flex flex-col animate-slide-in-right overflow-y-auto">
+
+                {/* Header */}
+                <div className="p-6 border-b border-cardBorder flex items-start justify-between bg-bg0/50 backdrop-blur-md sticky top-0 z-10">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <span className="text-xs font-mono text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20">#{invoice.id}</span>
+                            <span className="text-xs text-muted flex items-center gap-1"><Clock size={12} /> Due {new Date(invoice.dueDate).toLocaleDateString()}</span>
+                        </div>
+                        <h2 className="text-2xl font-bold text-white leading-tight">{invoice.msmeName}</h2>
+                        <div className="flex items-center gap-2 mt-2 text-sm text-muted">
+                            <Building size={14} /> {details.sector} • {details.location}
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-muted hover:text-white transition-colors">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                {/* Body */}
+                <div className="p-6 space-y-8">
+                    {/* Key Stats */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="p-4 rounded-xl bg-accent/5 border border-accent/20">
+                            <p className="text-xs text-muted uppercase tracking-wider mb-1">Invoice Amount</p>
+                            <p className="text-2xl font-bold text-white">₹{Number(invoice.amount).toLocaleString('en-IN')}</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-success/5 border border-success/20">
+                            <p className="text-xs text-muted uppercase tracking-wider mb-1">Expected Return</p>
+                            <p className="text-2xl font-bold text-success">{invoice.expectedReturn}%</p>
+                        </div>
+                    </div>
+
+                    {/* Risk & Fraud Check */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <ShieldAlert size={16} className="text-accent" /> Risk Assessment
+                        </h3>
+                        <div className="bg-card border border-cardBorder rounded-xl p-5 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted">Credit Score</span>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-32 h-2 bg-bg0 rounded-full overflow-hidden">
+                                        <div className="h-full bg-gradient-to-r from-danger via-warning to-success" style={{ width: `${invoice.creditScore}%` }} />
+                                    </div>
+                                    <span className="text-sm font-bold text-white">{invoice.creditScore}/100</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between border-t border-cardBorder pt-4">
+                                <span className="text-sm text-muted">Fraud Check</span>
+                                <span className={`flex items-center gap-1.5 text-sm font-semibold ${details.fraudCheck.status === 'PASSED' ? 'text-success' : 'text-warning'}`}>
+                                    {details.fraudCheck.status === 'PASSED' ? <CheckCircle size={14} /> : <AlertOctagon size={14} />}
+                                    {details.fraudCheck.status}
+                                </span>
+                            </div>
+                            {details.fraudCheck.flags.length > 0 && (
+                                <div className="bg-warning/10 border border-warning/20 p-3 rounded-lg flex items-start gap-2">
+                                    <AlertTriangle size={14} className="text-warning mt-0.5" />
+                                    <p className="text-xs text-warning/90">{details.fraudCheck.flags[0]}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Company Financials */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <PieChartIcon size={16} className="text-accent" /> Financial Snapshot
+                        </h3>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="p-3 bg-bg0 rounded-lg border border-cardBorder text-center">
+                                <p className="text-xs text-muted mb-1">Annual Revenue</p>
+                                <p className="text-sm font-semibold text-white">{details.financials.revenue}</p>
+                            </div>
+                            <div className="p-3 bg-bg0 rounded-lg border border-cardBorder text-center">
+                                <p className="text-xs text-muted mb-1">Net Profit</p>
+                                <p className="text-sm font-semibold text-white">{details.financials.profit}</p>
+                            </div>
+                            <div className="p-3 bg-bg0 rounded-lg border border-cardBorder text-center">
+                                <p className="text-xs text-muted mb-1">YoY Growth</p>
+                                <p className="text-sm font-semibold text-success">{details.financials.yoyGrowth}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Documents */}
+                    <div>
+                        <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                            <FileText size={16} className="text-accent" /> Verified Documents
+                        </h3>
+                        <div className="space-y-2">
+                            {details.documents.map((doc, i) => (
+                                <div key={i} className="flex items-center justify-between p-3 bg-card border border-cardBorder rounded-lg hover:border-accent/40 transition-colors cursor-pointer group">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-accent/10 rounded-lg text-accent">
+                                            <FileText size={16} />
+                                        </div>
+                                        <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{doc}</span>
+                                    </div>
+                                    <Download size={16} className="text-muted group-hover:text-accent transition-colors" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer Actions */}
+                <div className="p-6 border-t border-cardBorder bg-bg0/50 backdrop-blur-md sticky bottom-0 mt-auto">
+                    <button className="btn-primary py-3.5 text-base shadow-lg shadow-accent/20">
+                        Fund This Invoice <ArrowUpRight size={18} />
+                    </button>
+                    <p className="text-xs text-center text-muted mt-3 flex items-center justify-center gap-1">
+                        <ShieldAlert size={12} /> FinBridge Guarantee applies to Low Risk invoices
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ─── Section Components ───────────────────────────────────────────────────────
+
+const OverviewSection = ({ onExploreMarketplace }) => (
+    <div className="space-y-8">
+        {/* KPI Summary Cards — 4 metrics as per spec */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <StatCard title="Total Funds Invested" value="₹7,00,000" icon={TrendingUp} color="accent" trend="up" trendValue="+18%" />
+            <StatCard title="Active Deals" value="2" icon={Briefcase} color="success" />
+            <StatCard title="Total Returns Earned" value="₹46,750" icon={DollarSign} color="success" trend="up" trendValue="+12.4%" />
+            <StatCard title="Available Wallet Balance" value="₹24,50,000" icon={ArrowUpRight} color="accent2" trend="up" trendValue="+₹5L" />
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Investment Over Time */}
+            <div className="lg:col-span-2 bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 className="text-lg font-semibold text-white">Investment Over Time</h2>
+                        <p className="text-xs text-muted mt-0.5">6-month investment growth trend</p>
+                    </div>
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-success/10 text-success border border-success/20">+8.7% avg</span>
+                </div>
+                <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                        <LineChart data={DUMMY_PORTFOLIO_TREND}>
+                            <defs>
+                                <linearGradient id="investedGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="returnsGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.15} />
+                                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                            <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
+                                itemStyle={{ color: '#fff' }}
+                                formatter={(v, name) => [`₹${Number(v).toLocaleString('en-IN')}`, name === 'invested' ? 'Invested' : 'Returns']}
+                            />
+                            <Line type="monotone" dataKey="invested" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} />
+                            <Line type="monotone" dataKey="returns" stroke="#22c55e" strokeWidth={2.5} dot={{ fill: '#22c55e', r: 3 }} activeDot={{ r: 5 }} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+                <div className="flex items-center gap-5 mt-3">
+                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-accent rounded" /><span className="text-xs text-muted">Invested</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-success rounded" /><span className="text-xs text-muted">Returns</span></div>
+                </div>
+            </div>
+
+            {/* Risk Distribution Doughnut */}
+            <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+                <h2 className="text-lg font-semibold text-white mb-1">Risk Distribution</h2>
+                <p className="text-xs text-muted mb-6">Current portfolio breakdown</p>
+                <div className="h-52 relative">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                        <PieChart>
+                            <Pie
+                                data={DUMMY_RISK_DISTRIBUTION}
+                                cx="50%" cy="50%"
+                                innerRadius={52} outerRadius={78}
+                                paddingAngle={4} dataKey="value"
+                            >
+                                {DUMMY_RISK_DISTRIBUTION.map((entry, i) => (
+                                    <Cell key={i} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
+                                formatter={(v) => [`${v}%`]}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span className="text-xl font-bold text-white">54%</span>
+                        <span className="text-xs text-muted">Low Risk</span>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2 mt-2">
+                    {DUMMY_RISK_DISTRIBUTION.map((item) => (
+                        <div key={item.name} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                                <span className="text-xs text-muted">{item.name}</span>
+                            </div>
+                            <span className="text-xs font-semibold text-white">{item.value}%</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {/* Explore Marketplace CTA */}
+        <div className="flex justify-center pt-2 pb-4">
+            <button
+                onClick={onExploreMarketplace}
+                className="btn-primary px-8 py-3.5 text-base font-semibold flex items-center gap-2.5 shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all"
+            >
+                <Zap size={18} />
+                Explore Marketplace
+                <ChevronRight size={18} />
+            </button>
+        </div>
+    </div>
+);
+
+const MarketplaceSection = ({ onSelectInvoice }) => {
+    const [search, setSearch] = useState('');
+    const [riskFilter, setRiskFilter] = useState('ALL');
+
+    const filtered = DUMMY_AVAILABLE_INVOICES.filter(inv => {
+        const matchSearch =
+            inv.msmeName.toLowerCase().includes(search.toLowerCase()) ||
+            inv.id.includes(search.toLowerCase());
+        const matchRisk = riskFilter === 'ALL' || inv.riskLevel === riskFilter;
+        return matchSearch && matchRisk;
+    });
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">Available Invoices</h2>
+                <p className="text-muted mt-1">Browse and fund verified MSME invoices</p>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={17} />
+                    <input
+                        type="text"
+                        placeholder="Search by MSME name or Invoice ID..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="form-input pl-10 w-full"
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <Filter size={16} className="text-muted" />
+                    {['ALL', 'LOW', 'MEDIUM', 'HIGH'].map(r => (
+                        <button
+                            key={r}
+                            onClick={() => setRiskFilter(r)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${riskFilter === r
+                                ? 'bg-accent/20 border-accent/50 text-accent'
+                                : 'border-cardBorder bg-card text-muted hover:text-white hover:border-accent/30'
+                                }`}
+                        >
+                            {r}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Table */}
+            <div className="bg-card border border-cardBorder rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="border-b border-cardBorder bg-bg1/50">
+                                {['Invoice ID', 'MSME Name', 'Amount', 'Due Date', 'Credit Score', 'Risk Level', 'Exp. Return', 'Actions'].map(h => (
+                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-cardBorder">
+                            {filtered.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="px-6 py-12 text-center text-muted">
+                                        No invoices match your search.
+                                    </td>
+                                </tr>
+                            ) : filtered.map((inv) => (
+                                <tr key={inv.id} className="hover:bg-accent/5 transition-colors">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">#{inv.id}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{inv.msmeName}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                                        ₹{Number(inv.amount).toLocaleString('en-IN')}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                        {new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-16 bg-bg1 rounded-full h-1.5 overflow-hidden">
+                                                <div
+                                                    className={`h-1.5 rounded-full ${inv.creditScore >= 80 ? 'bg-success' : inv.creditScore >= 55 ? 'bg-warning' : 'bg-danger'}`}
+                                                    style={{ width: `${inv.creditScore}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-xs text-muted">{inv.creditScore}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <RiskBadge level={inv.riskLevel} />
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className="text-sm font-semibold text-success">{inv.expectedReturn}%</span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => onSelectInvoice(inv)}
+                                                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-cardBorder text-muted hover:text-white hover:border-accent/40 transition-all flex items-center gap-1">
+                                                <Eye size={13} /> View
+                                            </button>
+                                            <button className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
+                                                <Zap size={13} /> Fund Now
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const InvestmentsSection = () => (
+    <div className="space-y-6">
+        <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">My Investments</h2>
+            <p className="text-muted mt-1">Track all your funded invoices and expected returns</p>
+        </div>
+
+        {/* Summary Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+                { label: 'Total Invested', value: '₹7,00,000', color: 'text-accent' },
+                { label: 'Expected Returns', value: '₹46,750', color: 'text-success' },
+                { label: 'Active Positions', value: '2', color: 'text-white' },
+                { label: 'Settled / Defaulted', value: '1 / 1', color: 'text-muted' },
+            ].map(item => (
+                <div key={item.label} className="bg-card border border-cardBorder rounded-xl p-4 shadow">
+                    <p className="text-xs text-muted font-medium uppercase tracking-wider mb-1">{item.label}</p>
+                    <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
+                </div>
+            ))}
+        </div>
+
+        {/* Table */}
+        <div className="bg-card border border-cardBorder rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
+            <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                    <thead>
+                        <tr className="border-b border-cardBorder bg-bg1/50">
+                            {['Invoice ID', 'MSME Name', 'Invested', 'Interest Rate', 'Expected Return', 'Due Date', 'Days Left', 'Status'].map(h => (
+                                <th key={h} className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-cardBorder">
+                        {DUMMY_MY_INVESTMENTS.map((inv) => (
+                            <tr key={inv.id} className="hover:bg-accent/5 transition-colors">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">#{inv.id}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{inv.msmeName}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                                    ₹{Number(inv.invested).toLocaleString('en-IN')}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">{inv.interestRate}% p.a.</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-success">
+                                    ₹{Number(inv.expectedReturn).toLocaleString('en-IN')}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                    {new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    {inv.daysRemaining > 0
+                                        ? <span className="font-semibold text-white">{inv.daysRemaining}d</span>
+                                        : <span className="text-muted">—</span>}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <InvestmentStatusBadge status={inv.status} />
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+);
+
+const MeetingsSection = () => (
+    <div className="space-y-6">
+        <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Meeting Records</h2>
+            <p className="text-muted mt-1">Zoom verification sessions with MSME partners</p>
+        </div>
+
+        {/* Info Banner */}
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-accent/5 border border-accent/20">
+            <Video size={18} className="text-accent mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-muted">
+                All meetings are recorded for compliance purposes. Recordings are available for 90 days post-session.
+                <span className="text-accent ml-1">Contact support</span> for extended access.
+            </p>
+        </div>
+
+        {/* Table */}
+        <div className="bg-card border border-cardBorder rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
+            <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                    <thead>
+                        <tr className="border-b border-cardBorder bg-bg1/50">
+                            {['Invoice ID', 'MSME Name', 'Meeting Date', 'Duration', 'Recording', 'Action'].map(h => (
+                                <th key={h} className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-cardBorder">
+                        {DUMMY_MEETINGS.map((m) => (
+                            <tr key={m.invoiceId + m.meetingDate} className="hover:bg-accent/5 transition-colors">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">#{m.invoiceId}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{m.msmeName}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                    {new Date(m.meetingDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                    <div className="flex items-center gap-1.5">
+                                        <Clock size={13} className="text-muted" />
+                                        {m.duration}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <RecordingStatusBadge status={m.recordingStatus} />
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <button
+                                        disabled={m.recordingStatus !== 'AVAILABLE'}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 ${m.recordingStatus === 'AVAILABLE'
+                                            ? 'border-accent/40 text-accent hover:bg-accent/10 cursor-pointer'
+                                            : 'border-cardBorder text-muted cursor-not-allowed opacity-50'
+                                            }`}
+                                    >
+                                        <Video size={13} />
+                                        {m.recordingStatus === 'AVAILABLE' ? 'View Recording' : 'Processing...'}
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {/* Empty state note */}
+        <p className="text-xs text-muted text-center">Showing {DUMMY_MEETINGS.length} meeting records. New sessions are logged automatically upon completion.</p>
+    </div>
+);
+
+const AnalyticsSection = () => (
+    <div className="space-y-8">
+        <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight">Risk Analytics</h2>
+            <p className="text-muted mt-1">Portfolio health metrics and risk intelligence</p>
+        </div>
+
+        {/* Summary Stat Blocks */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+                { label: 'Average Credit Score', value: '76.8', sub: 'Across all funded invoices', color: '#3b82f6' },
+                { label: 'Default Rate', value: '8.3%', sub: 'Historical portfolio average', color: '#ef4444' },
+                { label: 'Avg. Return Rate', value: '11.2%', sub: 'Annualised across all investments', color: '#22c55e' },
+            ].map(stat => (
+                <div key={stat.label} className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm text-center hover:border-accent/30 transition-all">
+                    <div className="text-3xl font-extrabold mb-2" style={{ color: stat.color }}>{stat.value}</div>
+                    <div className="text-sm font-semibold text-white mb-1">{stat.label}</div>
+                    <div className="text-xs text-muted">{stat.sub}</div>
+                </div>
+            ))}
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Default Probability Bar Chart */}
+            <div className="lg:col-span-2 bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+                <h3 className="text-lg font-semibold text-white mb-1">Default Probability by Risk Tier</h3>
+                <p className="text-xs text-muted mb-6">Historical default rates per risk classification</p>
+                <div className="h-56">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                        <BarChart data={DUMMY_DEFAULT_PROB} barSize={48}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
+                            <XAxis dataKey="tier" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
+                                formatter={(v) => [`${v}%`, 'Default Probability']}
+                            />
+                            <Bar dataKey="probability" radius={[6, 6, 0, 0]}>
+                                {DUMMY_DEFAULT_PROB.map((entry, i) => (
+                                    <Cell key={i} fill={i === 0 ? '#22c55e' : i === 1 ? '#f59e0b' : '#ef4444'} />
+                                ))}
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            {/* Portfolio Allocation Pie - NOW SECTOR WISE */}
+            <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+                <h3 className="text-lg font-semibold text-white mb-1">Sector Allocation</h3>
+                <p className="text-xs text-muted mb-6">Investment distribution by industry</p>
+                <div className="h-56 relative">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                        <PieChart>
+                            <Pie
+                                data={DUMMY_SECTOR_DATA}
+                                cx="50%" cy="50%"
+                                outerRadius={80}
+                                paddingAngle={3}
+                                dataKey="value"
+                            >
+                                {DUMMY_SECTOR_DATA.map((entry, i) => (
+                                    <Cell key={i} fill={entry.color} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
+                                formatter={(v) => [`${v}%`]}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </div>
+                <div className="flex flex-wrap gap-3 mt-2 justify-center">
+                    {DUMMY_SECTOR_DATA.map(item => (
+                        <div key={item.name} className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                            <span className="text-xs text-muted">{item.name}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+
+        {/* ROI Benchmark Chart */}
+        <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm">
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h3 className="text-lg font-semibold text-white">ROI vs Market Benchmark</h3>
+                    <p className="text-xs text-muted mt-0.5">Your portfolio performance vs standard FD rates</p>
+                </div>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-accent rounded" /><span className="text-xs text-muted">My Portfolio</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-muted rounded" /><span className="text-xs text-muted">Market Benchmark</span></div>
+                </div>
+            </div>
+            <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                    <LineChart data={DUMMY_ROI_BENCHMARK}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                        <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
+                        <Tooltip
+                            contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
+                            itemStyle={{ color: '#fff' }}
+                            formatter={(v) => [`${v}%`]}
+                        />
+                        <Line type="monotone" dataKey="portfolio" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 4 }} activeDot={{ r: 6 }} />
+                        <Line type="monotone" dataKey="benchmark" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
+        </div>
+
+        {/* Risk Guidance */}
+        <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm">
+            <h3 className="text-lg font-semibold text-white mb-4">Risk Guidelines</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                    { level: 'LOW', desc: 'Credit Score ≥ 80. Businesses with 5+ years history. Minimal default risk. Returns 7–10%.', color: 'border-success/30 bg-success/5', badge: 'bg-success/10 text-success' },
+                    { level: 'MEDIUM', desc: 'Credit Score 55–79. Moderate business age. Balanced risk-return. Returns 10–16%.', color: 'border-warning/30 bg-warning/5', badge: 'bg-warning/10 text-warning' },
+                    { level: 'HIGH', desc: 'Credit Score < 55. Young businesses or fraud-flagged. High default risk. Returns 17–25%.', color: 'border-danger/30 bg-danger/5', badge: 'bg-danger/10 text-danger' },
+                ].map(g => (
+                    <div key={g.level} className={`rounded-xl border p-4 ${g.color}`}>
+                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold mb-3 ${g.badge}`}>{g.level} RISK</span>
+                        <p className="text-xs text-muted leading-relaxed">{g.desc}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </div>
+);
+
+// ─── Main Dashboard ───────────────────────────────────────────────────────────
+
+const LenderDashboard = () => {
+    const navigate = useNavigate();
+    const { user } = useAuth();
+    const [activeTab, setActiveTab] = useState('overview');
+    const [selectedInvoice, setSelectedInvoice] = useState(null);
+
+    const kycStatus = user?.kycStatus || 'NOT_SUBMITTED';
+    const isKycVerified = kycStatus === 'VERIFIED';
+
+    // Loading skeleton — identical to MSMEDashboard pattern
+    const [loading, setLoading] = useState(true);
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        // Simulate short init delay for skeleton (matches MSME)
+        const t = setTimeout(() => {
+            setLoading(false);
+            setTimeout(() => setVisible(true), 20);
+        }, 1500);
+        return () => clearTimeout(t);
+    }, []);
+
+    // KYC toast on first render — identical to MSME pattern
+    useEffect(() => {
+        if (kycStatus !== 'VERIFIED' && kycStatus !== 'NOT_SUBMITTED') {
+            const toastId = 'kyc-status-toast';
+            if (kycStatus === 'IN_PROGRESS') {
+                toast(`🔍 Your KYC is under review. We'll notify you once verified.`, {
+                    id: toastId,
+                    duration: 5000,
+                    style: { background: '#1e293b', color: '#fff', border: '1px solid rgba(59,130,246,0.3)' },
+                });
+            } else if (kycStatus === 'REJECTED') {
+                toast.error('❌ Your KYC was rejected. Please resubmit to access the marketplace.', {
+                    id: toastId,
+                    duration: 6000,
+                });
+            }
+        }
+    }, [kycStatus]);
+
+    // ── Marketplace KYC Gate Banner ───────────────────────────────────────────
+    const MarketplaceKycBanner = () => (
+        <div className="flex flex-col items-center justify-center py-20 space-y-6 text-center">
+            <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                <LockKeyhole size={36} className="text-amber-500" />
+            </div>
+            <div>
+                <h2 className="text-2xl font-bold text-white mb-2">Marketplace Access Restricted</h2>
+                <p className="text-muted max-w-md">
+                    {kycStatus === 'IN_PROGRESS'
+                        ? 'Your KYC is currently under review. Marketplace access will be unlocked once verified by our team.'
+                        : kycStatus === 'REJECTED'
+                        ? 'Your KYC was rejected. Please resubmit your details to regain marketplace access.'
+                        : 'Please complete your KYC verification to access the invoice marketplace.'}
+                </p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+                <button
+                    onClick={() => navigate('/lender/kyc')}
+                    className="btn-primary px-6 py-2.5 flex items-center gap-2"
+                >
+                    <ShieldCheck size={16} />
+                    {kycStatus === 'REJECTED' ? 'Resubmit KYC' : kycStatus === 'IN_PROGRESS' ? 'View KYC Status' : 'Complete KYC'}
+                </button>
+                {kycStatus === 'IN_PROGRESS' && (
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                        <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                        <span className="text-xs text-blue-400 font-medium">Verification in progress</span>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
+    const renderSection = () => {
+        switch (activeTab) {
+            case 'overview': return <OverviewSection onExploreMarketplace={() => setActiveTab('marketplace')} />;
+            case 'marketplace': return isKycVerified
+                ? <MarketplaceSection onSelectInvoice={setSelectedInvoice} />
+                : <MarketplaceKycBanner />;
+            case 'investments': return <InvestmentsSection />;
+            case 'meetings': return <MeetingsSection />;
+            case 'analytics': return <AnalyticsSection />;
+            default: return <OverviewSection />;
+        }
+    };
+
+    return (
+        <div className="min-h-screen relative overflow-hidden bg-slate-950">
+            {/* Glow blobs — same as MSMEDashboard */}
+            <div className="absolute top-0 right-1/4 w-[480px] h-[480px] bg-blue-600 rounded-full -z-10 blur-3xl opacity-[0.12] pointer-events-none" />
+            <div className="absolute bottom-1/4 -left-24 w-[400px] h-[400px] bg-cyan-500 rounded-full -z-10 blur-3xl opacity-[0.08] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/40 to-slate-950 -z-10 pointer-events-none" />
+
+            <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                {/* Skeleton loader — same as MSMEDashboard */}
+                {loading && <FinbridgeLoading userName={user?.name} />}
+
+                <div
+                    className="space-y-6 pb-20"
+                    style={{
+                        opacity: (loading || !visible) ? 0 : 1,
+                        transition: 'opacity 0.5s ease',
+                        display: loading ? 'none' : undefined,
+                    }}
+                >
+            {/* Invoice Detail Panel Overlay */}
+            {selectedInvoice && (
+                <InvoiceDetailPanel
+                    invoice={selectedInvoice}
+                    onClose={() => setSelectedInvoice(null)}
+                />
+            )}
+            {/* Page Header — same pattern as MSMEDashboard */}
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
+                <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-medium mb-4">
+                        <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+                        Lender Dashboard
+                    </div>
+                    <h1 className="text-4xl font-semibold text-white tracking-tight">
+                        Welcome back,{' '}
+                        <span className="text-blue-400">{user?.name || 'Lender'}</span>
+                    </h1>
+                    <p className="text-white/60 mt-2 text-sm">Here's what's happening with your investments today.</p>
+                </div>
+
+                {/* KYC CTA — amber pulsing button identical to MSME */}
+                {!isKycVerified ? (
+                    <div className="shrink-0 flex flex-col items-end gap-2 text-right">
+                        <button
+                            onClick={() => navigate('/lender/kyc')}
+                            className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-medium px-6 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm animate-pulse"
+                        >
+                            <Briefcase size={16} />
+                            Complete KYC to Unlock Marketplace
+                        </button>
+                        <span className="text-amber-400/80 text-xs font-medium bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">
+                            Current Status: {kycStatus?.replace('_', ' ') || 'NOT SUBMITTED'}
+                        </span>
+                    </div>
+                ) : (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold shrink-0">
+                        <ShieldCheck size={14} />
+                        KYC Verified
+                    </div>
+                )}
+            </div>
+
+            {/* Tab Navigation */}
+            <div className="border-b border-cardBorder">
+                <div className="flex gap-0 overflow-x-auto">
+                    {TABS.map(tab => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${isActive
+                                    ? 'border-accent text-accent'
+                                    : 'border-transparent text-muted hover:text-white hover:border-muted/30'
+                                    }`}
+                            >
+                                <Icon size={15} />
+                                {tab.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Active Section */}
+            {renderSection()}
+                </div>
+            </div>
         </div>
     );
 };
