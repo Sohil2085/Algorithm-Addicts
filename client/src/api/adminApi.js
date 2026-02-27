@@ -62,3 +62,12 @@ export const rejectLenderKyc = async (id, adminRemark) => {
         throw error.response?.data?.message || 'Failed to reject Lender KYC';
     }
 };
+
+export const getAllDeals = async () => {
+    try {
+        const response = await api.get('/admin/deals');
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.message || 'Failed to fetch deals';
+    }
+};

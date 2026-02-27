@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import RiskBadge from './RiskBadge';
 import { ShieldAlert, Plus, X, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import InvoiceViewDialog from './InvoiceViewDialog';
 
 const riskPill = (level) => {
     const l = (level || '').toLowerCase();
@@ -149,7 +150,7 @@ const InvoiceTable = ({ invoices, onCreate }) => {
             )}
 
             {/* Fund Invoice Modal */}
-            {isFundOpen && selectedInvoiceForFund && (
+            {/* {isFundOpen && selectedInvoiceForFund && (
                 <FundInvoiceDialog
                     invoice={selectedInvoiceForFund}
                     onClose={() => {
@@ -157,7 +158,7 @@ const InvoiceTable = ({ invoices, onCreate }) => {
                         setSelectedInvoiceForFund(null);
                     }}
                 />
-            )}
+            )} */}
         </>
     );
 };

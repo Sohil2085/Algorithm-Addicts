@@ -21,6 +21,7 @@ import Profile from './pages/Profile';
 import AdminKycPage from './pages/AdminKycPage';
 import AdminLenderKycPage from './pages/AdminLenderKycPage';
 import LenderOnboardingPage from './pages/LenderOnboardingPage';
+import AdminDealPage from './pages/AdminDealPage';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading, isAuthenticated } = useAuth();
@@ -171,6 +172,11 @@ function App() {
             <Route path="/admin/lender-kyc" element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminLenderKycPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/deals" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminDealPage />
               </ProtectedRoute>
             } />
 

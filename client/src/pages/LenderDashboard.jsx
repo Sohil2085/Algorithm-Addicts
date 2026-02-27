@@ -591,7 +591,7 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
     );
 };
 
-const InvestmentsSection = ({ myDeals, onFundDeal }) => {
+const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal }) => {
     const totalInvested = myDeals.reduce((sum, deal) => sum + parseFloat(deal.fundedAmount), 0);
     const expectedReturns = myDeals.reduce((sum, deal) => sum + parseFloat(deal.interestAmount), 0);
     const activePositions = myDeals.filter(d => d.status === 'ACTIVE').length;
@@ -667,8 +667,10 @@ const InvestmentsSection = ({ myDeals, onFundDeal }) => {
                                             {deal.status === 'ACTIVE' ? (
                                                 <button
                                                     onClick={() => onFundDeal(deal.id)}
-                                                    className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
-                                                    <Zap size={13} /> Fund Deal
+                                                    disabled={isSubmittingDeal}
+                                                    className={`btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1 ${isSubmittingDeal ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                    {isSubmittingDeal ? <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Zap size={13} />}
+                                                    {isSubmittingDeal ? 'Processing...' : 'Fund Deal'}
                                                 </button>
                                             ) : (
                                                 <InvestmentStatusBadge status={deal.status} />
@@ -901,6 +903,7 @@ const LenderDashboard = () => {
     const [myDeals, setMyDeals] = useState([]);
     const [offerForm, setOfferForm] = useState({ amount: '', rate: '' });
     const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
+    const [isSubmittingDeal, setIsSubmittingDeal] = useState(false);
 
     const kycStatus = user?.kycStatus || 'NOT_SUBMITTED';
     const isKycVerified = kycStatus === 'VERIFIED';
@@ -1014,21 +1017,21 @@ const LenderDashboard = () => {
 
     const handleFundDeal = async (dealId) => {
         try {
+            setIsSubmittingDeal(true);
             const res = await fundDeal(dealId);
             toast.success('Deal funded successfully!');
 
-            // 4. Update useState manually based on API response
-            if (res?.data?.updatedWallet) {
-                setWallet(res.data.updatedWallet);
-            } else {
-                const walletData = await getMyWallet();
-                setWallet(walletData);
-            }
-
-            const dealsData = await getMyDeals();
+            const [walletData, dealsData] = await Promise.all([
+                getMyWallet(),
+                getMyDeals()
+            ]);
+            setWallet(walletData);
             setMyDeals(dealsData);
+
         } catch (error) {
             toast.error(error.message || 'Failed to fund deal');
+        } finally {
+            setIsSubmittingDeal(false);
         }
     };
 
@@ -1085,7 +1088,7 @@ const LenderDashboard = () => {
                 : <MarketplaceKycBanner />;
             case 'investments': return (
                 <FeatureGuard featureKey="DEAL_EXECUTION_MODULE">
-                    <InvestmentsSection myDeals={myDeals} onFundDeal={handleFundDeal} />
+                    <InvestmentsSection myDeals={myDeals} onFundDeal={handleFundDeal} isSubmittingDeal={isSubmittingDeal} />
                 </FeatureGuard>
             );
             case 'meetings': return <MeetingsSection />;
