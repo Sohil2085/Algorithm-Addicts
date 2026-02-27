@@ -97,104 +97,10 @@ function App() {
                 success: {
                   iconTheme: {
                     primary: '#22c55e',
-                    secondary: '#fff',
                   },
                 },
-              },
-            }}
-          />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={
-              <PublicRoute>
-                <Landing />
-              </PublicRoute>
-            } />
-            <Route path="/login" element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            } />
-            <Route path="/register" element={
-              <PublicRoute>
-                <Register />
-              </PublicRoute>
-            } />
-
-            {/* Protected Routes - MSME */}
-            <Route path="/msme" element={
-              <ProtectedRoute allowedRoles={['MSME']}>
-                <MSMEDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/upload-invoice" element={
-              <ProtectedRoute allowedRoles={['MSME']}>
-                <UploadInvoice />
-              </ProtectedRoute>
-            } />
-            <Route path="/invoices" element={
-              <ProtectedRoute allowedRoles={['MSME']}>
-                <InvoiceList />
-              </ProtectedRoute>
-            } />
-            <Route path="/kyc" element={
-              <ProtectedRoute allowedRoles={['MSME']}>
-                <KycForm />
-              </ProtectedRoute>
-            } />
-
-            {/* Protected Routes - Lender */}
-            <Route path="/lender" element={
-              <ProtectedRoute allowedRoles={['LENDER']}>
-                <LenderDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/lender/kyc" element={
-              <ProtectedRoute allowedRoles={['LENDER']}>
-                <LenderOnboardingPage />
-              </ProtectedRoute>
-            } />
-
-            {/* Protected Routes - Admin */}
-            <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/kyc" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminKycPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/lender-kyc" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminLenderKycPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/deals" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminDealPage />
-              </ProtectedRoute>
-            } />
-
-            {/* Protected Route - Controller */}
-            <Route path="/system-control" element={
-              <ProtectedRoute allowedRoles={['CONTROLLER']}>
-                <SystemControl />
-              </ProtectedRoute>
-            } />
-
-            {/* Shared Protected Routes */}
-            <Route path="/wallet" element={
-              <FeatureGuard featureKey="WALLET_MODULE">
-                error: {
-                  iconTheme: {
-                    primary: '#ef4444',
-                    secondary: '#fff',
-                  },
-                },
-              }}
-            />
+              }
+              } />
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={
@@ -263,27 +169,11 @@ function App() {
                   <AdminLenderKycPage />
                 </ProtectedRoute>
               } />
-            {/* Protected Routes - Admin */}
-            <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/kyc" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminKycPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/lender-kyc" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminLenderKycPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/deals" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminDealPage />
-              </ProtectedRoute>
-            } />
+              <Route path="/admin/deals" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <AdminDealPage />
+                </ProtectedRoute>
+              } />
 
               {/* Protected Route - Controller */}
               <Route path="/system-control" element={
