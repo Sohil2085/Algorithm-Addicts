@@ -1,21 +1,14 @@
-export const requireRole = (roles) => {
+export const checkRole = (allowedRoles) => {
     return (req, res, next) => {
-        if (!req.user) {
-            return res.status(401).json({
-                success: false,
-                message: 'Authentication required to check role.',
-                error: { code: 'UnauthorizedError' }
-            });
-        }
+        const userRole = req.user && req.user.role ? req.user.role.toUpperCase() : null;
+        const upperAllowedRoles = allowedRoles.map(r => r.toUpperCase());
 
-        if (!roles.includes(req.user.role)) {
+        if (!userRole || !upperAllowedRoles.includes(userRole)) {
             return res.status(403).json({
-                success: false,
-                message: 'You do not have permission to access this resource.',
-                error: { code: 'ForbiddenError' }
+                error: 'Forbidden',
+                message: `You do not have permission. Your role is ${userRole || 'MISSING'}, required: ${upperAllowedRoles.join(', ')}`,
             });
         }
-
         next();
     };
 };

@@ -41,7 +41,7 @@ const register = async (req, res) => {
                 password: hashedPassword,
                 role,
                 gstin,
-                business_age,
+                business_age: business_age ? parseInt(business_age) : null,
             },
         });
 
@@ -55,6 +55,8 @@ const register = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                gstin: user.gstin,
+                business_age: user.business_age,
             },
         });
     } catch (error) {
@@ -98,6 +100,8 @@ const login = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                gstin: user.gstin,
+                business_age: user.business_age,
             },
         });
     } catch (error) {

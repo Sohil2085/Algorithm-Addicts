@@ -1,40 +1,55 @@
+import jwt from 'jsonwebtoken';
+import prisma from '../config/prisma.js';
 
-import express from 'express';
-import { createInvoice, getMyInvoices, getInvoiceById } from '../controllers/invoiceController.js';
-import { protect } from '../middleware/authMiddleware.js';
-import { checkRole } from '../middleware/roleMiddleware.js';
-import { requireFeatureEnabled } from '../middleware/feature.middleware.js';
-import { requireVerifiedLender } from '../middleware/lender.middleware.js';
+const protect = async (req, res, next) => {
+    let token;
 
-const router = express.Router();
+    if (
+        req.headers.authorization &&
+        req.headers.authorization.startsWith('Bearer')
+    ) {
+        token = req.headers.authorization.split(' ')[1];
+    }
 
-// Apply authentication middleware to all routes in this router
-// All invoice operations require a logged-in user
-router.use(protect);
-router.use(requireFeatureEnabled('INVOICE_UPLOAD'));
+    if (!token) {
+        return res.status(401).json({ message: 'Not authorized, no token' });
+    }
 
-// Create a new invoice (MSME only)
-router.post(
-    '/create',
-    checkRole(['MSME']),
-    createInvoice
-);
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-// Get invoices for the logged-in user (MSME only)
-// Lenders/Admins might need different endpoints or role checks, 
-// strictly following request for "MSME only" for this route.
-router.get(
-    '/my',
-    checkRole(['MSME']),
-    getMyInvoices
-);
+        const user = await prisma.user.findUnique({
+            where: { id: decoded.id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                kycStatus: true,
+            },
+        });
 
-// Get specific invoice by ID (Authenticated user)
-// Controller handles ownership checks, but lenders must be verified to view
-router.get(
-    '/:id',
-    requireVerifiedLender,
-    getInvoiceById
-);
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
 
-export default router;
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error(error);
+        return res.status(401).json({ message: 'Not authorized, token failed' });
+    }
+};
+
+const authorize = (...roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({
+                message: `User role ${req.user.role} is not authorized to access this route`,
+            });
+        }
+        next();
+    };
+};
+
+export { protect, authorize };
