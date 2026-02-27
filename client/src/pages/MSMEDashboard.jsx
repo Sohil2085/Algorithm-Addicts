@@ -25,6 +25,9 @@ import {
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import { getInvoiceStats, getInvoices } from '../api/invoiceApi';
+import { getMyWallet } from '../api/walletApi';
+import { getMyOffers, acceptOffer } from '../api/offerApi';
+import { getMyDeals, repayDeal } from '../api/dealApi';
 import { useAuth } from '../context/AuthContext';
 import { FeatureGuard } from '../context/FeatureContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
@@ -38,21 +41,62 @@ const MSMEDashboard = () => {
     const [visible, setVisible] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
 
+    // New Deal Lifecycle States
+    const [wallet, setWallet] = useState({ availableBalance: 0, lockedBalance: 0, totalEarnings: 0 });
+    const [offers, setOffers] = useState([]);
+    const [deals, setDeals] = useState([]);
+    const [isAcceptingOffer, setIsAcceptingOffer] = useState(false);
+    const [isRepayingDeal, setIsRepayingDeal] = useState(false);
+
+    const loadDashboardData = async () => {
+        try {
+            const [statsData, walletData, offersData, dealsData] = await Promise.all([
+                getInvoiceStats().catch(() => null),
+                user?.kycStatus === 'VERIFIED' ? getMyWallet().catch(() => ({ availableBalance: 0, lockedBalance: 0, totalEarnings: 0 })) : { availableBalance: 0, lockedBalance: 0, totalEarnings: 0 },
+                user?.kycStatus === 'VERIFIED' ? getMyOffers().catch(() => []) : [],
+                user?.kycStatus === 'VERIFIED' ? getMyDeals().catch(() => []) : []
+            ]);
+            if (statsData) setStats(statsData);
+            setWallet(walletData || { availableBalance: 0, lockedBalance: 0, totalEarnings: 0 });
+            setOffers(offersData || []);
+            setDeals(dealsData || []);
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        } finally {
+            setLoading(false);
+            setTimeout(() => setVisible(true), 20);
+        }
+    };
+
     useEffect(() => {
-        const loadStats = async () => {
-            try {
-                const data = await getInvoiceStats();
-                setStats(data);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
-                // brief delay so fade-in keyframe fires after paint
-                setTimeout(() => setVisible(true), 20);
-            }
-        };
-        loadStats();
-    }, []);
+        loadDashboardData();
+    }, [user?.kycStatus]);
+
+    const handleAcceptOffer = async (offerId) => {
+        setIsAcceptingOffer(true);
+        try {
+            await acceptOffer(offerId);
+            toast.success("Offer accepted successfully! Deal created.");
+            await loadDashboardData(); // Refresh all data
+        } catch (error) {
+            toast.error(error.message || "Failed to accept offer");
+        } finally {
+            setIsAcceptingOffer(false);
+        }
+    };
+
+    const handleRepayDeal = async (dealId) => {
+        setIsRepayingDeal(true);
+        try {
+            await repayDeal(dealId);
+            toast.success("Deal repaid successfully!");
+            await loadDashboardData(); // Refresh all data
+        } catch (error) {
+            toast.error(error.message || "Failed to repay deal");
+        } finally {
+            setIsRepayingDeal(false);
+        }
+    };
 
     const handleExportReport = async () => {
         setIsExporting(true);
@@ -181,8 +225,8 @@ const MSMEDashboard = () => {
                             className={user?.kycStatus !== 'VERIFIED' ? "blur-[2px] opacity-70" : ""}
                         />
                         <StatCard
-                            title="Business Age"
-                            value={user?.kycStatus === 'VERIFIED' ? (user?.business_age !== null && user?.business_age !== undefined ? `${user.business_age} Yrs` : 'N/A') : '---'}
+                            title="Wallet Balance"
+                            value={user?.kycStatus === 'VERIFIED' ? `₹${Number(wallet?.availableBalance || 0).toLocaleString('en-IN')}` : '---'}
                             icon={Briefcase}
                             color="accent2"
                             className={user?.kycStatus !== 'VERIFIED' ? "blur-[2px] opacity-70" : ""}
@@ -274,6 +318,118 @@ const MSMEDashboard = () => {
                             )}
                         </div>
                     </div>
+
+                    {/* Pending Offers Section */}
+                    {user?.kycStatus === 'VERIFIED' && (
+                        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+                            <h2 className="text-base font-semibold text-white mb-5">Received Funding Offers</h2>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="border-b border-white/10">
+                                            {['Invoice ID', 'Offer Amount', 'Interest Rate', 'Expected Fee', 'Status', 'Actions'].map(h => (
+                                                <th key={h} className="px-4 py-3 text-xs font-semibold text-white/50 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/10">
+                                        {offers.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={6} className="px-4 py-8 text-center text-white/40 text-sm">No pending offers received yet</td>
+                                            </tr>
+                                        ) : offers.map((offer) => (
+                                            <tr key={offer.id} className="hover:bg-white/5 transition-colors">
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-400">
+                                                    #{offer.invoice?.invoice_number || offer.invoiceId.substring(0, 6)}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-white">
+                                                    ₹{Number(offer.fundedAmount).toLocaleString('en-IN')}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">{offer.interestRate}% p.a.</td>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                                                    ₹{Number(offer.platformFee).toLocaleString('en-IN')}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                                        {offer.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <button
+                                                        onClick={() => handleAcceptOffer(offer.id)}
+                                                        disabled={isAcceptingOffer}
+                                                        className="px-3 py-1.5 text-xs font-semibold rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors disabled:opacity-50"
+                                                    >
+                                                        {isAcceptingOffer ? 'Accepting...' : 'Accept Offer'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Active Deals Section */}
+                    {user?.kycStatus === 'VERIFIED' && (
+                        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+                            <h2 className="text-base font-semibold text-white mb-5">Active Deals & Repayments</h2>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="border-b border-white/10">
+                                            {['Invoice ID', 'Funded Amount', 'Interest', 'Platform Fee', 'Due Date', 'Status', 'Actions'].map(h => (
+                                                <th key={h} className="px-4 py-3 text-xs font-semibold text-white/50 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/10">
+                                        {deals.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={7} className="px-4 py-8 text-center text-white/40 text-sm">No deals found</td>
+                                            </tr>
+                                        ) : deals.map((deal) => (
+                                            <tr key={deal.id} className="hover:bg-white/5 transition-colors">
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-400">
+                                                    #{deal.invoice?.invoice_number || deal.invoiceId.substring(0, 6)}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-white">
+                                                    ₹{Number(deal.fundedAmount).toLocaleString('en-IN')}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                                                    ₹{Number(deal.interestAmount).toLocaleString('en-IN')}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                                                    ₹{Number(deal.platformFee).toLocaleString('en-IN')}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                                                    {new Date(deal.dueDate).toLocaleDateString('en-IN')}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${deal.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
+                                                        {deal.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    {deal.status === 'ACTIVE' && (
+                                                        <button
+                                                            onClick={() => handleRepayDeal(deal.id)}
+                                                            disabled={isRepayingDeal || wallet.availableBalance < deal.totalPayableToLender}
+                                                            className="px-3 py-1.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+                                                            title={wallet.availableBalance < deal.totalPayableToLender ? "Insufficient wallet balance" : "Repay this deal"}
+                                                        >
+                                                            {isRepayingDeal ? 'Processing...' : 'Repay Deal'}
+                                                        </button>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Quick Actions */}
                     <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 relative overflow-hidden">

@@ -3,29 +3,38 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String      @id @default(uuid())
-  name         String
-  email        String      @unique
-  password     String
-  role         Role        @default(MSME)
-  gstin        String?
-  business_age Int?
-  created_at   DateTime    @default(now())
-  updated_at   DateTime    @updatedAt
-  isActive     Boolean     @default(true)
-  kycStatus    KycStatus   @default(NOT_SUBMITTED)
-  riskScore    Int?
-  bids         Bid[]       @relation("UserBids")
-  fraud_flags  FraudFlag[]
-  invoices     Invoice[]   @relation("UserInvoices")
-  kyc          KYC?
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password      String
+  role          Role           @default(MSME)
+  gstin         String?
+  business_age  Int?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  isActive      Boolean        @default(true)
+  kycStatus     KycStatus      @default(NOT_SUBMITTED)
+  riskScore     Int?
+  bids          Bid[]          @relation("UserBids")
+  fraud_flags   FraudFlag[]
+  invoices      Invoice[]      @relation("UserInvoices")
+  kyc           KYC?
   lenderProfile LenderProfile?
+
+  // Funding offers where user is lender
+  fundingOffers FundingOffer[] @relation("LenderOffers")
+
+  // Deals
+  dealsAsLender Deal[] @relation("LenderDeals")
+  dealsAsMsme   Deal[] @relation("MsmeDeals")
+
+  // Wallet
+  wallet Wallet?
 
   @@index([email])
   @@map("users")
@@ -71,6 +80,8 @@ model Invoice {
   risk_analysis  InvoiceRiskAnalysis?
   user           User                 @relation("UserInvoices", fields: [user_id], references: [id], onDelete: Cascade)
   transactions   Transaction[]
+  fundingOffers  FundingOffer[]
+  deal           Deal?
 
   @@index([user_id])
   @@index([status])
@@ -174,8 +185,22 @@ enum KycStatus {
 enum InvoiceStatus {
   PENDING
   VERIFIED
+  OPEN_FOR_FUNDING
   FUNDED
   SETTLED
+  CLOSED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum DealStatus {
+  ACTIVE
+  CLOSED
+  DEFAULTED
 }
 
 enum RiskLevel {
@@ -236,8 +261,67 @@ model LenderProfile {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
-  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("lender_profiles")
+}
+
+model FundingOffer {
+  id             String      @id @default(uuid())
+  invoiceId      String
+  lenderId       String
+  fundedAmount   Decimal     @db.Decimal(15, 2)
+  interestRate   Decimal     @db.Decimal(5, 2)
+  interestAmount Decimal     @db.Decimal(15, 2)
+  platformFee    Decimal     @db.Decimal(15, 2)
+  status         OfferStatus @default(PENDING)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  lender User @relation("LenderOffers", fields: [lenderId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([lenderId])
+  @@map("funding_offers")
+}
+
+model Deal {
+  id                   String     @id @default(uuid())
+  invoiceId            String     @unique
+  lenderId             String
+  msmeId               String
+  invoiceAmount        Decimal    @db.Decimal(15, 2)
+  fundedAmount         Decimal    @db.Decimal(15, 2)
+  interestAmount       Decimal    @db.Decimal(15, 2)
+  platformFee          Decimal    @db.Decimal(15, 2)
+  totalPayableToLender Decimal    @db.Decimal(15, 2)
+  dueDate              DateTime
+  status               DealStatus @default(ACTIVE)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+  lender  User    @relation("LenderDeals", fields: [lenderId], references: [id])
+  msme    User    @relation("MsmeDeals", fields: [msmeId], references: [id])
+
+  @@index([lenderId])
+  @@index([msmeId])
+  @@map("deals")
+}
+
+model Wallet {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  availableBalance Decimal  @default(0) @db.Decimal(15, 2)
+  lockedBalance    Decimal  @default(0) @db.Decimal(15, 2)
+  totalEarnings    Decimal  @default(0) @db.Decimal(15, 2)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallets")
 }

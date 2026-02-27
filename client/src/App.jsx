@@ -12,6 +12,7 @@ import './App.css';
 import { Toaster } from 'react-hot-toast'; // Import Toaster
 import AdminDashboard from './pages/AdminDashboard';
 import SystemControl from './pages/SystemControl';
+import WalletPage from './pages/WalletPage';
 
 import Landing from './pages/Landing'; // Import Landing page
 import InvoiceList from './pages/InvoiceList';
@@ -181,6 +182,11 @@ function App() {
             } />
 
             {/* Shared Protected Routes */}
+            <Route path="/wallet" element={
+              <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
+                <WalletPage />
+              </ProtectedRoute>
+            } />
             <Route path="/analytics" element={
               <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
                 <Analytics />

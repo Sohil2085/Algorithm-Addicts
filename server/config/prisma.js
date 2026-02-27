@@ -1,15 +1,7 @@
-import { createRequire } from 'node:module';
+import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const { PrismaClient } = require('@prisma/client');
 
-const prisma = new PrismaClient({
-    datasources: {
-        db: {
-            url: process.env.DATABASE_URL,
-        },
-    },
-    // Tolerate NeonDB cold starts (free tier suspends after inactivity)
-    log: ['error'],
-});
+const prisma = new PrismaClient();
 
 export default prisma;

@@ -20,6 +20,9 @@ import { useAuth } from '../context/AuthContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
 import toast from 'react-hot-toast';
 import { getAvailableInvoices } from '../api/invoiceApi';
+import { getMyWallet } from '../api/walletApi';
+import { createOffer } from '../api/offerApi';
+import { getMyDeals, fundDeal } from '../api/dealApi';
 import '../styles/landing.css';
 // ─── Static Dummy Data ────────────────────────────────────────────────────────
 // TODO: Replace with API calls when backend bidding endpoints are ready
@@ -154,7 +157,7 @@ const TABS = [
 
 // ─── Component: Invoice Detail Panel ──────────────────────────────────────────
 
-const InvoiceDetailPanel = ({ invoice, onClose }) => {
+const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
     if (!invoice) return null;
 
     const isMock = invoice.expectedReturn !== undefined && !invoice.original;
@@ -296,7 +299,14 @@ const InvoiceDetailPanel = ({ invoice, onClose }) => {
 
                 {/* Footer Actions */}
                 <div className="p-6 border-t border-cardBorder bg-bg0/50 backdrop-blur-md sticky bottom-0 mt-auto">
-                    <button className="btn-primary py-3.5 text-base shadow-lg shadow-accent/20">
+                    <button
+                        onClick={() => {
+                            if (onFundInvoice) {
+                                onFundInvoice(invoice);
+                            }
+                        }}
+                        className="btn-primary py-3.5 text-base shadow-lg shadow-accent/20"
+                    >
                         Fund This Invoice <ArrowUpRight size={18} />
                     </button>
                     <p className="text-xs text-center text-muted mt-3 flex items-center justify-center gap-1">
@@ -310,116 +320,122 @@ const InvoiceDetailPanel = ({ invoice, onClose }) => {
 
 // ─── Section Components ───────────────────────────────────────────────────────
 
-const OverviewSection = ({ onExploreMarketplace }) => (
-    <div className="space-y-8">
-        {/* KPI Summary Cards — 4 metrics as per spec */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <StatCard title="Total Funds Invested" value="₹7,00,000" icon={TrendingUp} color="accent" trend="up" trendValue="+18%" />
-            <StatCard title="Active Deals" value="2" icon={Briefcase} color="success" />
-            <StatCard title="Total Returns Earned" value="₹46,750" icon={DollarSign} color="success" trend="up" trendValue="+12.4%" />
-            <StatCard title="Available Wallet Balance" value="₹24,50,000" icon={ArrowUpRight} color="accent2" trend="up" trendValue="+₹5L" />
-        </div>
+const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
+    const totalInvested = myDeals.reduce((sum, deal) => sum + parseFloat(deal.fundedAmount), 0);
+    const activeDeals = myDeals.filter(d => d.status === 'ACTIVE').length;
+    const totalReturns = myDeals.reduce((sum, deal) => sum + parseFloat(deal.interestAmount), 0);
 
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Investment Over Time */}
-            <div className="lg:col-span-2 bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 className="text-lg font-semibold text-white">Investment Over Time</h2>
-                        <p className="text-xs text-muted mt-0.5">6-month investment growth trend</p>
-                    </div>
-                    <span className="text-xs px-2.5 py-1 rounded-full bg-success/10 text-success border border-success/20">+8.7% avg</span>
-                </div>
-                <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                        <LineChart data={DUMMY_PORTFOLIO_TREND}>
-                            <defs>
-                                <linearGradient id="investedGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
-                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                </linearGradient>
-                                <linearGradient id="returnsGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.15} />
-                                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-                            <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
-                                itemStyle={{ color: '#fff' }}
-                                formatter={(v, name) => [`₹${Number(v).toLocaleString('en-IN')}`, name === 'invested' ? 'Invested' : 'Returns']}
-                            />
-                            <Line type="monotone" dataKey="invested" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} />
-                            <Line type="monotone" dataKey="returns" stroke="#22c55e" strokeWidth={2.5} dot={{ fill: '#22c55e', r: 3 }} activeDot={{ r: 5 }} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
-                <div className="flex items-center gap-5 mt-3">
-                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-accent rounded" /><span className="text-xs text-muted">Invested</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-success rounded" /><span className="text-xs text-muted">Returns</span></div>
-                </div>
+    return (
+        <div className="space-y-8">
+            {/* KPI Summary Cards — 4 metrics as per spec */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <StatCard title="Total Funds Invested" value={`₹${Number(totalInvested).toLocaleString('en-IN')}`} icon={TrendingUp} color="accent" trend="up" trendValue="+18%" />
+                <StatCard title="Active Deals" value={activeDeals.toString()} icon={Briefcase} color="success" />
+                <StatCard title="Total Returns Earned" value={`₹${Number(totalReturns).toLocaleString('en-IN')}`} icon={DollarSign} color="success" trend="up" trendValue="+12.4%" />
+                <StatCard title="Available Wallet Balance" value={`₹${Number(wallet?.availableBalance || 0).toLocaleString('en-IN')}`} icon={ArrowUpRight} color="accent2" trend="up" trendValue="+₹5L" />
             </div>
 
-            {/* Risk Distribution Doughnut */}
-            <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
-                <h2 className="text-lg font-semibold text-white mb-1">Risk Distribution</h2>
-                <p className="text-xs text-muted mb-6">Current portfolio breakdown</p>
-                <div className="h-52 relative">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                        <PieChart>
-                            <Pie
-                                data={DUMMY_RISK_DISTRIBUTION}
-                                cx="50%" cy="50%"
-                                innerRadius={52} outerRadius={78}
-                                paddingAngle={4} dataKey="value"
-                            >
-                                {DUMMY_RISK_DISTRIBUTION.map((entry, i) => (
-                                    <Cell key={i} fill={entry.color} />
-                                ))}
-                            </Pie>
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
-                                formatter={(v) => [`${v}%`]}
-                            />
-                        </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span className="text-xl font-bold text-white">54%</span>
-                        <span className="text-xs text-muted">Low Risk</span>
-                    </div>
-                </div>
-                <div className="flex flex-col gap-2 mt-2">
-                    {DUMMY_RISK_DISTRIBUTION.map((item) => (
-                        <div key={item.name} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                                <span className="text-xs text-muted">{item.name}</span>
-                            </div>
-                            <span className="text-xs font-semibold text-white">{item.value}%</span>
+            {/* Charts Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Investment Over Time */}
+                <div className="lg:col-span-2 bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+                    <div className="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 className="text-lg font-semibold text-white">Investment Over Time</h2>
+                            <p className="text-xs text-muted mt-0.5">6-month investment growth trend</p>
                         </div>
-                    ))}
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-success/10 text-success border border-success/20">+8.7% avg</span>
+                    </div>
+                    <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                            <LineChart data={DUMMY_PORTFOLIO_TREND}>
+                                <defs>
+                                    <linearGradient id="investedGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                    </linearGradient>
+                                    <linearGradient id="returnsGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.15} />
+                                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                                <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
+                                    itemStyle={{ color: '#fff' }}
+                                    formatter={(v, name) => [`₹${Number(v).toLocaleString('en-IN')}`, name === 'invested' ? 'Invested' : 'Returns']}
+                                />
+                                <Line type="monotone" dataKey="invested" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} activeDot={{ r: 5 }} />
+                                <Line type="monotone" dataKey="returns" stroke="#22c55e" strokeWidth={2.5} dot={{ fill: '#22c55e', r: 3 }} activeDot={{ r: 5 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="flex items-center gap-5 mt-3">
+                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-accent rounded" /><span className="text-xs text-muted">Invested</span></div>
+                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-success rounded" /><span className="text-xs text-muted">Returns</span></div>
+                    </div>
+                </div>
+
+                {/* Risk Distribution Doughnut */}
+                <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+                    <h2 className="text-lg font-semibold text-white mb-1">Risk Distribution</h2>
+                    <p className="text-xs text-muted mb-6">Current portfolio breakdown</p>
+                    <div className="h-52 relative">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+                            <PieChart>
+                                <Pie
+                                    data={DUMMY_RISK_DISTRIBUTION}
+                                    cx="50%" cy="50%"
+                                    innerRadius={52} outerRadius={78}
+                                    paddingAngle={4} dataKey="value"
+                                >
+                                    {DUMMY_RISK_DISTRIBUTION.map((entry, i) => (
+                                        <Cell key={i} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
+                                    formatter={(v) => [`${v}%`]}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <span className="text-xl font-bold text-white">54%</span>
+                            <span className="text-xs text-muted">Low Risk</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-2 mt-2">
+                        {DUMMY_RISK_DISTRIBUTION.map((item) => (
+                            <div key={item.name} className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                                    <span className="text-xs text-muted">{item.name}</span>
+                                </div>
+                                <span className="text-xs font-semibold text-white">{item.value}%</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        {/* Explore Marketplace CTA */}
-        <div className="flex justify-center pt-2 pb-4">
-            <button
-                onClick={onExploreMarketplace}
-                className="btn-primary px-8 py-3.5 text-base font-semibold flex items-center gap-2.5 shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all"
-            >
-                <Zap size={18} />
-                Explore Marketplace
-                <ChevronRight size={18} />
-            </button>
+            {/* Explore Marketplace CTA */}
+            <div className="flex justify-center pt-2 pb-4">
+                <button
+                    onClick={onExploreMarketplace}
+                    className="btn-primary px-8 py-3.5 text-base font-semibold flex items-center gap-2.5 shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all"
+                >
+                    <Zap size={18} />
+                    Explore Marketplace
+                    <ChevronRight size={18} />
+                </button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
-const MarketplaceSection = ({ onSelectInvoice, availableInvoices = [] }) => {
+const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = [] }) => {
     const [search, setSearch] = useState('');
     const [riskFilter, setRiskFilter] = useState('ALL');
 
@@ -519,11 +535,19 @@ const MarketplaceSection = ({ onSelectInvoice, availableInvoices = [] }) => {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    onClick={() => onSelectInvoice(inv)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onViewInvoice(inv);
+                                                    }}
                                                     className="px-3 py-1.5 text-xs font-medium rounded-lg border border-cardBorder text-muted hover:text-white hover:border-accent/40 transition-all flex items-center gap-1">
                                                     <Eye size={13} /> View
                                                 </button>
-                                                <button className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onFundInvoice(inv);
+                                                    }}
+                                                    className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
                                                     <Zap size={13} /> Fund Now
                                                 </button>
                                             </div>
@@ -539,70 +563,99 @@ const MarketplaceSection = ({ onSelectInvoice, availableInvoices = [] }) => {
     );
 };
 
-const InvestmentsSection = () => (
-    <div className="space-y-6">
-        <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">My Investments</h2>
-            <p className="text-muted mt-1">Track all your funded invoices and expected returns</p>
-        </div>
+const InvestmentsSection = ({ myDeals, onFundDeal }) => {
+    const totalInvested = myDeals.reduce((sum, deal) => sum + parseFloat(deal.fundedAmount), 0);
+    const expectedReturns = myDeals.reduce((sum, deal) => sum + parseFloat(deal.interestAmount), 0);
+    const activePositions = myDeals.filter(d => d.status === 'ACTIVE').length;
+    const settledPositions = myDeals.filter(d => d.status === 'CLOSED').length;
+    const defaultedPositions = myDeals.filter(d => d.status === 'DEFAULTED').length;
 
-        {/* Summary Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-                { label: 'Total Invested', value: '₹7,00,000', color: 'text-accent' },
-                { label: 'Expected Returns', value: '₹46,750', color: 'text-success' },
-                { label: 'Active Positions', value: '2', color: 'text-white' },
-                { label: 'Settled / Defaulted', value: '1 / 1', color: 'text-muted' },
-            ].map(item => (
-                <div key={item.label} className="bg-card border border-cardBorder rounded-xl p-4 shadow">
-                    <p className="text-xs text-muted font-medium uppercase tracking-wider mb-1">{item.label}</p>
-                    <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
-                </div>
-            ))}
-        </div>
+    return (
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">My Investments</h2>
+                <p className="text-muted mt-1">Track all your funded invoices and expected returns</p>
+            </div>
 
-        {/* Table */}
-        <div className="bg-card border border-cardBorder rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="border-b border-cardBorder bg-bg1/50">
-                            {['Invoice ID', 'MSME Name', 'Invested', 'Interest Rate', 'Expected Return', 'Due Date', 'Days Left', 'Status'].map(h => (
-                                <th key={h} className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-cardBorder">
-                        {DUMMY_MY_INVESTMENTS.map((inv) => (
-                            <tr key={inv.id} className="hover:bg-accent/5 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">#{inv.id}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{inv.msmeName}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
-                                    ₹{Number(inv.invested).toLocaleString('en-IN')}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">{inv.interestRate}% p.a.</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-success">
-                                    ₹{Number(inv.expectedReturn).toLocaleString('en-IN')}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
-                                    {new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    {inv.daysRemaining > 0
-                                        ? <span className="font-semibold text-white">{inv.daysRemaining}d</span>
-                                        : <span className="text-muted">—</span>}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <InvestmentStatusBadge status={inv.status} />
-                                </td>
+            {/* Summary Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                    { label: 'Total Invested', value: `₹${Number(totalInvested).toLocaleString('en-IN')}`, color: 'text-accent' },
+                    { label: 'Expected Returns', value: `₹${Number(expectedReturns).toLocaleString('en-IN')}`, color: 'text-success' },
+                    { label: 'Active Positions', value: activePositions.toString(), color: 'text-white' },
+                    { label: 'Settled / Defaulted', value: `${settledPositions} / ${defaultedPositions}`, color: 'text-muted' },
+                ].map(item => (
+                    <div key={item.label} className="bg-card border border-cardBorder rounded-xl p-4 shadow">
+                        <p className="text-xs text-muted font-medium uppercase tracking-wider mb-1">{item.label}</p>
+                        <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Table */}
+            <div className="bg-card border border-cardBorder rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="border-b border-cardBorder bg-bg1/50">
+                                {['Invoice ID', 'MSME Name', 'Invested', 'Expected Return', 'Due Date', 'Days Left', 'Action'].map(h => (
+                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                ))}
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-cardBorder">
+                            {myDeals.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-6 py-12 text-center text-muted">No investments found</td>
+                                </tr>
+                            ) : myDeals.map((deal) => {
+                                const dueDate = new Date(deal.dueDate);
+                                const now = new Date();
+                                const diffTime = dueDate - now;
+                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                const maxDaysLeft = Math.max(0, diffDays);
+
+                                return (
+                                    <tr key={deal.id} className="hover:bg-accent/5 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">
+                                            {deal.invoice?.invoice_number ? `#${deal.invoice.invoice_number}` : `#${deal.invoiceId.substring(0, 6)}`}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{deal.msme?.name || 'Unknown MSME'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
+                                            ₹{Number(deal.fundedAmount).toLocaleString('en-IN')}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-success">
+                                            ₹{Number(deal.interestAmount).toLocaleString('en-IN')}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                            {dueDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {deal.status === 'ACTIVE'
+                                                ? <span className="font-semibold text-white">{maxDaysLeft}d</span>
+                                                : <span className="text-muted">—</span>}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {deal.status === 'ACTIVE' ? (
+                                                <button
+                                                    onClick={() => onFundDeal(deal.id)}
+                                                    className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
+                                                    <Zap size={13} /> Fund Deal
+                                                </button>
+                                            ) : (
+                                                <InvestmentStatusBadge status={deal.status} />
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 const MeetingsSection = () => (
     <div className="space-y-6">
@@ -813,6 +866,11 @@ const LenderDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [selectedInvoice, setSelectedInvoice] = useState(null);
     const [availableInvoices, setAvailableInvoices] = useState([]);
+    const [wallet, setWallet] = useState({ availableBalance: 0, lockedBalance: 0, totalEarnings: 0 });
+    const [myDeals, setMyDeals] = useState([]);
+    const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+    const [offerForm, setOfferForm] = useState({ amount: '', rate: '' });
+    const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
 
     const kycStatus = user?.kycStatus || 'NOT_SUBMITTED';
     const isKycVerified = kycStatus === 'VERIFIED';
@@ -861,8 +919,81 @@ const LenderDashboard = () => {
                 }
             }
         };
+
+        const fetchDashboardData = async () => {
+            if (isKycVerified) {
+                try {
+                    const [walletData, dealsData] = await Promise.all([
+                        getMyWallet(),
+                        getMyDeals()
+                    ]);
+                    setWallet(walletData);
+                    setMyDeals(dealsData);
+                } catch (error) {
+                    console.error("Failed to fetch dashboard data", error);
+                }
+            }
+        };
+
         fetchMarketplace();
+        fetchDashboardData();
     }, [isKycVerified]);
+
+    const handleCreateOffer = async (e) => {
+        e.preventDefault();
+        if (!selectedInvoice) return;
+
+        const amount = parseFloat(offerForm.amount);
+        const rate = parseFloat(offerForm.rate);
+
+        if (amount <= 0 || amount > selectedInvoice.amount) {
+            toast.error('Invalid offer amount');
+            return;
+        }
+
+        if (rate <= 0 || rate > 36) {
+            toast.error('Invalid interest rate');
+            return;
+        }
+
+        if (amount > wallet.availableBalance) {
+            toast.error('Offer amount exceeds available wallet balance');
+            return;
+        }
+
+        try {
+            setIsSubmittingOffer(true);
+            await createOffer({
+                invoiceId: selectedInvoice.id,
+                fundedAmount: amount,
+                interestRate: rate
+            });
+            toast.success('Funding offer sent successfully!');
+            setIsOfferModalOpen(false);
+            setOfferForm({ amount: '', rate: '' });
+            setSelectedInvoice(null);
+        } catch (error) {
+            toast.error(error.message || 'Failed to send offer');
+        } finally {
+            setIsSubmittingOffer(false);
+        }
+    };
+
+    const handleFundDeal = async (dealId) => {
+        try {
+            await fundDeal(dealId);
+            toast.success('Deal funded successfully!');
+            // Refresh data
+            const [walletData, dealsData] = await Promise.all([
+                getMyWallet(),
+                getMyDeals()
+            ]);
+            setWallet(walletData);
+            setMyDeals(dealsData);
+        } catch (error) {
+            toast.error(error.message || 'Failed to fund deal');
+        }
+    };
 
     // ── Marketplace KYC Gate Banner ───────────────────────────────────────────
     const MarketplaceKycBanner = () => (
@@ -900,14 +1031,22 @@ const LenderDashboard = () => {
 
     const renderSection = () => {
         switch (activeTab) {
-            case 'overview': return <OverviewSection onExploreMarketplace={() => setActiveTab('marketplace')} />;
+            case 'overview': return <OverviewSection onExploreMarketplace={() => setActiveTab('marketplace')} wallet={wallet} myDeals={myDeals} />;
             case 'marketplace': return isKycVerified
-                ? <MarketplaceSection onSelectInvoice={setSelectedInvoice} availableInvoices={availableInvoices} />
+                ? <MarketplaceSection
+                    onViewInvoice={(inv) => {
+                        setSelectedInvoice(inv);
+                    }}
+                    onFundInvoice={(inv) => {
+                        setSelectedInvoice(inv);
+                        setIsOfferModalOpen(true);
+                    }}
+                    availableInvoices={availableInvoices} />
                 : <MarketplaceKycBanner />;
-            case 'investments': return <InvestmentsSection />;
+            case 'investments': return <InvestmentsSection myDeals={myDeals} onFundDeal={handleFundDeal} />;
             case 'meetings': return <MeetingsSection />;
             case 'analytics': return <AnalyticsSection />;
-            default: return <OverviewSection />;
+            default: return <OverviewSection wallet={wallet} myDeals={myDeals} />;
         }
     };
 
@@ -931,12 +1070,82 @@ const LenderDashboard = () => {
                     }}
                 >
                     {/* Invoice Detail Panel Overlay */}
-                    {selectedInvoice && (
+                    {selectedInvoice && !isOfferModalOpen && (
                         <InvoiceDetailPanel
                             invoice={selectedInvoice}
                             onClose={() => setSelectedInvoice(null)}
+                            onFundInvoice={(inv) => {
+                                setIsOfferModalOpen(true);
+                            }}
                         />
                     )}
+                    {/* Offer Modal */}
+                    {isOfferModalOpen && selectedInvoice && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOfferModalOpen(false)}></div>
+                            <div className="relative bg-[#0F172A] border border-cardBorder rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in-up">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h3 className="text-xl font-bold text-white">Make Funding Offer</h3>
+                                    <button onClick={() => setIsOfferModalOpen(false)} className="text-muted hover:text-white transition-colors">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+
+                                <div className="mb-6 p-4 rounded-xl bg-bg0/50 border border-cardBorder">
+                                    <p className="text-xs text-muted mb-1">Invoice #{selectedInvoice.id.substring(0, 6)}</p>
+                                    <p className="text-lg font-semibold text-white">₹{Number(selectedInvoice.amount).toLocaleString('en-IN')}</p>
+                                    <p className="text-xs text-muted mt-2 flex justify-between">
+                                        <span>Wallet Available:</span>
+                                        <span className="text-accent font-medium">₹{Number(wallet.availableBalance).toLocaleString('en-IN')}</span>
+                                    </p>
+                                </div>
+
+                                <form onSubmit={handleCreateOffer} className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted mb-1.5">Offer Amount (₹)</label>
+                                        <input
+                                            type="number"
+                                            required
+                                            min="1000"
+                                            max={selectedInvoice.amount}
+                                            value={offerForm.amount}
+                                            onChange={(e) => setOfferForm({ ...offerForm, amount: e.target.value })}
+                                            className="form-input w-full bg-bg0/50 text-white placeholder-muted/50 border-cardBorder focus:border-accent"
+                                            placeholder="Enter amount to fund..."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-muted mb-1.5">Interest Rate (% p.a.)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            required
+                                            min="1"
+                                            max="36"
+                                            value={offerForm.rate}
+                                            onChange={(e) => setOfferForm({ ...offerForm, rate: e.target.value })}
+                                            className="form-input w-full bg-bg0/50 text-white placeholder-muted/50 border-cardBorder focus:border-accent"
+                                            placeholder="E.g. 12.5"
+                                        />
+                                    </div>
+                                    <div className="pt-4 border-t border-cardBorder">
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmittingOffer}
+                                            className="btn-primary w-full py-3 flex justify-center items-center gap-2"
+                                        >
+                                            {isSubmittingOffer ? (
+                                                <><div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Sending...</>
+                                            ) : (
+                                                <><Zap size={18} /> Send Offer</>
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Page Header — same pattern as MSMEDashboard */}
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
                         <div>

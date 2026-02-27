@@ -78,7 +78,7 @@ const Navbar = () => {
 
                 {/* Mobile Dropdown */}
                 {isMobileMenuOpen && (
-                    <div className="absolute top-[50px] left-0 right-0 border-b p-5 flex flex-col gap-3 md:hidden shadow-2xl" style={{background:'rgba(11,18,32,0.97)', borderColor:'rgba(59,130,246,0.14)', backdropFilter:'blur(18px)' }}>
+                    <div className="absolute top-[50px] left-0 right-0 border-b p-5 flex flex-col gap-3 md:hidden shadow-2xl" style={{ background: 'rgba(11,18,32,0.97)', borderColor: 'rgba(59,130,246,0.14)', backdropFilter: 'blur(18px)' }}>
                         {!user ? (
                             <>
                                 <button
@@ -140,6 +140,7 @@ const Navbar = () => {
                     {user.role === 'MSME' && (
                         <>
                             <NavLink to="/msme" end className={linkClass}>Dashboard</NavLink>
+                            <NavLink to="/wallet" className={linkClass}>Wallet</NavLink>
                             <FeatureGuard featureKey="INVOICE_UPLOAD">
                                 <NavLink to="/upload-invoice" className={linkClass}>Upload Invoice</NavLink>
                             </FeatureGuard>
@@ -151,18 +152,18 @@ const Navbar = () => {
                     {user.role === 'LENDER' && (
                         <>
                             <NavLink to="/lender" end className={linkClass}>Dashboard</NavLink>
+                            <NavLink to="/wallet" className={linkClass}>Wallet</NavLink>
                             <NavLink to="/analytics" className={linkClass}>Analytics</NavLink>
                             <NavLink
                                 to="/lender/kyc"
                                 className={({ isActive }) =>
-                                    `px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 ${
-                                        isActive
-                                            ? 'bg-blue-500/20 border-blue-500/40 text-blue-400'
-                                            : user.kycStatus === 'VERIFIED'
+                                    `px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all flex items-center gap-1.5 ${isActive
+                                        ? 'bg-blue-500/20 border-blue-500/40 text-blue-400'
+                                        : user.kycStatus === 'VERIFIED'
                                             ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
                                             : user.kycStatus === 'IN_PROGRESS'
-                                            ? 'bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20'
-                                            : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
+                                                ? 'bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20'
+                                                : 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20'
                                     }`
                                 }
                             >
@@ -183,6 +184,7 @@ const Navbar = () => {
                     {user.role === 'MSME' && (
                         <>
                             <NavLink to="/msme" end className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</NavLink>
+                            <NavLink to="/wallet" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Wallet</NavLink>
                             <FeatureGuard featureKey="INVOICE_UPLOAD">
                                 <NavLink to="/upload-invoice" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Upload Invoice</NavLink>
                             </FeatureGuard>
@@ -194,19 +196,19 @@ const Navbar = () => {
                     {user.role === 'LENDER' && (
                         <>
                             <NavLink to="/lender" end className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</NavLink>
+                            <NavLink to="/wallet" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Wallet</NavLink>
                             <NavLink to="/analytics" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Analytics</NavLink>
                             <NavLink
                                 to="/lender/kyc"
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={({ isActive }) =>
-                                    `px-3 py-2 rounded-lg text-sm font-semibold border transition-all flex items-center gap-2 ${
-                                        isActive
-                                            ? 'bg-blue-500/20 border-blue-500/40 text-blue-400'
-                                            : user.kycStatus === 'VERIFIED'
+                                    `px-3 py-2 rounded-lg text-sm font-semibold border transition-all flex items-center gap-2 ${isActive
+                                        ? 'bg-blue-500/20 border-blue-500/40 text-blue-400'
+                                        : user.kycStatus === 'VERIFIED'
                                             ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                                             : user.kycStatus === 'IN_PROGRESS'
-                                            ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
-                                            : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                                                ? 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                                                : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
                                     }`
                                 }
                             >
