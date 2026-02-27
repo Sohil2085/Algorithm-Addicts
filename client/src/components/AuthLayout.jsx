@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { ShieldCheck, Zap, TrendingUp } from 'lucide-react';
+import { ShieldCheck, Zap, TrendingUp, Home, Landmark } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import '../styles/authTheme.css';
 import MovingLinesBackground from './MovingLinesBackground';
 
@@ -29,12 +30,22 @@ const AuthLayout = ({ children, title, subtitle }) => {
 
             {/* Left Panel: Marketing */}
             <motion.div
-                className="brand-panel"
+                className="brand-panel relative"
                 initial="hidden"
                 animate="visible"
                 variants={stagger}
             >
-                <motion.div variants={fadeIn} className="my-10">
+                {/* Home Button */}
+                <motion.div variants={fadeIn} className="absolute top-12 left-8 lg:top-16 lg:left-24 z-50">
+                    <Link
+                        to="/"
+                        className="inline-flex items-center justify-center p-3 rounded-xl bg-theme-surface hover:bg-theme-surface-hover border border-theme-border text-theme-text-muted hover:text-theme-text transition-all backdrop-blur-md shadow-sm hover:shadow-theme-md duration-300"
+                        title="Return to Home"
+                    >
+                        <Home size={18} />
+                    </Link>
+                </motion.div>
+                <motion.div variants={fadeIn} className="my-10 translate-y-8 lg:translate-y-12">
                     <div className="inline-flex items-center gap-2 rounded-full border border-theme-border bg-theme-surface backdrop-blur-md px-5 py-2.5 text-sm font-medium text-theme-text shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:shadow-theme-md transition-all duration-300">
                         <ShieldCheck className="h-4 w-4 text-blue-500 shrink-0" />
                         <span className="leading-none tracking-wider uppercase text-xs font-bold">Enterprise-Grade Financing</span>
@@ -44,11 +55,7 @@ const AuthLayout = ({ children, title, subtitle }) => {
                 <motion.div variants={fadeIn} className="flex items-center gap-5 mt-4 mb-6 group cursor-default">
                     <div className="relative flex items-center justify-center w-[4.5rem] h-[4.5rem] rounded-[1.25rem] bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 shadow-[0_0_30px_rgba(59,130,246,0.5)] border border-blue-400/40 overflow-hidden shrink-0 transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_0_45px_rgba(59,130,246,0.7)] group-hover:rotate-3">
                         <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 ease-in-out"></div>
-                        <svg className="w-10 h-10 text-theme-text relative z-10 drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                            <line x1="12" y1="22.08" x2="12" y2="12" />
-                        </svg>
+                        <Landmark className="w-9 h-9 text-theme-text relative z-10 drop-shadow-md" strokeWidth={2.5} />
                     </div>
                     <h1 className="brand-name">
                         FinBridge
