@@ -19,6 +19,9 @@ const statusPill = (status) => {
 
 const InvoiceTable = ({ invoices, onCreate }) => {
     const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const [selectedInvoiceForFund, setSelectedInvoiceForFund] = useState(null);
+    const [isViewOpen, setIsViewOpen] = useState(false);
+    const [isFundOpen, setIsFundOpen] = useState(false);
     if (!invoices || invoices.length === 0) {
         return (
             <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-12 text-center">
@@ -96,12 +99,30 @@ const InvoiceTable = ({ invoices, onCreate }) => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                                        <button
-                                            onClick={() => setSelectedInvoice(invoice)}
-                                            className="text-xs text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-lg transition-colors border border-blue-500/20"
-                                        >
-                                            Details
-                                        </button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setSelectedInvoice(invoice);
+                                                    setIsViewOpen(true);
+                                                }}
+                                                className="h-9 px-3 rounded-lg text-sm font-medium text-blue-400 bg-blue-500/10 border border-blue-500/20 hover:bg-white/10 hover:border-white/20 transition-colors"
+                                            >
+                                                View
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setSelectedInvoiceForFund(invoice);
+                                                    setIsFundOpen(true);
+                                                }}
+                                                className="h-9 px-3 rounded-lg text-sm font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-white/10 hover:border-white/20 transition-colors"
+                                            >
+                                                Fund
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -110,114 +131,32 @@ const InvoiceTable = ({ invoices, onCreate }) => {
                 </div>
             </div>
 
-            {/* Risk Breakdown Modal */}
-            {selectedInvoice && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div
-                        className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
-                        onClick={() => setSelectedInvoice(null)}
-                    />
-                    <div className="relative w-full max-w-2xl bg-slate-900 border border-white/10 rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+            {/* View Invoice Modal */}
+            {isViewOpen && selectedInvoice && (
+                <InvoiceViewDialog
+                    invoice={selectedInvoice}
+                    onClose={() => {
+                        setIsViewOpen(false);
+                        setSelectedInvoice(null);
+                    }}
+                    onFund={() => {
+                        setIsViewOpen(false);
+                        setSelectedInvoice(null);
+                        setSelectedInvoiceForFund(selectedInvoice);
+                        setIsFundOpen(true);
+                    }}
+                />
+            )}
 
-                        <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
-                            <div>
-                                <h2 className="text-xl font-semibold text-white">Risk Analysis Breakdown</h2>
-                                <p className="text-sm text-white/50 mt-1">Invoice #{selectedInvoice.id.toString().slice(-6)} • ₹{Number(selectedInvoice.amount).toLocaleString()}</p>
-                            </div>
-                            <button
-                                onClick={() => setSelectedInvoice(null)}
-                                className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-white/60 hover:text-white transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <div className="p-6 overflow-y-auto space-y-6">
-                            {/* Top Stats */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="bg-slate-950/50 border border-white/5 p-4 rounded-xl text-center">
-                                    <p className="text-xs text-white/40 mb-1">Base Credit</p>
-                                    <p className="text-2xl font-semibold text-white">{selectedInvoice.baseCreditScore || 'N/A'}</p>
-                                </div>
-                                <div className="bg-slate-950/50 border border-white/5 p-4 rounded-xl text-center">
-                                    <p className="text-xs text-white/40 mb-1">Fraud Score</p>
-                                    <p className="text-2xl font-semibold text-white">{selectedInvoice.fraudScore || 0}</p>
-                                </div>
-                                <div className="bg-slate-950/50 border border-white/5 p-4 rounded-xl text-center">
-                                    <p className="text-xs text-white/40 mb-1">Probability</p>
-                                    <p className="text-2xl font-semibold text-blue-400">{((selectedInvoice.fraudProbability || 0) * 100).toFixed(0)}%</p>
-                                </div>
-                                <div className="bg-slate-800 border-t border-blue-500/30 p-4 rounded-xl text-center shadow-[0_-4px_24px_-12px_rgba(59,130,246,0.5)]">
-                                    <p className="text-xs text-cyan-200/60 mb-1">Final Risk</p>
-                                    <p className="text-2xl font-bold tracking-tight text-white">{selectedInvoice.creditScore || 0}</p>
-                                </div>
-                            </div>
-
-                            {selectedInvoice.breakdown ? (
-                                <div className="space-y-6">
-                                    {/* Credit Details */}
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <CheckCircle2 size={16} className="text-emerald-400" />
-                                            <h3 className="text-sm font-semibold text-white">Credit Strength (+ Points)</h3>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {Object.entries(selectedInvoice.breakdown.credit || {}).map(([rule, data]) => (
-                                                <div key={rule} className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/5 border border-white/5 p-3 rounded-xl gap-2">
-                                                    <div>
-                                                        <p className="text-sm font-medium text-white/80 capitalize">{rule.replace(/([A-Z])/g, ' $1').trim()}</p>
-                                                        <p className="text-xs text-white/40 mt-0.5">{data.reason}</p>
-                                                    </div>
-                                                    <div className="shrink-0 text-right">
-                                                        <span className="text-xs font-semibold text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded border border-emerald-400/20">
-                                                            +{data.score} pts
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Fraud Details */}
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <AlertTriangle size={16} className="text-rose-400" />
-                                            <h3 className="text-sm font-semibold text-white">Fraud Suspicion (Risk Factors)</h3>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {Object.entries(selectedInvoice.breakdown.fraud || {}).map(([rule, data]) => {
-                                                if (data.score === 0) return null; // Only show flagged logic
-                                                return (
-                                                    <div key={rule} className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/5 border border-white/5 p-3 rounded-xl gap-2">
-                                                        <div>
-                                                            <p className="text-sm font-medium text-white/80 capitalize">{rule.replace(/([A-Z])/g, ' $1').trim()}</p>
-                                                            <p className="text-xs text-white/40 mt-0.5">{data.reason}</p>
-                                                        </div>
-                                                        <div className="shrink-0 text-right">
-                                                            <span className="text-xs font-semibold text-rose-400 bg-rose-400/10 px-2 py-1 rounded border border-rose-400/20">
-                                                                Risky (+{data.score} pts)
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                            {Object.values(selectedInvoice.breakdown.fraud || {}).every(v => v.score === 0) && (
-                                                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl text-emerald-400 text-sm">
-                                                    No suspicious fraud signals detected!
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 text-white/40 text-sm bg-white/5 rounded-xl border border-white/5 grid place-items-center">
-                                    <ShieldAlert className="mb-2 opacity-50" />
-                                    No detailed breakdown available for this legacy invoice.
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+            {/* Fund Invoice Modal */}
+            {isFundOpen && selectedInvoiceForFund && (
+                <FundInvoiceDialog
+                    invoice={selectedInvoiceForFund}
+                    onClose={() => {
+                        setIsFundOpen(false);
+                        setSelectedInvoiceForFund(null);
+                    }}
+                />
             )}
         </>
     );

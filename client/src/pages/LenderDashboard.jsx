@@ -206,12 +206,12 @@ const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
     const docs = isMock ? dummyDetails.documents : ['Invoice_Copy.pdf', 'GST_Certificate.pdf'];
 
     return (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
-            <div className="relative w-full max-w-2xl h-full bg-slate-900/95 backdrop-blur-xl border-l border-white/10 shadow-2xl flex flex-col animate-slide-in-right overflow-y-auto">
+            <div className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl flex flex-col animate-in fade-in zoom-in-95 overflow-hidden">
 
                 {/* Header */}
-                <div className="p-6 border-b border-white/10 flex items-start justify-between bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+                <div className="p-6 border-b border-white/10 flex items-start justify-between bg-white/5">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">#{invoice.id.substring(0, 8)}</span>
@@ -228,98 +228,102 @@ const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
                 </div>
 
                 {/* Body */}
-                <div className="p-6 space-y-8">
-                    {/* Key Stats */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
-                            <p className="text-xs text-white/45 uppercase tracking-wider mb-1">Invoice Amount</p>
-                            <p className="text-2xl font-bold text-white">₹{Number(invoice.amount).toLocaleString('en-IN')}</p>
-                        </div>
-                        <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-                            <p className="text-xs text-white/45 uppercase tracking-wider mb-1">Expected Return</p>
-                            <p className="text-2xl font-bold text-emerald-400">{expectedReturnStr}%</p>
-                        </div>
-                    </div>
-
-                    {/* Risk & Fraud Check */}
-                    <div>
-                        <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <ShieldAlert size={16} className="text-blue-400" /> Risk Assessment
-                        </h3>
-                        <div className="rounded-xl bg-white/5 border border-white/10 p-5 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-white/45">Credit Score</span>
-                                <div className="flex items-center gap-3">
-                                    <div className="w-32 h-2 bg-slate-900 rounded-full overflow-hidden">
-                                        <div className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-emerald-500" style={{ width: `${invoice.creditScore}%` }} />
-                                    </div>
-                                    <span className="text-sm font-bold text-white">{invoice.creditScore}/100</span>
+                <div className="p-6 overflow-y-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Left Column */}
+                        <div className="space-y-6">
+                            {/* Key Stats */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+                                    <p className="text-xs text-white/45 uppercase tracking-wider mb-1">Invoice Amount</p>
+                                    <p className="text-2xl font-bold text-white">₹{Number(invoice.amount).toLocaleString('en-IN')}</p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                                    <p className="text-xs text-white/45 uppercase tracking-wider mb-1">Expected Return</p>
+                                    <p className="text-2xl font-bold text-emerald-400">{expectedReturnStr}%</p>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-between border-t border-white/10 pt-4">
-                                <span className="text-sm text-white/45">Fraud Check</span>
-                                <span className={`flex items-center gap-1.5 text-sm font-semibold ${fraudStatusText === 'PASSED' ? 'text-emerald-400' : 'text-yellow-400'}`}>
-                                    {fraudStatusText === 'PASSED' ? <CheckCircle size={14} /> : <AlertOctagon size={14} />}
-                                    {fraudStatusText}
-                                </span>
-                            </div>
-                            {fraudFlags.length > 0 && (
-                                <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg flex items-start gap-2">
-                                    <AlertTriangle size={14} className="text-yellow-400 mt-0.5 min-w-fit" />
-                                    <div className="flex flex-col gap-1">
-                                        {fraudFlags.map((flag, idx) => (
-                                            <p key={idx} className="text-xs text-yellow-400/90 capitalize">{flag}</p>
-                                        ))}
+
+                            {/* Company Financials */}
+                            <div>
+                                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <PieChartIcon size={16} className="text-blue-400" /> Financial Snapshot
+                                </h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-center">
+                                        <p className="text-xs text-white/45 mb-1">Annual Revenue</p>
+                                        <p className="text-sm font-semibold text-white">{revenueStr}</p>
+                                    </div>
+                                    <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-center line-through opacity-50" title="Not available in current integration">
+                                        <p className="text-xs text-white/45 mb-1">Net Profit</p>
+                                        <p className="text-sm font-semibold text-white">N/A</p>
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Company Financials */}
-                    <div>
-                        <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <PieChartIcon size={16} className="text-blue-400" /> Financial Snapshot
-                        </h3>
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="p-3 bg-slate-900/50 rounded-lg border border-white/10 text-center">
-                                <p className="text-xs text-white/45 mb-1">Annual Revenue</p>
-                                <p className="text-sm font-semibold text-white">{revenueStr}</p>
-                            </div>
-                            <div className="p-3 bg-slate-900/50 rounded-lg border border-white/10 text-center line-through opacity-50" title="Not available in current integration">
-                                <p className="text-xs text-white/45 mb-1">Net Profit</p>
-                                <p className="text-sm font-semibold text-white">N/A</p>
-                            </div>
-                            <div className="p-3 bg-slate-900/50 rounded-lg border border-white/10 text-center line-through opacity-50" title="Not available in current integration">
-                                <p className="text-xs text-white/45 mb-1">YoY Growth</p>
-                                <p className="text-sm font-semibold text-emerald-400">N/A</p>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Documents */}
-                    <div>
-                        <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <FileText size={16} className="text-blue-400" /> Verified Documents
-                        </h3>
-                        <div className="space-y-2">
-                            {docs.map((doc, i) => (
-                                <div key={i} className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg hover:border-blue-500/40 transition-colors cursor-pointer group">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
-                                            <FileText size={16} />
+                        {/* Right Column */}
+                        <div className="space-y-6">
+                            {/* Risk & Fraud Check */}
+                            <div>
+                                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <ShieldAlert size={16} className="text-blue-400" /> Risk Assessment
+                                </h3>
+                                <div className="rounded-xl bg-white/5 border border-white/10 p-5 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-white/45">Credit Score</span>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-32 h-2 bg-slate-900 rounded-full overflow-hidden">
+                                                <div className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-emerald-500" style={{ width: `${invoice.creditScore}%` }} />
+                                            </div>
+                                            <span className="text-sm font-bold text-white">{invoice.creditScore}/100</span>
                                         </div>
-                                        <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{doc}</span>
                                     </div>
-                                    <Download size={16} className="text-white/45 group-hover:text-blue-400 transition-colors" />
+                                    <div className="flex items-center justify-between border-t border-white/10 pt-4">
+                                        <span className="text-sm text-white/45">Fraud Check</span>
+                                        <span className={`flex items-center gap-1.5 text-sm font-semibold ${fraudStatusText === 'PASSED' ? 'text-emerald-400' : 'text-yellow-400'}`}>
+                                            {fraudStatusText === 'PASSED' ? <CheckCircle size={14} /> : <AlertOctagon size={14} />}
+                                            {fraudStatusText}
+                                        </span>
+                                    </div>
+                                    {fraudFlags.length > 0 && (
+                                        <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg flex items-start gap-2">
+                                            <AlertTriangle size={14} className="text-yellow-400 mt-0.5 min-w-fit" />
+                                            <div className="flex flex-col gap-1">
+                                                {fraudFlags.map((flag, idx) => (
+                                                    <p key={idx} className="text-xs text-yellow-400/90 capitalize">{flag}</p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            ))}
+                            </div>
+
+                            {/* Documents */}
+                            <div>
+                                <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <FileText size={16} className="text-blue-400" /> Verified Documents
+                                </h3>
+                                <div className="space-y-2">
+                                    {docs.map((doc, i) => (
+                                        <div key={i} className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg hover:border-blue-500/40 transition-colors cursor-pointer group">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                                                    <FileText size={16} />
+                                                </div>
+                                                <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{doc}</span>
+                                            </div>
+                                            <Download size={16} className="text-white/45 group-hover:text-blue-400 transition-colors" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Footer Actions */}
-                <div className="p-6 border-t border-white/10 bg-slate-900/50 backdrop-blur-md sticky bottom-0 mt-auto">
+                <div className="p-6 border-t border-white/10 bg-white/5 mt-auto">
                     <button
                         onClick={() => {
                             if (onFundInvoice) {
@@ -554,21 +558,23 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
                                             <span className="text-sm font-semibold text-emerald-400">{expReturn}%</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <div className="flex items-center justify-end gap-2">
                                                 <button
                                                     onClick={(e) => {
+                                                        e.preventDefault();
                                                         e.stopPropagation();
                                                         onViewInvoice(inv);
                                                     }}
-                                                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-white/10 text-white/70 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all flex items-center gap-1">
+                                                    className="h-9 px-3 rounded-lg text-sm font-medium border border-white/10 text-white/70 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all flex items-center gap-1">
                                                     <Eye size={13} /> View
                                                 </button>
                                                 <button
                                                     onClick={(e) => {
+                                                        e.preventDefault();
                                                         e.stopPropagation();
                                                         onFundInvoice(inv);
                                                     }}
-                                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-sky-500 text-white flex items-center gap-1 shadow-[0_0_10px_rgba(56,189,248,0.2)] hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all">
+                                                    className="h-9 px-3 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-sky-500 text-white flex items-center gap-1 shadow-[0_0_10px_rgba(56,189,248,0.2)] hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all">
                                                     <Zap size={13} /> Fund
                                                 </button>
                                             </div>
@@ -888,10 +894,10 @@ const LenderDashboard = () => {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('overview');
     const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const [fundInvoice, setFundInvoice] = useState(null);
     const [availableInvoices, setAvailableInvoices] = useState([]);
     const [wallet, setWallet] = useState({ availableBalance: 0, lockedBalance: 0, totalEarnings: 0 });
     const [myDeals, setMyDeals] = useState([]);
-    const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
     const [offerForm, setOfferForm] = useState({ amount: '', rate: '' });
     const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
 
@@ -964,12 +970,12 @@ const LenderDashboard = () => {
 
     const handleCreateOffer = async (e) => {
         e.preventDefault();
-        if (!selectedInvoice) return;
+        if (!fundInvoice) return;
 
         const amount = parseFloat(offerForm.amount);
         const rate = parseFloat(offerForm.rate);
 
-        if (amount <= 0 || amount > selectedInvoice.amount) {
+        if (amount <= 0 || amount > fundInvoice.amount) {
             toast.error('Invalid offer amount');
             return;
         }
@@ -987,14 +993,13 @@ const LenderDashboard = () => {
         try {
             setIsSubmittingOffer(true);
             await createOffer({
-                invoiceId: selectedInvoice.id,
+                invoiceId: fundInvoice.id,
                 fundedAmount: amount,
                 interestRate: rate
             });
             toast.success('Funding offer sent successfully!');
-            setIsOfferModalOpen(false);
+            setFundInvoice(null);
             setOfferForm({ amount: '', rate: '' });
-            setSelectedInvoice(null);
 
             // Refresh wallet balance to reflect locked funds
             const walletData = await getMyWallet();
@@ -1069,8 +1074,7 @@ const LenderDashboard = () => {
                         setSelectedInvoice(inv);
                     }}
                     onFundInvoice={(inv) => {
-                        setSelectedInvoice(inv);
-                        setIsOfferModalOpen(true);
+                        setFundInvoice(inv);
                     }}
                     availableInvoices={availableInvoices} />
                 : <MarketplaceKycBanner />;
@@ -1101,30 +1105,31 @@ const LenderDashboard = () => {
                     }}
                 >
                     {/* Invoice Detail Panel Overlay */}
-                    {selectedInvoice && !isOfferModalOpen && (
+                    {selectedInvoice && (
                         <InvoiceDetailPanel
                             invoice={selectedInvoice}
                             onClose={() => setSelectedInvoice(null)}
                             onFundInvoice={(inv) => {
-                                setIsOfferModalOpen(true);
+                                setFundInvoice(inv);
+                                setSelectedInvoice(null);
                             }}
                         />
                     )}
                     {/* Offer Modal */}
-                    {isOfferModalOpen && selectedInvoice && (
+                    {fundInvoice && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOfferModalOpen(false)}></div>
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setFundInvoice(null)}></div>
                             <div className="relative bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-fade-in-up">
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-xl font-bold text-white">Make Funding Offer</h3>
-                                    <button onClick={() => setIsOfferModalOpen(false)} className="text-white/45 hover:text-white transition-colors">
+                                    <button onClick={() => setFundInvoice(null)} className="text-white/45 hover:text-white transition-colors">
                                         <X size={20} />
                                     </button>
                                 </div>
 
                                 <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
-                                    <p className="text-xs text-white/45 mb-1">Invoice #{selectedInvoice.id.substring(0, 6)}</p>
-                                    <p className="text-lg font-semibold text-white">₹{Number(selectedInvoice.amount).toLocaleString('en-IN')}</p>
+                                    <p className="text-xs text-white/45 mb-1">Invoice #{fundInvoice.id.substring(0, 6)}</p>
+                                    <p className="text-lg font-semibold text-white">₹{Number(fundInvoice.amount).toLocaleString('en-IN')}</p>
                                     <p className="text-xs text-white/45 mt-2 flex justify-between">
                                         <span>Wallet Available:</span>
                                         <span className="text-blue-400 font-medium">₹{Number(wallet.availableBalance).toLocaleString('en-IN')}</span>
@@ -1138,7 +1143,7 @@ const LenderDashboard = () => {
                                             type="number"
                                             required
                                             min="1000"
-                                            max={selectedInvoice.amount}
+                                            max={fundInvoice.amount}
                                             value={offerForm.amount}
                                             onChange={(e) => setOfferForm({ ...offerForm, amount: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
