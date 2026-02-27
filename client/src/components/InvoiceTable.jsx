@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import RiskBadge from './RiskBadge';
 import { ShieldAlert, Plus, X, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import InvoiceViewDialog from './InvoiceViewDialog';
 
 const riskPill = (level) => {
     const l = (level || '').toLowerCase();
@@ -18,10 +20,14 @@ const statusPill = (status) => {
 };
 
 const InvoiceTable = ({ invoices, onCreate }) => {
+    const { user } = useAuth();
     const [selectedInvoice, setSelectedInvoice] = useState(null);
     const [selectedInvoiceForFund, setSelectedInvoiceForFund] = useState(null);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [isFundOpen, setIsFundOpen] = useState(false);
+
+    const isLender = user?.role === 'LENDER';
+
     if (!invoices || invoices.length === 0) {
         return (
             <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-12 text-center">
@@ -111,17 +117,19 @@ const InvoiceTable = ({ invoices, onCreate }) => {
                                             >
                                                 View
                                             </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    setSelectedInvoiceForFund(invoice);
-                                                    setIsFundOpen(true);
-                                                }}
-                                                className="h-9 px-3 rounded-lg text-sm font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-white/10 hover:border-white/20 transition-colors"
-                                            >
-                                                Fund
-                                            </button>
+                                            {isLender && (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setSelectedInvoiceForFund(invoice);
+                                                        setIsFundOpen(true);
+                                                    }}
+                                                    className="h-9 px-3 rounded-lg text-sm font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-white/10 hover:border-white/20 transition-colors"
+                                                >
+                                                    Fund
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -139,23 +147,12 @@ const InvoiceTable = ({ invoices, onCreate }) => {
                         setIsViewOpen(false);
                         setSelectedInvoice(null);
                     }}
-                    onFund={() => {
+                    onFund={isLender ? () => {
                         setIsViewOpen(false);
                         setSelectedInvoice(null);
                         setSelectedInvoiceForFund(selectedInvoice);
                         setIsFundOpen(true);
-                    }}
-                />
-            )}
-
-            {/* Fund Invoice Modal */}
-            {isFundOpen && selectedInvoiceForFund && (
-                <FundInvoiceDialog
-                    invoice={selectedInvoiceForFund}
-                    onClose={() => {
-                        setIsFundOpen(false);
-                        setSelectedInvoiceForFund(null);
-                    }}
+                    } : undefined}
                 />
             )}
         </>

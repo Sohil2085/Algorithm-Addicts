@@ -177,13 +177,8 @@ export const acceptOffer = async (req, res) => {
                 }
             });
 
-            // Transfer Funds for ACCEPTED offer: Move from Lender locked to MSME available
-            await tx.wallet.update({
-                where: { userId: offer.lenderId },
-                data: {
-                    lockedBalance: { decrement: parseFloat(offer.fundedAmount) }
-                }
-            });
+            // Transfer Funds for ACCEPTED offer: MSME available gets the funded amount
+            // Note: Lender's lockedBalance is intentionally NOT decremented here because it stays locked until repayment.
 
             await tx.wallet.upsert({
                 where: { userId: msmeId },
