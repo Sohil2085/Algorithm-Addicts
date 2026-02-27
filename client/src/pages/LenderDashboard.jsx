@@ -116,6 +116,27 @@ const DUMMY_INVOICE_DETAILS = {
 
 // ─── Helper Components ────────────────────────────────────────────────────────
 
+const PremiumStatCard = ({ title, value, icon: Icon, trend, trendValue }) => {
+    return (
+        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between">
+            <div className="flex justify-between items-start mb-4">
+                <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                    <Icon size={20} className="text-blue-400" />
+                </div>
+                {trendValue && (
+                    <span className="text-emerald-300 bg-emerald-400/10 border border-emerald-400/20 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+                        <ArrowUpRight size={12} /> {trendValue}
+                    </span>
+                )}
+            </div>
+            <div>
+                <p className="text-xs tracking-widest text-white/45 uppercase mb-1">{title}</p>
+                <p className="text-3xl font-semibold text-white">{value}</p>
+            </div>
+        </div>
+    );
+};
+
 const InvestmentStatusBadge = ({ status }) => {
     const styles = {
         ACTIVE: 'bg-success/10 text-success border border-success/20',
@@ -328,23 +349,23 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
     return (
         <div className="space-y-8">
             {/* KPI Summary Cards — 4 metrics as per spec */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                <StatCard title="Total Funds Invested" value={`₹${Number(totalInvested).toLocaleString('en-IN')}`} icon={TrendingUp} color="accent" trend="up" trendValue="+18%" />
-                <StatCard title="Active Deals" value={activeDeals.toString()} icon={Briefcase} color="success" />
-                <StatCard title="Total Returns Earned" value={`₹${Number(totalReturns).toLocaleString('en-IN')}`} icon={DollarSign} color="success" trend="up" trendValue="+12.4%" />
-                <StatCard title="Available Wallet Balance" value={`₹${Number(wallet?.availableBalance || 0).toLocaleString('en-IN')}`} icon={ArrowUpRight} color="accent2" trend="up" trendValue="+₹5L" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <PremiumStatCard title="Total Funds Invested" value={`₹${Number(totalInvested).toLocaleString('en-IN')}`} icon={TrendingUp} trend="up" trendValue="+18%" />
+                <PremiumStatCard title="Active Deals" value={activeDeals.toString()} icon={Briefcase} />
+                <PremiumStatCard title="Total Returns Earned" value={`₹${Number(totalReturns).toLocaleString('en-IN')}`} icon={DollarSign} trend="up" trendValue="+12.4%" />
+                <PremiumStatCard title="Available Wallet Balance" value={`₹${Number(wallet?.availableBalance || 0).toLocaleString('en-IN')}`} icon={ArrowUpRight} trend="up" trendValue="+₹5L" />
             </div>
 
             {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Investment Over Time */}
-                <div className="lg:col-span-2 bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+                <div className="lg:col-span-2 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl min-w-0">
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h2 className="text-lg font-semibold text-white">Investment Over Time</h2>
-                            <p className="text-xs text-muted mt-0.5">6-month investment growth trend</p>
+                            <p className="text-xs text-white/45 mt-0.5">6-month investment growth trend</p>
                         </div>
-                        <span className="text-xs px-2.5 py-1 rounded-full bg-success/10 text-success border border-success/20">+8.7% avg</span>
+                        <span className="text-xs px-2.5 py-1 rounded-full bg-white/5 text-white/70 border border-white/10">+8.7% avg</span>
                     </div>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
@@ -373,15 +394,15 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
                         </ResponsiveContainer>
                     </div>
                     <div className="flex items-center gap-5 mt-3">
-                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-accent rounded" /><span className="text-xs text-muted">Invested</span></div>
-                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-success rounded" /><span className="text-xs text-muted">Returns</span></div>
+                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-blue-500 rounded" /><span className="text-xs text-white/45">Invested</span></div>
+                        <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-emerald-500 rounded" /><span className="text-xs text-white/45">Returns</span></div>
                     </div>
                 </div>
 
                 {/* Risk Distribution Doughnut */}
-                <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+                <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl min-w-0">
                     <h2 className="text-lg font-semibold text-white mb-1">Risk Distribution</h2>
-                    <p className="text-xs text-muted mb-6">Current portfolio breakdown</p>
+                    <p className="text-xs text-white/45 mb-6">Current portfolio breakdown</p>
                     <div className="h-52 relative">
                         <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                             <PieChart>
@@ -403,7 +424,7 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                             <span className="text-xl font-bold text-white">54%</span>
-                            <span className="text-xs text-muted">Low Risk</span>
+                            <span className="text-xs text-white/45">Low Risk</span>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2 mt-2">
@@ -411,7 +432,7 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
                             <div key={item.name} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                                    <span className="text-xs text-muted">{item.name}</span>
+                                    <span className="text-xs text-white/70">{item.name}</span>
                                 </div>
                                 <span className="text-xs font-semibold text-white">{item.value}%</span>
                             </div>
@@ -424,7 +445,7 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
             <div className="flex justify-center pt-2 pb-4">
                 <button
                     onClick={onExploreMarketplace}
-                    className="btn-primary px-8 py-3.5 text-base font-semibold flex items-center gap-2.5 shadow-lg shadow-accent/20 hover:shadow-accent/30 transition-all"
+                    className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white font-semibold flex items-center gap-2.5 shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:shadow-[0_0_30px_rgba(56,189,248,0.5)] hover:-translate-y-0.5 transition-all duration-300"
                 >
                     <Zap size={18} />
                     Explore Marketplace
@@ -452,30 +473,30 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
         <div className="space-y-6">
             <div>
                 <h2 className="text-2xl font-bold text-white tracking-tight">Available Invoices</h2>
-                <p className="text-muted mt-1">Browse and fund verified MSME invoices</p>
+                <p className="text-white/45 mt-1">Browse and fund verified MSME invoices</p>
             </div>
 
             {/* Filters */}
             <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={17} />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/45" size={17} />
                     <input
                         type="text"
                         placeholder="Search by MSME name or Invoice ID..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="form-input pl-10 w-full"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
                     />
                 </div>
                 <div className="flex items-center gap-2">
-                    <Filter size={16} className="text-muted" />
+                    <Filter size={16} className="text-white/45" />
                     {['ALL', 'LOW', 'MEDIUM', 'HIGH'].map(r => (
                         <button
                             key={r}
                             onClick={() => setRiskFilter(r)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${riskFilter === r
-                                ? 'bg-accent/20 border-accent/50 text-accent'
-                                : 'border-cardBorder bg-card text-muted hover:text-white hover:border-accent/30'
+                            className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-all duration-300 ${riskFilter === r
+                                ? 'bg-blue-500/20 border-blue-500/50 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.15)]'
+                                : 'border-white/10 bg-white/5 text-white/45 hover:text-white hover:border-white/20 hover:bg-white/10'
                                 }`}
                         >
                             {r}
@@ -485,20 +506,20 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
             </div>
 
             {/* Table */}
-            <div className="bg-card border border-cardBorder rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
+            <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b border-cardBorder bg-bg1/50">
+                            <tr className="border-b border-white/10 bg-white/5">
                                 {['Invoice ID', 'MSME Name', 'Amount', 'Due Date', 'Credit Score', 'Risk Level', 'Exp. Return', 'Actions'].map(h => (
-                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap">{h}</th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-cardBorder">
+                        <tbody className="divide-y divide-white/5">
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-12 text-center text-muted">
+                                    <td colSpan={8} className="px-6 py-12 text-center text-white/45">
                                         No invoices match your search.
                                     </td>
                                 </tr>
@@ -506,40 +527,40 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
                                 const msmeName = inv.original?.user?.kyc?.businessName || inv.original?.user?.kyc?.legalName || inv.msmeName || 'Unknown MSME';
                                 const expReturn = inv.expectedReturn || (inv.riskLevel === 'HIGH' ? 18.5 : inv.riskLevel === 'MEDIUM' ? 14.0 : 9.5);
                                 return (
-                                    <tr key={inv.id} className="hover:bg-accent/5 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">#{inv.id.substring(0, 6)}</td>
+                                    <tr key={inv.id} className="hover:bg-white/5 transition-colors group">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">#{inv.id.substring(0, 6)}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{msmeName}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                                             ₹{Number(inv.amount).toLocaleString('en-IN')}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                                             {new Date(inv.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
-                                                <div className="w-16 bg-bg1 rounded-full h-1.5 overflow-hidden">
+                                                <div className="w-16 bg-white/10 rounded-full h-1.5 overflow-hidden">
                                                     <div
-                                                        className={`h-1.5 rounded-full ${inv.creditScore >= 80 ? 'bg-success' : inv.creditScore >= 55 ? 'bg-warning' : 'bg-danger'}`}
+                                                        className={`h-1.5 rounded-full ${inv.creditScore >= 80 ? 'bg-emerald-500' : inv.creditScore >= 55 ? 'bg-amber-500' : 'bg-rose-500'}`}
                                                         style={{ width: `${inv.creditScore}%` }}
                                                     />
                                                 </div>
-                                                <span className="text-xs text-muted">{inv.creditScore}</span>
+                                                <span className="text-xs text-white/70">{inv.creditScore}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <RiskBadge level={inv.riskLevel} />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-sm font-semibold text-success">{expReturn}%</span>
+                                            <span className="text-sm font-semibold text-emerald-400">{expReturn}%</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         onViewInvoice(inv);
                                                     }}
-                                                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-cardBorder text-muted hover:text-white hover:border-accent/40 transition-all flex items-center gap-1">
+                                                    className="px-3 py-1.5 text-xs font-medium rounded-lg border border-white/10 text-white/70 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all flex items-center gap-1">
                                                     <Eye size={13} /> View
                                                 </button>
                                                 <button
@@ -547,8 +568,8 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
                                                         e.stopPropagation();
                                                         onFundInvoice(inv);
                                                     }}
-                                                    className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
-                                                    <Zap size={13} /> Fund Now
+                                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-sky-500 text-white flex items-center gap-1 shadow-[0_0_10px_rgba(56,189,248,0.2)] hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all">
+                                                    <Zap size={13} /> Fund
                                                 </button>
                                             </div>
                                         </td>
@@ -574,39 +595,39 @@ const InvestmentsSection = ({ myDeals, onFundDeal }) => {
         <div className="space-y-6">
             <div>
                 <h2 className="text-2xl font-bold text-white tracking-tight">My Investments</h2>
-                <p className="text-muted mt-1">Track all your funded invoices and expected returns</p>
+                <p className="text-white/45 mt-1">Track all your funded invoices and expected returns</p>
             </div>
 
             {/* Summary Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { label: 'Total Invested', value: `₹${Number(totalInvested).toLocaleString('en-IN')}`, color: 'text-accent' },
-                    { label: 'Expected Returns', value: `₹${Number(expectedReturns).toLocaleString('en-IN')}`, color: 'text-success' },
+                    { label: 'Total Invested', value: `₹${Number(totalInvested).toLocaleString('en-IN')}`, color: 'text-blue-400' },
+                    { label: 'Expected Returns', value: `₹${Number(expectedReturns).toLocaleString('en-IN')}`, color: 'text-emerald-400' },
                     { label: 'Active Positions', value: activePositions.toString(), color: 'text-white' },
-                    { label: 'Settled / Defaulted', value: `${settledPositions} / ${defaultedPositions}`, color: 'text-muted' },
+                    { label: 'Settled / Defaulted', value: `${settledPositions} / ${defaultedPositions}`, color: 'text-white/45' },
                 ].map(item => (
-                    <div key={item.label} className="bg-card border border-cardBorder rounded-xl p-4 shadow">
-                        <p className="text-xs text-muted font-medium uppercase tracking-wider mb-1">{item.label}</p>
+                    <div key={item.label} className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-4 transition-all duration-300 hover:bg-white/7 hover:border-white/20">
+                        <p className="text-xs text-white/45 font-medium uppercase tracking-wider mb-1">{item.label}</p>
                         <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
                     </div>
                 ))}
             </div>
 
             {/* Table */}
-            <div className="bg-card border border-cardBorder rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
+            <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b border-cardBorder bg-bg1/50">
+                            <tr className="border-b border-white/10 bg-white/5">
                                 {['Invoice ID', 'MSME Name', 'Invested', 'Expected Return', 'Due Date', 'Days Left', 'Action'].map(h => (
-                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap">{h}</th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-cardBorder">
+                        <tbody className="divide-y divide-white/5">
                             {myDeals.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-muted">No investments found</td>
+                                    <td colSpan={7} className="px-6 py-12 text-center text-white/45">No investments found</td>
                                 </tr>
                             ) : myDeals.map((deal) => {
                                 const dueDate = new Date(deal.dueDate);
@@ -616,30 +637,30 @@ const InvestmentsSection = ({ myDeals, onFundDeal }) => {
                                 const maxDaysLeft = Math.max(0, diffDays);
 
                                 return (
-                                    <tr key={deal.id} className="hover:bg-accent/5 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">
+                                    <tr key={deal.id} className="hover:bg-white/5 transition-colors group">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">
                                             {deal.invoice?.invoice_number ? `#${deal.invoice.invoice_number}` : `#${deal.invoiceId.substring(0, 6)}`}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{deal.msme?.name || 'Unknown MSME'}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                                             ₹{Number(deal.fundedAmount).toLocaleString('en-IN')}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-success">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-400">
                                             ₹{Number(deal.interestAmount).toLocaleString('en-IN')}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                                             {dueDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             {deal.status === 'ACTIVE'
                                                 ? <span className="font-semibold text-white">{maxDaysLeft}d</span>
-                                                : <span className="text-muted">—</span>}
+                                                : <span className="text-white/45">—</span>}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {deal.status === 'ACTIVE' ? (
                                                 <button
                                                     onClick={() => onFundDeal(deal.id)}
-                                                    className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
+                                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-sky-500 text-white flex items-center gap-1 shadow-[0_0_10px_rgba(56,189,248,0.2)] hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all opacity-0 group-hover:opacity-100">
                                                     <Zap size={13} /> Fund Deal
                                                 </button>
                                             ) : (
@@ -661,40 +682,40 @@ const MeetingsSection = () => (
     <div className="space-y-6">
         <div>
             <h2 className="text-2xl font-bold text-white tracking-tight">Meeting Records</h2>
-            <p className="text-muted mt-1">Zoom verification sessions with MSME partners</p>
+            <p className="text-white/45 mt-1">Zoom verification sessions with MSME partners</p>
         </div>
 
         {/* Info Banner */}
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-accent/5 border border-accent/20">
-            <Video size={18} className="text-accent mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-muted">
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <Video size={18} className="text-blue-400 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-white/70">
                 All meetings are recorded for compliance purposes. Recordings are available for 90 days post-session.
-                <span className="text-accent ml-1">Contact support</span> for extended access.
+                <span className="text-blue-400 ml-1 cursor-pointer hover:underline">Contact support</span> for extended access.
             </p>
         </div>
 
         {/* Table */}
-        <div className="bg-card border border-cardBorder rounded-xl overflow-hidden shadow-lg backdrop-blur-sm">
+        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-left">
                     <thead>
-                        <tr className="border-b border-cardBorder bg-bg1/50">
+                        <tr className="border-b border-white/10 bg-white/5">
                             {['Invoice ID', 'MSME Name', 'Meeting Date', 'Duration', 'Recording', 'Action'].map(h => (
-                                <th key={h} className="px-6 py-4 text-xs font-semibold text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                <th key={h} className="px-6 py-4 text-xs font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap">{h}</th>
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-cardBorder">
+                    <tbody className="divide-y divide-white/5">
                         {DUMMY_MEETINGS.map((m) => (
-                            <tr key={m.invoiceId + m.meetingDate} className="hover:bg-accent/5 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-accent">#{m.invoiceId}</td>
+                            <tr key={m.invoiceId + m.meetingDate} className="hover:bg-white/5 transition-colors group">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">#{m.invoiceId}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{m.msmeName}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                                     {new Date(m.meetingDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-muted">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                                     <div className="flex items-center gap-1.5">
-                                        <Clock size={13} className="text-muted" />
+                                        <Clock size={13} className="text-white/45" />
                                         {m.duration}
                                     </div>
                                 </td>
@@ -704,9 +725,9 @@ const MeetingsSection = () => (
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <button
                                         disabled={m.recordingStatus !== 'AVAILABLE'}
-                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 ${m.recordingStatus === 'AVAILABLE'
-                                            ? 'border-accent/40 text-accent hover:bg-accent/10 cursor-pointer'
-                                            : 'border-cardBorder text-muted cursor-not-allowed opacity-50'
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 opacity-0 group-hover:opacity-100 ${m.recordingStatus === 'AVAILABLE'
+                                            ? 'border-blue-500/50 text-blue-400 hover:bg-blue-500/10 cursor-pointer'
+                                            : 'border-white/10 text-white/30 cursor-not-allowed'
                                             }`}
                                     >
                                         <Video size={13} />
@@ -721,7 +742,7 @@ const MeetingsSection = () => (
         </div>
 
         {/* Empty state note */}
-        <p className="text-xs text-muted text-center">Showing {DUMMY_MEETINGS.length} meeting records. New sessions are logged automatically upon completion.</p>
+        <p className="text-xs text-white/45 text-center">Showing {DUMMY_MEETINGS.length} meeting records. New sessions are logged automatically upon completion.</p>
     </div>
 );
 
@@ -729,7 +750,7 @@ const AnalyticsSection = () => (
     <div className="space-y-8">
         <div>
             <h2 className="text-2xl font-bold text-white tracking-tight">Risk Analytics</h2>
-            <p className="text-muted mt-1">Portfolio health metrics and risk intelligence</p>
+            <p className="text-white/45 mt-1">Portfolio health metrics and risk intelligence</p>
         </div>
 
         {/* Summary Stat Blocks */}
@@ -737,22 +758,22 @@ const AnalyticsSection = () => (
             {[
                 { label: 'Average Credit Score', value: '76.8', sub: 'Across all funded invoices', color: '#3b82f6' },
                 { label: 'Default Rate', value: '8.3%', sub: 'Historical portfolio average', color: '#ef4444' },
-                { label: 'Avg. Return Rate', value: '11.2%', sub: 'Annualised across all investments', color: '#22c55e' },
+                { label: 'Avg. Return Rate', value: '11.2%', sub: 'Annualised across all investments', color: '#10b981' },
             ].map(stat => (
-                <div key={stat.label} className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm text-center hover:border-accent/30 transition-all">
+                <div key={stat.label} className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 text-center transition-all duration-300 hover:bg-white/7 hover:border-white/20 hover:-translate-y-0.5">
                     <div className="text-3xl font-extrabold mb-2" style={{ color: stat.color }}>{stat.value}</div>
                     <div className="text-sm font-semibold text-white mb-1">{stat.label}</div>
-                    <div className="text-xs text-muted">{stat.sub}</div>
+                    <div className="text-xs text-white/45">{stat.sub}</div>
                 </div>
             ))}
         </div>
 
         {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Default Probability Bar Chart */}
-            <div className="lg:col-span-2 bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+            <div className="lg:col-span-2 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 min-w-0">
                 <h3 className="text-lg font-semibold text-white mb-1">Default Probability by Risk Tier</h3>
-                <p className="text-xs text-muted mb-6">Historical default rates per risk classification</p>
+                <p className="text-xs text-white/45 mb-6">Historical default rates per risk classification</p>
                 <div className="h-56">
                     <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                         <BarChart data={DUMMY_DEFAULT_PROB} barSize={48}>
@@ -762,10 +783,11 @@ const AnalyticsSection = () => (
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#fff', borderRadius: '8px' }}
                                 formatter={(v) => [`${v}%`, 'Default Probability']}
+                                cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                             />
                             <Bar dataKey="probability" radius={[6, 6, 0, 0]}>
                                 {DUMMY_DEFAULT_PROB.map((entry, i) => (
-                                    <Cell key={i} fill={i === 0 ? '#22c55e' : i === 1 ? '#f59e0b' : '#ef4444'} />
+                                    <Cell key={i} fill={i === 0 ? '#10b981' : i === 1 ? '#f59e0b' : '#ef4444'} />
                                 ))}
                             </Bar>
                         </BarChart>
@@ -774,9 +796,9 @@ const AnalyticsSection = () => (
             </div>
 
             {/* Portfolio Allocation Pie - NOW SECTOR WISE */}
-            <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm min-w-0">
+            <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20 min-w-0">
                 <h3 className="text-lg font-semibold text-white mb-1">Sector Allocation</h3>
-                <p className="text-xs text-muted mb-6">Investment distribution by industry</p>
+                <p className="text-xs text-white/45 mb-6">Investment distribution by industry</p>
                 <div className="h-56 relative">
                     <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                         <PieChart>
@@ -786,6 +808,7 @@ const AnalyticsSection = () => (
                                 outerRadius={80}
                                 paddingAngle={3}
                                 dataKey="value"
+                                stroke="none"
                             >
                                 {DUMMY_SECTOR_DATA.map((entry, i) => (
                                     <Cell key={i} fill={entry.color} />
@@ -802,7 +825,7 @@ const AnalyticsSection = () => (
                     {DUMMY_SECTOR_DATA.map(item => (
                         <div key={item.name} className="flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                            <span className="text-xs text-muted">{item.name}</span>
+                            <span className="text-xs text-white/70">{item.name}</span>
                         </div>
                     ))}
                 </div>
@@ -810,15 +833,15 @@ const AnalyticsSection = () => (
         </div>
 
         {/* ROI Benchmark Chart */}
-        <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm">
+        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-white/7 hover:border-white/20">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="text-lg font-semibold text-white">ROI vs Market Benchmark</h3>
-                    <p className="text-xs text-muted mt-0.5">Your portfolio performance vs standard FD rates</p>
+                    <p className="text-xs text-white/45 mt-0.5">Your portfolio performance vs standard FD rates</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-accent rounded" /><span className="text-xs text-muted">My Portfolio</span></div>
-                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-muted rounded" /><span className="text-xs text-muted">Market Benchmark</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-blue-500 rounded" /><span className="text-xs text-white/70">My Portfolio</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-0.5 bg-white/30 rounded" /><span className="text-xs text-white/70">Market Benchmark</span></div>
                 </div>
             </div>
             <div className="h-64">
@@ -840,17 +863,17 @@ const AnalyticsSection = () => (
         </div>
 
         {/* Risk Guidance */}
-        <div className="bg-card border border-cardBorder rounded-xl p-6 shadow-lg backdrop-blur-sm">
+        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Risk Guidelines</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                    { level: 'LOW', desc: 'Credit Score ≥ 80. Businesses with 5+ years history. Minimal default risk. Returns 7–10%.', color: 'border-success/30 bg-success/5', badge: 'bg-success/10 text-success' },
-                    { level: 'MEDIUM', desc: 'Credit Score 55–79. Moderate business age. Balanced risk-return. Returns 10–16%.', color: 'border-warning/30 bg-warning/5', badge: 'bg-warning/10 text-warning' },
-                    { level: 'HIGH', desc: 'Credit Score < 55. Young businesses or fraud-flagged. High default risk. Returns 17–25%.', color: 'border-danger/30 bg-danger/5', badge: 'bg-danger/10 text-danger' },
+                    { level: 'LOW', desc: 'Credit Score ≥ 80. Businesses with 5+ years history. Minimal default risk. Returns 7–10%.', color: 'border-emerald-500/30 bg-emerald-500/5', badge: 'bg-emerald-500/10 text-emerald-400' },
+                    { level: 'MEDIUM', desc: 'Credit Score 55–79. Moderate business age. Balanced risk-return. Returns 10–16%.', color: 'border-amber-500/30 bg-amber-500/5', badge: 'bg-amber-500/10 text-amber-400' },
+                    { level: 'HIGH', desc: 'Credit Score < 55. Young businesses or fraud-flagged. High default risk. Returns 17–25%.', color: 'border-rose-500/30 bg-rose-500/5', badge: 'bg-rose-500/10 text-rose-400' },
                 ].map(g => (
                     <div key={g.level} className={`rounded-xl border p-4 ${g.color}`}>
                         <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold mb-3 ${g.badge}`}>{g.level} RISK</span>
-                        <p className="text-xs text-muted leading-relaxed">{g.desc}</p>
+                        <p className="text-xs text-white/70 leading-relaxed">{g.desc}</p>
                     </div>
                 ))}
             </div>
@@ -1128,11 +1151,11 @@ const LenderDashboard = () => {
                                             placeholder="E.g. 12.5"
                                         />
                                     </div>
-                                    <div className="pt-4 border-t border-cardBorder">
+                                    <div className="pt-4 border-t border-white/10">
                                         <button
                                             type="submit"
                                             disabled={isSubmittingOffer}
-                                            className="btn-primary w-full py-3 flex justify-center items-center gap-2"
+                                            className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white font-semibold flex justify-center items-center gap-2 shadow-[0_0_15px_rgba(56,189,248,0.3)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] transition-all"
                                         >
                                             {isSubmittingOffer ? (
                                                 <><div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Sending...</>
@@ -1155,7 +1178,7 @@ const LenderDashboard = () => {
                             </div>
                             <h1 className="text-4xl font-semibold text-white tracking-tight">
                                 Welcome back,{' '}
-                                <span className="text-blue-400">{user?.name || 'Lender'}</span>
+                                <span className="bg-gradient-to-r from-sky-400 to-blue-600 bg-clip-text text-transparent">{user?.name || 'Test Lender'}</span>
                             </h1>
                             <p className="text-white/60 mt-2 text-sm">Here's what's happening with your investments today.</p>
                         </div>
@@ -1183,8 +1206,8 @@ const LenderDashboard = () => {
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="border-b border-cardBorder">
-                        <div className="flex gap-0 overflow-x-auto">
+                    <div className="border-b border-white/10 pb-2">
+                        <div className="flex gap-2 overflow-x-auto">
                             {TABS.map(tab => {
                                 const Icon = tab.icon;
                                 const isActive = activeTab === tab.id;
@@ -1192,13 +1215,16 @@ const LenderDashboard = () => {
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${isActive
-                                            ? 'border-accent text-accent'
-                                            : 'border-transparent text-muted hover:text-white hover:border-muted/30'
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap relative ${isActive
+                                            ? 'text-white bg-white/10 border border-white/10'
+                                            : 'text-white/70 hover:text-white hover:bg-white/5 border border-transparent'
                                             }`}
                                     >
                                         <Icon size={15} />
                                         {tab.label}
+                                        {isActive && (
+                                            <div className="absolute -bottom-[9px] left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-blue-400 rounded-t-full shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
+                                        )}
                                     </button>
                                 );
                             })}
