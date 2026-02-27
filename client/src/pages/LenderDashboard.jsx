@@ -17,6 +17,7 @@ import {
 import StatCard from '../components/StatCard';
 import RiskBadge from '../components/RiskBadge';
 import { useAuth } from '../context/AuthContext';
+import { FeatureGuard } from '../context/FeatureContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
 import toast from 'react-hot-toast';
 import { getAvailableInvoices } from '../api/invoiceApi';
@@ -1069,16 +1070,24 @@ const LenderDashboard = () => {
         switch (activeTab) {
             case 'overview': return <OverviewSection onExploreMarketplace={() => setActiveTab('marketplace')} wallet={wallet} myDeals={myDeals} />;
             case 'marketplace': return isKycVerified
-                ? <MarketplaceSection
-                    onViewInvoice={(inv) => {
-                        setSelectedInvoice(inv);
-                    }}
-                    onFundInvoice={(inv) => {
-                        setFundInvoice(inv);
-                    }}
-                    availableInvoices={availableInvoices} />
+                ? (
+                    <FeatureGuard featureKey="MARKETPLACE_MODULE">
+                        <MarketplaceSection
+                            onViewInvoice={(inv) => {
+                                setSelectedInvoice(inv);
+                            }}
+                            onFundInvoice={(inv) => {
+                                setFundInvoice(inv);
+                            }}
+                            availableInvoices={availableInvoices} />
+                    </FeatureGuard>
+                )
                 : <MarketplaceKycBanner />;
-            case 'investments': return <InvestmentsSection myDeals={myDeals} onFundDeal={handleFundDeal} />;
+            case 'investments': return (
+                <FeatureGuard featureKey="DEAL_EXECUTION_MODULE">
+                    <InvestmentsSection myDeals={myDeals} onFundDeal={handleFundDeal} />
+                </FeatureGuard>
+            );
             case 'meetings': return <MeetingsSection />;
             case 'analytics': return <AnalyticsSection />;
             default: return <OverviewSection wallet={wallet} myDeals={myDeals} />;

@@ -104,7 +104,7 @@ const KycForm = () => {
     }
 
     return (
-        <FeatureGuard featureKey="KYC_MODULE">
+        <FeatureGuard featureKey="KYC_ONBOARDING_MODULE">
             <div className="min-h-screen relative overflow-hidden bg-slate-950 flex items-center justify-center py-12 px-4">
                 {/* Background elements */}
                 <div className="absolute top-0 right-1/4 w-[480px] h-[480px] bg-blue-600 rounded-full -z-10 blur-3xl opacity-[0.12] pointer-events-none" />

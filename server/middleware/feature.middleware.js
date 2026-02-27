@@ -12,14 +12,12 @@ export const refreshCache = async () => {
 
         // Default flags to insert if they don't exist
         const defaultFlags = [
-            'KYC_MODULE',
-            'LENDER_KYC',
-            'INVOICE_UPLOAD',
-            'LENDER_MARKETPLACE',
-            'FUNDING_OFFER',
-            'AGREEMENT_GENERATION',
-            'PAYMENT_SIMULATION',
-            'NOTIFICATION_SYSTEM'
+            'KYC_ONBOARDING_MODULE',
+            'INVOICE_MANAGEMENT_MODULE',
+            'RISK_ENGINE_MODULE',
+            'MARKETPLACE_MODULE',
+            'DEAL_EXECUTION_MODULE',
+            'WALLET_MODULE'
         ];
 
         const existingKeys = new Set(flags.map(f => f.featureKey));
