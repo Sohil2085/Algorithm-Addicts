@@ -25,6 +25,7 @@ const AdminSidebar = ({ open }) => {
         { icon: Users, label: 'Users', path: '/admin/users' },
         { icon: FileText, label: 'Invoices', path: '/admin/invoices' },
         { icon: TrendingUp, label: 'Bids & Funding', path: '/admin/bids' },
+        { icon: CreditCard, label: 'Deals', path: '/admin/deals' },
         { icon: CreditCard, label: 'Transactions', path: '/admin/transactions' },
         { icon: AlertCircle, label: 'Risk & Fraud', path: '/admin/alerts' },
         { icon: Settings, label: 'Settings', path: '/admin/settings' },

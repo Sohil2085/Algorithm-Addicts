@@ -206,3 +206,23 @@ export const rejectLender = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getAllDeals = async (req, res, next) => {
+    try {
+        const deals = await prisma.deal.findMany({
+            orderBy: { createdAt: 'desc' },
+            include: {
+                invoice: { select: { invoice_number: true, due_date: true, amount: true } },
+                lender: { select: { name: true, email: true } },
+                msme: { select: { name: true, email: true } }
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            data: deals
+        });
+    } catch (error) {
+        next(error);
+    }
+};
