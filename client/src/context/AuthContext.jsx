@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { getMe } from '../api/authApi';
 
 const AuthContext = createContext(null);
 
@@ -8,14 +9,35 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        const storedToken = localStorage.getItem('token');
+        const initAuth = async () => {
+            const storedToken = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
 
-        if (storedUser && storedToken) {
-            setUser(JSON.parse(storedUser));
-            setToken(storedToken);
-        }
-        setLoading(false);
+            if (storedToken) {
+                setToken(storedToken);
+                // Optimistically set user from storage if available
+                if (storedUser) {
+                    setUser(JSON.parse(storedUser));
+                }
+
+                // Verify token and fetch fresh user data
+                try {
+                    const data = await getMe();
+                    if (data && data.user) {
+                        setUser(data.user);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                    }
+                } catch (error) {
+                    console.error("Session verification failed:", error);
+                    // Optional: Logout if token is invalid?
+                    // For now, keep local state but warn
+                    if (!storedUser) logout(); // Only logout if no local user fallback
+                }
+            }
+            setLoading(false);
+        };
+
+        initAuth();
     }, []);
 
     const login = (newToken, newUser) => {
