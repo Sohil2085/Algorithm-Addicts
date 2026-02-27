@@ -1,1 +1,85 @@
 @import "tailwindcss";
+
+:root,
+[data-theme="light"] {
+    --color-bg-base: #f8fafc;
+    --color-bg-elevated: #ffffff;
+    --color-bg-elevated-hover: #f1f5f9;
+    --color-bg-elevated-active: #e2e8f0;
+
+    --color-border-subtle: #e2e8f0;
+    --color-border-hover: #cbd5e1;
+    --color-border-focus: #3b82f6;
+
+    --color-text-main: #0f172a;
+    --color-text-muted: #475569;
+
+    --color-accent-primary: #3b82f6;
+    --color-accent-subtle: #eff6ff;
+    --color-accent-border: #bfdbfe;
+    --color-glass-overlay: rgba(255, 255, 255, 0.9);
+
+    --color-shadow-base: rgba(0, 0, 0, 0.05);
+
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+}
+
+[data-theme="dark"] {
+    --color-bg-base: #0B1220;
+    --color-bg-elevated: rgba(15, 23, 42, 0.55);
+    --color-bg-elevated-hover: rgba(255, 255, 255, 0.05);
+    /* matches bg-white/5 */
+    --color-bg-elevated-active: rgba(255, 255, 255, 0.1);
+    /* matches bg-white/10 */
+
+    --color-border-subtle: rgba(255, 255, 255, 0.1);
+    /* matches border-white/10 */
+    --color-border-hover: rgba(255, 255, 255, 0.2);
+    /* matches border-white/20 */
+    --color-border-focus: rgba(96, 165, 250, 0.3);
+
+    --color-text-main: #ffffff;
+    /* matches text-white */
+    --color-text-muted: rgba(255, 255, 255, 0.6);
+    /* matches text-white/60 */
+
+    --color-accent-primary: #3B82F6;
+    --color-accent-subtle: rgba(59, 130, 246, 0.1);
+    --color-accent-border: rgba(59, 130, 246, 0.2);
+    --color-glass-overlay: rgba(11, 18, 32, 0.82);
+
+    --color-shadow-base: rgba(0, 0, 0, 0.3);
+
+    --color-success: #4ade80;
+    --color-warning: #fbbf24;
+    --color-danger: #f87171;
+}
+
+@theme {
+    --color-theme-bg: var(--color-bg-base);
+    --color-theme-surface: var(--color-bg-elevated);
+    --color-theme-surface-hover: var(--color-bg-elevated-hover);
+    --color-theme-surface-active: var(--color-bg-elevated-active);
+
+    --color-theme-border: var(--color-border-subtle);
+    --color-theme-border-hover: var(--color-border-hover);
+    --color-theme-border-focus: var(--color-border-focus);
+
+    --color-theme-text: var(--color-text-main);
+    --color-theme-text-muted: var(--color-text-muted);
+
+    --color-theme-accent: var(--color-accent-primary);
+    --color-theme-tag-bg: var(--color-accent-subtle);
+    --color-theme-tag-border: var(--color-accent-border);
+    --color-theme-glass: var(--color-glass-overlay);
+
+    --color-theme-shadow: var(--color-shadow-base);
+
+    --color-theme-success: var(--color-success);
+    --color-theme-warning: var(--color-warning);
+    --color-theme-danger: var(--color-danger);
+}
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
