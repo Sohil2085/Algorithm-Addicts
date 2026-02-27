@@ -660,7 +660,7 @@ const InvestmentsSection = ({ myDeals, onFundDeal }) => {
                                             {deal.status === 'ACTIVE' ? (
                                                 <button
                                                     onClick={() => onFundDeal(deal.id)}
-                                                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-sky-500 text-white flex items-center gap-1 shadow-[0_0_10px_rgba(56,189,248,0.2)] hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all opacity-0 group-hover:opacity-100">
+                                                    className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
                                                     <Zap size={13} /> Fund Deal
                                                 </button>
                                             ) : (
@@ -995,6 +995,10 @@ const LenderDashboard = () => {
             setIsOfferModalOpen(false);
             setOfferForm({ amount: '', rate: '' });
             setSelectedInvoice(null);
+
+            // Refresh wallet balance to reflect locked funds
+            const walletData = await getMyWallet();
+            setWallet(walletData);
         } catch (error) {
             toast.error(error.message || 'Failed to send offer');
         } finally {
@@ -1004,14 +1008,18 @@ const LenderDashboard = () => {
 
     const handleFundDeal = async (dealId) => {
         try {
-            await fundDeal(dealId);
+            const res = await fundDeal(dealId);
             toast.success('Deal funded successfully!');
-            // Refresh data
-            const [walletData, dealsData] = await Promise.all([
-                getMyWallet(),
-                getMyDeals()
-            ]);
-            setWallet(walletData);
+
+            // 4. Update useState manually based on API response
+            if (res?.data?.updatedWallet) {
+                setWallet(res.data.updatedWallet);
+            } else {
+                const walletData = await getMyWallet();
+                setWallet(walletData);
+            }
+
+            const dealsData = await getMyDeals();
             setMyDeals(dealsData);
         } catch (error) {
             toast.error(error.message || 'Failed to fund deal');

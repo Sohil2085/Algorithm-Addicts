@@ -54,41 +54,48 @@ export const fundDeal = async (req, res) => {
             return res.status(404).json({ message: 'Lender wallet not found' });
         }
 
-        const fundedAmount = parseFloat(deal.fundedAmount);
-
-        if (parseFloat(lenderWallet.availableBalance) < fundedAmount) {
+        if (lenderWallet.availableBalance.lt(deal.fundedAmount)) {
             return res.status(400).json({ message: 'Insufficient wallet balance' });
         }
 
         // 3. Execute Prisma Transaction
         const transactionResult = await prisma.$transaction(async (tx) => {
             // Deduct from lender wallet availableBalance, increase lockedBalance
-            const updatedLenderWallet = await tx.wallet.update({
+            await tx.wallet.update({
                 where: { userId: lenderId },
                 data: {
-                    availableBalance: { decrement: fundedAmount },
-                    lockedBalance: { increment: fundedAmount }
+                    availableBalance: { decrement: deal.fundedAmount },
+                    lockedBalance: { increment: deal.fundedAmount }
                 }
             });
 
             // Add to MSME wallet availableBalance
-            const updatedMsmeWallet = await tx.wallet.upsert({
+            await tx.wallet.upsert({
                 where: { userId: deal.msmeId },
                 update: {
-                    availableBalance: { increment: fundedAmount }
+                    availableBalance: { increment: deal.fundedAmount }
                 },
                 create: {
                     userId: deal.msmeId,
-                    availableBalance: fundedAmount,
+                    availableBalance: deal.fundedAmount,
                     lockedBalance: 0,
                     totalEarnings: 0
                 }
             });
 
-            return { lenderWallet: updatedLenderWallet, msmeWallet: updatedMsmeWallet };
+            const updatedWallet = await tx.wallet.findUnique({
+                where: { userId: lenderId }
+            });
+            console.log("UPDATED WALLET:", updatedWallet);
+
+            return { updatedWallet };
         });
 
-        res.status(200).json({ message: 'Deal funded successfully', result: transactionResult });
+        res.status(200).json({
+            success: true,
+            message: 'Deal funded successfully',
+            data: { updatedWallet: transactionResult.updatedWallet }
+        });
     } catch (error) {
         console.error('Error in fundDeal:', error);
         res.status(500).json({ message: 'Server error' });

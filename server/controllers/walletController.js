@@ -69,8 +69,8 @@ export const topUpWallet = async (req, res) => {
         }
 
         const topUpAmount = parseFloat(amount);
-        if (isNaN(topUpAmount) || topUpAmount <= 0) {
-            return res.status(400).json({ message: 'Invalid top-up amount' });
+        if (isNaN(topUpAmount) || topUpAmount <= 5000) {
+            return res.status(400).json({ message: 'Top up amount must be greater than 5000' });
         }
 
         // Use Prisma transaction to ensure integrity

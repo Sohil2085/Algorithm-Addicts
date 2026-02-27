@@ -120,7 +120,7 @@ export const evaluateInvoiceRisk = async ({
 
         // Also update the invoice status (e.g., if fraud is too high or credit is too low -> PENDING) 
         // This replaces determineInvoiceStatus from old code.
-        let status = 'VERIFIED';
+        let status = 'OPEN_FOR_FUNDING';
         if (fraudResult.score >= 80 || finalScore < 40) {
             status = 'PENDING';
         }
