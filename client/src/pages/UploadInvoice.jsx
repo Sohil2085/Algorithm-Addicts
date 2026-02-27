@@ -72,7 +72,7 @@ const UploadInvoice = () => {
     }
 
     return (
-        <FeatureGuard featureKey="INVOICE_UPLOAD">
+        <FeatureGuard featureKey="INVOICE_MANAGEMENT_MODULE">
             <div className="min-h-screen relative overflow-hidden bg-slate-950">
                 <div className="absolute top-0 right-1/3 w-96 h-96 bg-blue-600 rounded-full -z-10 blur-3xl opacity-[0.10] pointer-events-none"></div>
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/40 to-slate-950 -z-10 pointer-events-none"></div>

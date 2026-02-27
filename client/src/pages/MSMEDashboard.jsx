@@ -450,7 +450,7 @@ const MSMEDashboard = () => {
                         )}
                         <h2 className="text-base font-semibold text-white mb-5">Quick Actions</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <FeatureGuard featureKey="INVOICE_UPLOAD">
+                            <FeatureGuard featureKey="INVOICE_MANAGEMENT_MODULE">
                                 <button
                                     onClick={() => navigate('/upload-invoice')}
                                     disabled={user?.kycStatus !== 'VERIFIED'}

@@ -140,11 +140,13 @@ const Navbar = () => {
                     {user.role === 'MSME' && (
                         <>
                             <NavLink to="/msme" end className={linkClass}>Dashboard</NavLink>
-                            <NavLink to="/wallet" className={linkClass}>Wallet</NavLink>
-                            <FeatureGuard featureKey="INVOICE_UPLOAD">
+                            <FeatureGuard featureKey="WALLET_MODULE">
+                                <NavLink to="/wallet" className={linkClass}>Wallet</NavLink>
+                            </FeatureGuard>
+                            <FeatureGuard featureKey="INVOICE_MANAGEMENT_MODULE">
                                 <NavLink to="/upload-invoice" className={linkClass}>Upload Invoice</NavLink>
                             </FeatureGuard>
-                            <FeatureGuard featureKey="INVOICE_UPLOAD">
+                            <FeatureGuard featureKey="INVOICE_MANAGEMENT_MODULE">
                                 <NavLink to="/invoices" className={linkClass}>Invoices</NavLink>
                             </FeatureGuard>
                         </>
@@ -152,7 +154,9 @@ const Navbar = () => {
                     {user.role === 'LENDER' && (
                         <>
                             <NavLink to="/lender" end className={linkClass}>Dashboard</NavLink>
-                            <NavLink to="/wallet" className={linkClass}>Wallet</NavLink>
+                            <FeatureGuard featureKey="WALLET_MODULE">
+                                <NavLink to="/wallet" className={linkClass}>Wallet</NavLink>
+                            </FeatureGuard>
                             <NavLink to="/analytics" className={linkClass}>Analytics</NavLink>
                             <NavLink
                                 to="/lender/kyc"
@@ -185,10 +189,10 @@ const Navbar = () => {
                         <>
                             <NavLink to="/msme" end className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</NavLink>
                             <NavLink to="/wallet" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Wallet</NavLink>
-                            <FeatureGuard featureKey="INVOICE_UPLOAD">
+                            <FeatureGuard featureKey="INVOICE_MANAGEMENT_MODULE">
                                 <NavLink to="/upload-invoice" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Upload Invoice</NavLink>
                             </FeatureGuard>
-                            <FeatureGuard featureKey="INVOICE_UPLOAD">
+                            <FeatureGuard featureKey="INVOICE_MANAGEMENT_MODULE">
                                 <NavLink to="/invoices" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Invoices</NavLink>
                             </FeatureGuard>
                         </>
@@ -196,7 +200,9 @@ const Navbar = () => {
                     {user.role === 'LENDER' && (
                         <>
                             <NavLink to="/lender" end className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Dashboard</NavLink>
-                            <NavLink to="/wallet" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Wallet</NavLink>
+                            <FeatureGuard featureKey="WALLET_MODULE">
+                                <NavLink to="/wallet" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Wallet</NavLink>
+                            </FeatureGuard>
                             <NavLink to="/analytics" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Analytics</NavLink>
                             <NavLink
                                 to="/lender/kyc"

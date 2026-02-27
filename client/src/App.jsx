@@ -183,9 +183,11 @@ function App() {
 
             {/* Shared Protected Routes */}
             <Route path="/wallet" element={
-              <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
-                <WalletPage />
-              </ProtectedRoute>
+              <FeatureGuard featureKey="WALLET_MODULE">
+                <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
+                  <WalletPage />
+                </ProtectedRoute>
+              </FeatureGuard>
             } />
             <Route path="/analytics" element={
               <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
