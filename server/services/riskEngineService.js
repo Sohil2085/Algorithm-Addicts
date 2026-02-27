@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma.js';
 import { calculateCreditScore } from './creditScoreService.js';
 import { calculateFraudScore } from './fraudDetectionService.js';
 import { RISK_BANDS } from './riskConstants.js';
-
-const prisma = new PrismaClient();
 
 const getRiskBand = (score, bands) => {
     const band = bands.find(b => score >= b.min && score <= b.max);

@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../config/prisma.js';
 import { validateGST } from '../utils/gstValidator.js';
 import { calculateRiskScore } from '../utils/riskEngine.js';
 

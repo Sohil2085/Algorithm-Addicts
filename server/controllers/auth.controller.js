@@ -1,5 +1,6 @@
 import * as authService from '../services/auth.service.js';
 import jwt from 'jsonwebtoken';
+import prisma from '../config/prisma.js';
 
 export const signup = async (req, res, next) => {
     try {
@@ -96,8 +97,6 @@ export const getMe = async (req, res, next) => {
             });
         }
 
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
 
         const user = await prisma.user.findUnique({
             where: { id: userId },

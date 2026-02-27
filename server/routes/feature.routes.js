@@ -1,11 +1,10 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { requireRole } from '../middleware/role.middleware.js';
 import { refreshCache } from '../middleware/feature.middleware.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get all feature flags (accessible by authenticated users, for context)
 router.get('/', requireAuth, async (req, res) => {

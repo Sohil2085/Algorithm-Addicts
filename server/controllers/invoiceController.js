@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma.js';
 import { validateInvoice } from '../validators/invoiceValidator.js';
 import { evaluateInvoiceRisk } from '../services/riskEngineService.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Create a new invoice with full risk engine evaluation
