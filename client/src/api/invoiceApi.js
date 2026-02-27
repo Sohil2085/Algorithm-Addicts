@@ -68,6 +68,16 @@ export const getInvoices = async () => {
     }
 };
 
+export const getAvailableInvoices = async () => {
+    try {
+        const response = await api.get('/invoices/available');
+        return response.data.map(mapInvoiceFromBackend);
+    } catch (error) {
+        console.error("Get Available Invoices Error:", error);
+        throw error.response?.data?.error || 'Failed to fetch available invoices';
+    }
+};
+
 export const getInvoiceStats = async () => {
     try {
         const invoices = await getInvoices();
