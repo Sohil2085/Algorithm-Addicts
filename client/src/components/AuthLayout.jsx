@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Check, Shield, Zap } from 'lucide-react';
+import { ShieldCheck, Zap, TrendingUp } from 'lucide-react';
 import '../styles/authTheme.css';
 import MovingLinesBackground from './MovingLinesBackground';
 
@@ -34,38 +34,58 @@ const AuthLayout = ({ children, title, subtitle }) => {
                 animate="visible"
                 variants={stagger}
             >
-                <motion.div variants={fadeIn} className="pill-badge">
-                    <Shield size={14} style={{ marginRight: '6px' }} />
-                    Secure • Automated • Fast
+                <motion.div variants={fadeIn} className="my-10">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-blue-400/40 bg-slate-900/70 backdrop-blur-md px-5 py-2.5 text-sm font-medium text-blue-200 shadow-[0_0_20px_rgba(59,130,246,0.15)] hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] transition-all duration-300">
+                        <ShieldCheck className="h-4 w-4 text-blue-400 shrink-0" />
+                        <span className="leading-none tracking-wider uppercase text-xs font-bold">Enterprise-Grade Financing</span>
+                    </div>
                 </motion.div>
 
-                <motion.h1 variants={fadeIn} className="brand-name">
-                    InvoiceFlow
-                </motion.h1>
+                <motion.div variants={fadeIn} className="flex items-center gap-5 mt-4 mb-6 group cursor-default">
+                    <div className="relative flex items-center justify-center w-[4.5rem] h-[4.5rem] rounded-[1.25rem] bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 shadow-[0_0_30px_rgba(59,130,246,0.5)] border border-blue-400/40 overflow-hidden shrink-0 transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_0_45px_rgba(59,130,246,0.7)] group-hover:rotate-3">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 ease-in-out"></div>
+                        <svg className="w-10 h-10 text-white relative z-10 drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                            <line x1="12" y1="22.08" x2="12" y2="12" />
+                        </svg>
+                    </div>
+                    <h1 className="brand-name">
+                        FinBridge
+                    </h1>
+                </motion.div>
 
                 <motion.p variants={fadeIn} className="brand-tagline">
-                    Turn unpaid invoices into instant working capital.
-                    Stop waiting for payments and start growing your business.
+                    Unlock trapped capital in your unpaid invoices. We provide <span className="text-white font-medium">instant liquidity</span> with seamless, AI-driven risk assessment to accelerate your business growth.
                 </motion.p>
 
                 <motion.div variants={fadeIn} className="feature-list">
-                    <div className="feature-item">
-                        <div className="feature-icon-box">
-                            <Check size={20} />
+                    <div className="feature-item group">
+                        <div className="feature-icon-box group-hover:scale-110 group-hover:bg-blue-500/10 group-hover:border-blue-500/30 transition-all duration-300 ease-out">
+                            <Zap size={20} className="text-blue-400" />
                         </div>
-                        <span>GST-verified authentic invoices</span>
+                        <div className="flex flex-col ml-3">
+                            <span className="font-semibold text-slate-100 text-[1.05rem]">Instant Liquidity</span>
+                            <span className="text-[0.9rem] text-slate-400 mt-1">Access up to 80% of your invoice value within 24 hours.</span>
+                        </div>
                     </div>
-                    <div className="feature-item">
-                        <div className="feature-icon-box">
-                            <Shield size={20} />
+                    <div className="feature-item group mt-2">
+                        <div className="feature-icon-box group-hover:scale-110 group-hover:bg-blue-500/10 group-hover:border-blue-500/30 transition-all duration-300 ease-out">
+                            <ShieldCheck size={20} className="text-blue-400" />
                         </div>
-                        <span>Smart risk scoring AI engine</span>
+                        <div className="flex flex-col ml-3">
+                            <span className="font-semibold text-slate-100 text-[1.05rem]">Smart Risk Engine</span>
+                            <span className="text-[0.9rem] text-slate-400 mt-1">AI-powered, GST-verified assessment for rapid approvals.</span>
+                        </div>
                     </div>
-                    <div className="feature-item">
-                        <div className="feature-icon-box">
-                            <Zap size={20} />
+                    <div className="feature-item group mt-2">
+                        <div className="feature-icon-box group-hover:scale-110 group-hover:bg-blue-500/10 group-hover:border-blue-500/30 transition-all duration-300 ease-out">
+                            <TrendingUp size={20} className="text-blue-400" />
                         </div>
-                        <span>Instant 70–80% funding availability</span>
+                        <div className="flex flex-col ml-3">
+                            <span className="font-semibold text-slate-100 text-[1.05rem]">Scale Without Debt</span>
+                            <span className="text-[0.9rem] text-slate-400 mt-1">Grow your operations without taking on rigid bank loans.</span>
+                        </div>
                     </div>
                 </motion.div>
             </motion.div>
