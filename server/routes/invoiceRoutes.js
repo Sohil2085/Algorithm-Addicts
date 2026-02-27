@@ -1,55 +1,49 @@
-import jwt from 'jsonwebtoken';
-import prisma from '../config/prisma.js';
 
-const protect = async (req, res, next) => {
-    let token;
+import express from 'express';
+import { createInvoice, getMyInvoices, getInvoiceById, getAvailableInvoices } from '../controllers/invoiceController.js';
+import { protect } from '../middleware/authMiddleware.js';
+import { checkRole } from '../middleware/roleMiddleware.js';
+import { requireFeatureEnabled } from '../middleware/feature.middleware.js';
+import { requireVerifiedLender } from '../middleware/lender.middleware.js';
 
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
-        token = req.headers.authorization.split(' ')[1];
-    }
+const router = express.Router();
 
-    if (!token) {
-        return res.status(401).json({ message: 'Not authorized, no token' });
-    }
+// Apply authentication middleware to all routes in this router
+// All invoice operations require a logged-in user
+router.use(protect);
+router.use(requireFeatureEnabled('INVOICE_UPLOAD'));
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+// Create a new invoice (MSME only)
+router.post(
+    '/create',
+    checkRole(['MSME']),
+    createInvoice
+);
 
-        const user = await prisma.user.findUnique({
-            where: { id: decoded.id },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                kycStatus: true,
-            },
-        });
+// Get invoices for the logged-in user (MSME only)
+// Lenders/Admins might need different endpoints or role checks, 
+// strictly following request for "MSME only" for this route.
+router.get(
+    '/my',
+    checkRole(['MSME']),
+    getMyInvoices
+);
 
-        if (!user) {
-            return res.status(401).json({ message: 'User not found' });
-        }
+// Get available invoices for lenders (LENDER role + verified lender check)
+// This needs to be checked before /:id so that 'available' is not treated as an ID
+router.get(
+    '/available',
+    checkRole(['LENDER', 'ADMIN']),
+    requireVerifiedLender,
+    getAvailableInvoices
+);
 
-        req.user = user;
-        next();
-    } catch (error) {
-        console.error(error);
-        return res.status(401).json({ message: 'Not authorized, token failed' });
-    }
-};
+// Get specific invoice by ID (Authenticated user)
+// Controller handles ownership checks, but lenders must be verified to view
+router.get(
+    '/:id',
+    requireVerifiedLender,
+    getInvoiceById
+);
 
-const authorize = (...roles) => {
-    return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
-            return res.status(403).json({
-                message: `User role ${req.user.role} is not authorized to access this route`,
-            });
-        }
-        next();
-    };
-};
-
-export { protect, authorize };
+export default router;

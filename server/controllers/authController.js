@@ -6,7 +6,7 @@ import signToken from '../config/jwt.js';
 // @route   POST /api/auth/register
 // @access  Public
 const register = async (req, res) => {
-    let { name, email, password, role, gstin, business_age } = req.body;
+    let { name, email, password, role, gstin, business_started_date } = req.body;
 
     try {
         // Automatic Admin Role Assignment
@@ -34,29 +34,45 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-                role,
-                gstin,
-                business_age: business_age ? parseInt(business_age) : null,
-            },
+        // Transaction to ensure Wallet is created securely with user
+        const result = await prisma.$transaction(async (tx) => {
+            const newUser = await tx.user.create({
+                data: {
+                    name,
+                    email,
+                    password: hashedPassword,
+                    role,
+                    gstin,
+                    business_started_date: business_started_date ? new Date(business_started_date) : null,
+                },
+            });
+
+            if (role === 'MSME' || role === 'LENDER') {
+                await tx.wallet.create({
+                    data: {
+                        userId: newUser.id,
+                        availableBalance: 0,
+                        lockedBalance: 0,
+                        totalEarnings: 0
+                    }
+                });
+            }
+
+            return newUser;
         });
 
-        const token = signToken(user.id);
+        const token = signToken(result.id);
 
         res.status(201).json({
             message: 'User registered successfully',
             token,
             user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                gstin: user.gstin,
-                business_age: user.business_age,
+                id: result.id,
+                name: result.name,
+                email: result.email,
+                role: result.role,
+                gstin: result.gstin,
+                business_started_date: result.business_started_date
             },
         });
     } catch (error) {
@@ -101,7 +117,7 @@ const login = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 gstin: user.gstin,
-                business_age: user.business_age,
+                business_started_date: user.business_started_date
             },
         });
     } catch (error) {
@@ -123,7 +139,7 @@ const getMe = async (req, res) => {
                 email: true,
                 role: true,
                 gstin: true,
-                business_age: true,
+                business_started_date: true,
                 created_at: true,
             },
         });

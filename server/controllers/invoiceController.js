@@ -159,7 +159,7 @@ export const getInvoiceById = async (req, res) => {
 export const getAvailableInvoices = async (req, res) => {
     try {
         const invoices = await prisma.invoice.findMany({
-            where: { status: 'VERIFIED' },
+            where: { status: { in: ['VERIFIED', 'OPEN_FOR_FUNDING'] } },
             include: {
                 user: {
                     include: {
