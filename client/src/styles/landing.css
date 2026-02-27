@@ -1,12 +1,12 @@
 :root {
-    --bg0: #0B1220;
-    --bg1: #0F172A;
-    --accent: #3B82F6;
-    --accentSoft: #60A5FA;
-    --text: #F8FAFC;
-    --muted: rgba(248, 250, 252, 0.7);
-    --card: rgba(15, 23, 42, 0.55);
-    --cardBorder: rgba(148, 163, 184, 0.14);
+    --bg0: var(--color-bg-base);
+    --bg1: var(--color-bg-elevated);
+    --accent: var(--color-accent-primary);
+    --accentSoft: var(--color-accent-subtle);
+    --text: var(--color-text-main);
+    --muted: var(--color-text-muted);
+    --card: var(--color-bg-elevated);
+    --cardBorder: var(--color-border-subtle);
     --font-main: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
@@ -54,20 +54,20 @@ html::-webkit-scrollbar-thumb:hover {
 
 /* Landing navbar — matches page dark-navy palette */
 .landing-nav {
-    background: rgba(11, 18, 32, 0.82);
+    background: var(--color-theme-glass);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border-bottom: 1px solid rgba(59, 130, 246, 0.12);
-    box-shadow: 0 1px 24px 0 rgba(11, 18, 32, 0.55);
+    border-bottom: 1px solid var(--color-theme-border);
+    box-shadow: 0 1px 24px 0 var(--color-theme-shadow);
 }
 
 /* Compact navbar buttons for landing page — match dashboard style */
 .landing-nav-btn-ghost {
     padding: 7px 16px;
     border-radius: 8px;
-    background: rgba(15, 23, 42, 0.35);
-    border: 1px solid rgba(96, 165, 250, 0.30);
-    color: #F8FAFC;
+    background: var(--color-theme-surface);
+    border: 1px solid var(--color-theme-border);
+    color: var(--color-theme-text);
     font-weight: 600;
     font-size: 14px;
     font-family: var(--font-main);
@@ -76,9 +76,10 @@ html::-webkit-scrollbar-thumb:hover {
     display: inline-flex;
     align-items: center;
 }
+
 .landing-nav-btn-ghost:hover {
-    background: rgba(59, 130, 246, 0.10);
-    border-color: var(--accent);
+    background: var(--color-theme-surface-hover);
+    border-color: var(--color-theme-border-focus);
 }
 
 .landing-nav-btn-primary {
@@ -95,6 +96,7 @@ html::-webkit-scrollbar-thumb:hover {
     display: inline-flex;
     align-items: center;
 }
+
 .landing-nav-btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
@@ -154,7 +156,6 @@ html::-webkit-scrollbar-thumb:hover {
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--accentSoft);
     margin-top: 50px;
     margin-bottom: 10px;
     display: flex;
@@ -177,7 +178,7 @@ html::-webkit-scrollbar-thumb:hover {
     font-weight: 800;
     line-height: 1.05;
     letter-spacing: -0.02em;
-    background: linear-gradient(to bottom right, #ffffff, #94a3b8);
+    background: linear-gradient(to bottom right, var(--text), var(--muted));
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -219,8 +220,8 @@ html::-webkit-scrollbar-thumb:hover {
 
 .site-footer {
     width: 100%;
-    border-top: 1px solid rgba(148, 163, 184, 0.08);
-    background: linear-gradient(180deg, rgba(11, 18, 32, 0.6), rgba(11, 18, 32, 0.8));
+    border-top: 1px solid var(--color-theme-border);
+    background: var(--color-theme-bg);
     padding: 28px 0;
     position: relative;
     z-index: 5;
@@ -235,7 +236,7 @@ html::-webkit-scrollbar-thumb:hover {
 }
 
 .footer-col {
-    color: #cbd5e1;
+    color: var(--color-theme-text-muted);
 }
 
 .footer-brand .footer-logo {
@@ -247,18 +248,18 @@ html::-webkit-scrollbar-thumb:hover {
 
 .footer-tag {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--color-theme-text-muted);
     margin-bottom: 8px;
 }
 
 .footer-copy {
     font-size: 12px;
-    color: #7b8896;
+    color: var(--color-theme-text-muted);
 }
 
 .footer-heading {
     font-weight: 700;
-    color: white;
+    color: var(--color-theme-text);
     margin-bottom: 12px;
 }
 
@@ -321,9 +322,9 @@ html::-webkit-scrollbar-thumb:hover {
 
     padding: 14px 22px;
     border-radius: 12px;
-    background: rgba(15, 23, 42, 0.35);
-    border: 1px solid rgba(96, 165, 250, 0.35);
-    color: #F8FAFC;
+    background: var(--color-theme-surface);
+    border: 1px solid var(--color-theme-border);
+    color: var(--color-theme-text);
     font-weight: 600;
     font-size: 15px;
     transition: all 0.2s ease;
@@ -331,8 +332,8 @@ html::-webkit-scrollbar-thumb:hover {
 }
 
 .btn-ghost:hover {
-    background: rgba(59, 130, 246, 0.10);
-    border-color: var(--accent);
+    background: var(--color-theme-surface-hover);
+    border-color: var(--color-theme-border-focus);
 }
 
 /* Navbar-specific button adjustments to ensure perfect alignment */
@@ -390,8 +391,8 @@ html::-webkit-scrollbar-thumb:hover {
     position: relative;
     width: 520px;
     height: 480px;
-    background: rgba(15, 23, 42, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-theme-surface-active);
+    border: 1px solid var(--color-theme-border);
     border-radius: 24px;
     overflow: hidden;
     display: flex;
@@ -407,9 +408,9 @@ html::-webkit-scrollbar-thumb:hover {
     position: absolute;
     top: 40px;
     right: 30px;
-    background: rgba(15, 23, 42, 0.75);
+    background: var(--color-theme-glass);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--color-theme-border);
     border-radius: 16px;
     padding: 20px;
     width: 220px;
@@ -421,9 +422,9 @@ html::-webkit-scrollbar-thumb:hover {
     position: absolute;
     bottom: 40px;
     left: 30px;
-    background: rgba(15, 23, 42, 0.75);
+    background: var(--color-theme-glass);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--color-theme-border);
     border-radius: 16px;
     padding: 20px;
     width: 200px;
@@ -440,7 +441,7 @@ html::-webkit-scrollbar-thumb:hover {
 
 .card-label {
     font-size: 12px;
-    color: #94a3b8;
+    color: var(--color-theme-text-muted);
     font-weight: 500;
 }
 
@@ -456,14 +457,14 @@ html::-webkit-scrollbar-thumb:hover {
 .card-value {
     font-size: 20px;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-theme-text);
     font-family: monospace;
 }
 
 .card-value-sm {
     font-size: 16px;
     font-weight: 700;
-    color: #fff;
+    color: var(--color-theme-text);
 }
 
 .icon-circle {
@@ -494,7 +495,7 @@ html::-webkit-scrollbar-thumb:hover {
 .landing-h2 {
     font-size: 40px;
     font-weight: 700;
-    color: white;
+    color: var(--color-theme-text);
 }
 
 .features-grid {
@@ -560,17 +561,13 @@ html::-webkit-scrollbar-thumb:hover {
 .section-title {
     font-size: 48px;
     font-weight: 800;
-    color: white;
+    color: var(--color-theme-text);
     margin: 0 0 16px 0;
-    background: linear-gradient(to bottom right, #ffffff, #cbd5e1);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .section-subtitle {
     font-size: 18px;
-    color: #94a3b8;
+    color: var(--color-theme-text-muted);
     max-width: 600px;
     margin: 0 auto;
     line-height: 1.6;

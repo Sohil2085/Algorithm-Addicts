@@ -146,12 +146,12 @@ const MSMEDashboard = () => {
     };
 
     return (
-        <div className="min-h-screen relative overflow-hidden bg-slate-950">
+        <div className="min-h-screen relative overflow-hidden bg-theme-bg">
             {/* Glow blobs */}
             <div className="absolute top-0 right-1/4 w-[480px] h-[480px] bg-blue-600 rounded-full -z-10 blur-3xl opacity-[0.12] pointer-events-none" />
             <div className="absolute bottom-1/4 -left-24 w-[400px] h-[400px] bg-cyan-500 rounded-full -z-10 blur-3xl opacity-[0.08] pointer-events-none" />
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/40 to-slate-950 -z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-theme-bg via-theme-elevated/40 to-theme-bg -z-10 pointer-events-none" />
 
             <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 {loading && <FinbridgeLoading userName={user?.name} />}
@@ -170,17 +170,17 @@ const MSMEDashboard = () => {
                                 <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
                                 MSME Dashboard
                             </div>
-                            <h1 className="text-4xl font-semibold text-white tracking-tight">
+                            <h1 className="text-4xl font-semibold text-theme-text tracking-tight">
                                 Welcome back,{' '}
                                 <span className="text-blue-400">{user?.name || 'Partner'}</span>
                             </h1>
-                            <p className="text-white/60 mt-2 text-sm">Here's what's happening with your business today.</p>
+                            <p className="text-theme-text-muted mt-2 text-sm">Here's what's happening with your business today.</p>
                         </div>
 
                         {user?.kycStatus === 'VERIFIED' ? (
                             <button
                                 onClick={() => navigate('/upload-invoice')}
-                                className="shrink-0 inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 text-sm"
+                                className="shrink-0 inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-theme-text font-medium px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 text-sm"
                             >
                                 <Plus size={15} />
                                 Create Invoice
@@ -189,7 +189,7 @@ const MSMEDashboard = () => {
                             <div className="shrink-0 flex flex-col items-end gap-2 text-right">
                                 <button
                                     onClick={() => navigate('/kyc')}
-                                    className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-medium px-6 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm animate-pulse"
+                                    className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-theme-text font-medium px-6 py-3 rounded-xl transition-all shadow-lg shadow-amber-500/20 text-sm animate-pulse"
                                 >
                                     <Briefcase size={16} />
                                     Complete KYC to Unlock Features
@@ -236,10 +236,10 @@ const MSMEDashboard = () => {
                     {/* Charts Section */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Revenue Graph */}
-                        <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 min-w-0">
+                        <div className="lg:col-span-2 rounded-2xl border border-theme-border bg-theme-elevated/20 backdrop-blur-xl p-6 min-w-0 shadow-lg shadow-theme-border">
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-base font-semibold text-white">Revenue Trend</h2>
-                                <span className="text-xs text-white/40 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">Last 6 months</span>
+                                <h2 className="text-base font-semibold text-theme-text">Revenue Trend</h2>
+                                <span className="text-xs text-theme-text-muted bg-theme-surface-hover border border-theme-border px-2.5 py-1 rounded-full">Last 6 months</span>
                             </div>
                             <div className="h-60">
                                 {stats?.revenueData && stats.revenueData.length > 0 && stats.revenueData.some(d => d.revenue > 0) ? (
@@ -257,7 +257,7 @@ const MSMEDashboard = () => {
                                         </LineChart>
                                     </ResponsiveContainer>
                                 ) : (
-                                    <div className="h-full flex flex-col items-center justify-center gap-2 text-white/30">
+                                    <div className="h-full flex flex-col items-center justify-center gap-2 text-theme-text-muted">
                                         <FileText size={28} />
                                         <p className="text-sm">No revenue data available yet</p>
                                     </div>
@@ -266,10 +266,10 @@ const MSMEDashboard = () => {
                         </div>
 
                         {/* Risk Distribution */}
-                        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 min-w-0">
+                        <div className="rounded-2xl border border-theme-border bg-theme-elevated/20 backdrop-blur-xl p-6 min-w-0 shadow-lg shadow-theme-border">
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-base font-semibold text-white">Risk Distribution</h2>
-                                <span className="text-xs text-white/40 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full">All time</span>
+                                <h2 className="text-base font-semibold text-theme-text">Risk Distribution</h2>
+                                <span className="text-xs text-theme-text-muted bg-theme-surface-hover border border-theme-border px-2.5 py-1 rounded-full">All time</span>
                             </div>
                             <div className="h-60 relative">
                                 {stats?.totalInvoices > 0 ? (
@@ -295,12 +295,12 @@ const MSMEDashboard = () => {
                                             </PieChart>
                                         </ResponsiveContainer>
                                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                            <span className="text-2xl font-bold text-white">{stats.totalInvoices}</span>
-                                            <span className="text-xs text-white/40 mt-0.5">invoices</span>
+                                            <span className="text-2xl font-bold text-theme-text">{stats.totalInvoices}</span>
+                                            <span className="text-xs text-theme-text-muted mt-0.5">invoices</span>
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="h-full flex flex-col items-center justify-center gap-2 text-white/30">
+                                    <div className="h-full flex flex-col items-center justify-center gap-2 text-theme-text-muted">
                                         <ShieldAlert size={28} />
                                         <p className="text-sm">No risk data calculated</p>
                                     </div>
@@ -311,7 +311,7 @@ const MSMEDashboard = () => {
                                     {stats.riskData.map((item) => (
                                         <div key={item.name} className="flex items-center gap-1.5">
                                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
-                                            <span className="text-xs text-white/50">{item.name}</span>
+                                            <span className="text-xs text-theme-text-muted">{item.name}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -321,32 +321,32 @@ const MSMEDashboard = () => {
 
                     {/* Pending Offers Section */}
                     {user?.kycStatus === 'VERIFIED' && (
-                        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
-                            <h2 className="text-base font-semibold text-white mb-5">Received Funding Offers</h2>
+                        <div className="rounded-2xl border border-theme-border bg-theme-elevated/20 backdrop-blur-xl p-6 shadow-lg shadow-theme-border">
+                            <h2 className="text-base font-semibold text-theme-text mb-5">Received Funding Offers</h2>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead>
-                                        <tr className="border-b border-white/10">
+                                        <tr className="border-b border-theme-border">
                                             {['Invoice ID', 'Offer Amount', 'Interest Rate', 'Expected Fee', 'Status', 'Actions'].map(h => (
-                                                <th key={h} className="px-4 py-3 text-xs font-semibold text-white/50 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                                <th key={h} className="px-4 py-3 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
                                             ))}
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-white/10">
+                                    <tbody className="divide-y divide-theme-border">
                                         {offers.length === 0 ? (
                                             <tr>
-                                                <td colSpan={6} className="px-4 py-8 text-center text-white/40 text-sm">No pending offers received yet</td>
+                                                <td colSpan={6} className="px-4 py-8 text-center text-theme-text-muted text-sm">No pending offers received yet</td>
                                             </tr>
                                         ) : offers.map((offer) => (
-                                            <tr key={offer.id} className="hover:bg-white/5 transition-colors">
+                                            <tr key={offer.id} className="hover:bg-theme-surface-hover transition-colors">
                                                 <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-400">
                                                     #{offer.invoice?.invoice_number || offer.invoiceId.substring(0, 6)}
                                                 </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-white">
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-theme-text">
                                                     ₹{Number(offer.fundedAmount).toLocaleString('en-IN')}
                                                 </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">{offer.interestRate}% p.a.</td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-theme-text-muted">{offer.interestRate}% p.a.</td>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-theme-text-muted">
                                                     ₹{Number(offer.platformFee).toLocaleString('en-IN')}
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
@@ -373,37 +373,37 @@ const MSMEDashboard = () => {
 
                     {/* Active Deals Section */}
                     {user?.kycStatus === 'VERIFIED' && (
-                        <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6">
-                            <h2 className="text-base font-semibold text-white mb-5">Active Deals & Repayments</h2>
+                        <div className="rounded-2xl border border-theme-border bg-theme-elevated/20 backdrop-blur-xl p-6 shadow-lg shadow-theme-border">
+                            <h2 className="text-base font-semibold text-theme-text mb-5">Active Deals & Repayments</h2>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead>
-                                        <tr className="border-b border-white/10">
+                                        <tr className="border-b border-theme-border">
                                             {['Invoice ID', 'Funded Amount', 'Interest', 'Platform Fee', 'Due Date', 'Status', 'Actions'].map(h => (
-                                                <th key={h} className="px-4 py-3 text-xs font-semibold text-white/50 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                                <th key={h} className="px-4 py-3 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
                                             ))}
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-white/10">
+                                    <tbody className="divide-y divide-theme-border">
                                         {deals.length === 0 ? (
                                             <tr>
-                                                <td colSpan={7} className="px-4 py-8 text-center text-white/40 text-sm">No deals found</td>
+                                                <td colSpan={7} className="px-4 py-8 text-center text-theme-text-muted text-sm">No deals found</td>
                                             </tr>
                                         ) : deals.map((deal) => (
-                                            <tr key={deal.id} className="hover:bg-white/5 transition-colors">
+                                            <tr key={deal.id} className="hover:bg-theme-surface-hover transition-colors">
                                                 <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-400">
                                                     #{deal.invoice?.invoice_number || deal.invoiceId.substring(0, 6)}
                                                 </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-white">
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-theme-text">
                                                     ₹{Number(deal.fundedAmount).toLocaleString('en-IN')}
                                                 </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-theme-text-muted">
                                                     ₹{Number(deal.interestAmount).toLocaleString('en-IN')}
                                                 </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-theme-text-muted">
                                                     ₹{Number(deal.platformFee).toLocaleString('en-IN')}
                                                 </td>
-                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-white/70">
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm text-theme-text-muted">
                                                     {new Date(deal.dueDate).toLocaleDateString('en-IN')}
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
@@ -432,13 +432,13 @@ const MSMEDashboard = () => {
                     )}
 
                     {/* Quick Actions */}
-                    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 relative overflow-hidden">
+                    <div className="rounded-2xl border border-theme-border bg-theme-elevated/20 backdrop-blur-xl p-6 relative overflow-hidden shadow-lg shadow-theme-border">
                         {user?.kycStatus !== 'VERIFIED' && (
-                            <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center">
-                                <div className="bg-slate-900 border border-amber-500/20 rounded-xl p-4 flex flex-col items-center gap-2 shadow-2xl">
+                            <div className="absolute inset-0 bg-theme-bg/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center">
+                                <div className="bg-theme-surface border border-amber-500/20 rounded-xl p-4 flex flex-col items-center gap-2 shadow-2xl">
                                     <ShieldAlert className="text-amber-500" size={24} />
-                                    <p className="text-white text-sm font-medium">Verification Required</p>
-                                    <p className="text-white/60 text-xs text-center">Complete your KYC to unlock invoice creation<br />and other platform features.</p>
+                                    <p className="text-theme-text text-sm font-medium">Verification Required</p>
+                                    <p className="text-theme-text-muted text-xs text-center">Complete your KYC to unlock invoice creation<br />and other platform features.</p>
                                     <button
                                         onClick={() => navigate('/kyc')}
                                         className="mt-2 bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 px-4 py-1.5 rounded-lg text-xs font-semibold transition-colors"
@@ -448,14 +448,14 @@ const MSMEDashboard = () => {
                                 </div>
                             </div>
                         )}
-                        <h2 className="text-base font-semibold text-white mb-5">Quick Actions</h2>
+                        <h2 className="text-base font-semibold text-theme-text mb-5">Quick Actions</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <FeatureGuard featureKey="INVOICE_MANAGEMENT_MODULE">
                                 <button
                                     onClick={() => navigate('/upload-invoice')}
                                     disabled={user?.kycStatus !== 'VERIFIED'}
-                                    className={`group text-left p-5 rounded-2xl border border-white/10 bg-transparent transition-all duration-200 ${user?.kycStatus === 'VERIFIED'
-                                        ? 'hover:bg-white/5 hover:-translate-y-0.5'
+                                    className={`group text-left p-5 rounded-2xl border border-theme-border bg-transparent transition-all duration-200 ${user?.kycStatus === 'VERIFIED'
+                                        ? 'hover:bg-theme-surface-hover hover:-translate-y-0.5'
                                         : 'opacity-50 cursor-not-allowed'
                                         }`}
                                 >
@@ -463,18 +463,18 @@ const MSMEDashboard = () => {
                                         <div className="h-10 w-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
                                             <Plus size={18} />
                                         </div>
-                                        <ChevronRight size={15} className="text-white/20 group-hover:text-white/50 transition-colors mt-1" />
+                                        <ChevronRight size={15} className="text-theme-text-muted group-hover:text-theme-text-muted transition-colors mt-1" />
                                     </div>
-                                    <h3 className="font-medium text-white text-sm mb-1">Create Invoice</h3>
-                                    <p className="text-xs text-white/50 leading-relaxed">Submit a new invoice for financing</p>
+                                    <h3 className="font-medium text-theme-text text-sm mb-1">Create Invoice</h3>
+                                    <p className="text-xs text-theme-text-muted leading-relaxed">Submit a new invoice for financing</p>
                                 </button>
                             </FeatureGuard>
 
                             <button
                                 onClick={() => navigate('/invoices')}
                                 disabled={user?.kycStatus !== 'VERIFIED'}
-                                className={`group text-left p-5 rounded-2xl border border-white/10 bg-transparent transition-all duration-200 ${user?.kycStatus === 'VERIFIED'
-                                    ? 'hover:bg-white/5 hover:-translate-y-0.5'
+                                className={`group text-left p-5 rounded-2xl border border-theme-border bg-transparent transition-all duration-200 ${user?.kycStatus === 'VERIFIED'
+                                    ? 'hover:bg-theme-surface-hover hover:-translate-y-0.5'
                                     : 'opacity-50 cursor-not-allowed'
                                     }`}
                             >
@@ -482,17 +482,17 @@ const MSMEDashboard = () => {
                                     <div className="h-10 w-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
                                         <FileSearch size={18} />
                                     </div>
-                                    <ChevronRight size={15} className="text-white/20 group-hover:text-white/50 transition-colors mt-1" />
+                                    <ChevronRight size={15} className="text-theme-text-muted group-hover:text-theme-text-muted transition-colors mt-1" />
                                 </div>
-                                <h3 className="font-medium text-white text-sm mb-1">View All Invoices</h3>
-                                <p className="text-xs text-white/50 leading-relaxed">Check status and history</p>
+                                <h3 className="font-medium text-theme-text text-sm mb-1">View All Invoices</h3>
+                                <p className="text-xs text-theme-text-muted leading-relaxed">Check status and history</p>
                             </button>
 
                             <button
                                 onClick={handleExportReport}
                                 disabled={user?.kycStatus !== 'VERIFIED' || isExporting}
-                                className={`group text-left p-5 rounded-2xl border border-white/10 bg-transparent transition-all duration-200 ${user?.kycStatus === 'VERIFIED' && !isExporting
-                                    ? 'hover:bg-white/5 hover:-translate-y-0.5'
+                                className={`group text-left p-5 rounded-2xl border border-theme-border bg-transparent transition-all duration-200 ${user?.kycStatus === 'VERIFIED' && !isExporting
+                                    ? 'hover:bg-theme-surface-hover hover:-translate-y-0.5'
                                     : 'opacity-50 cursor-not-allowed'
                                     }`}
                             >
@@ -500,10 +500,10 @@ const MSMEDashboard = () => {
                                     <div className="h-10 w-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
                                         {isExporting ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
                                     </div>
-                                    <ChevronRight size={15} className="text-white/20 group-hover:text-white/50 transition-colors mt-1" />
+                                    <ChevronRight size={15} className="text-theme-text-muted group-hover:text-theme-text-muted transition-colors mt-1" />
                                 </div>
-                                <h3 className="font-medium text-white text-sm mb-1">{isExporting ? 'Exporting...' : 'Export Report'}</h3>
-                                <p className="text-xs text-white/50 leading-relaxed">Download monthly summary</p>
+                                <h3 className="font-medium text-theme-text text-sm mb-1">{isExporting ? 'Exporting...' : 'Export Report'}</h3>
+                                <p className="text-xs text-theme-text-muted leading-relaxed">Download monthly summary</p>
                             </button>
                         </div>
                     </div>

@@ -53,17 +53,17 @@ const PendingKycTable = () => {
 
     if (loading) {
         return (
-            <div className="bg-slate-900 border border-white/5 rounded-2xl overflow-hidden p-8 flex items-center justify-center">
+            <div className="bg-slate-900 border border-theme-border rounded-2xl overflow-hidden p-8 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="bg-slate-900 border border-white/5 rounded-2xl overflow-hidden">
-            <div className="p-6 border-b border-white/5 flex justify-between items-center">
+        <div className="bg-slate-900 border border-theme-border rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-theme-border flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                    <h2 className="text-lg font-semibold text-white">Pending KYC Requests</h2>
+                    <h2 className="text-lg font-semibold text-theme-text">Pending KYC Requests</h2>
                     <span className="bg-amber-500/20 text-amber-500 text-xs font-bold px-2 py-0.5 rounded-full">
                         {kycRequests.length}
                     </span>
@@ -71,14 +71,14 @@ const PendingKycTable = () => {
             </div>
 
             {kycRequests.length === 0 ? (
-                <div className="p-12 text-center text-white/50">
+                <div className="p-12 text-center text-theme-text-muted">
                     <Building2 className="mx-auto mb-3 opacity-50" size={32} />
                     <p>No pending KYC requests at the moment.</p>
                 </div>
             ) : (
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-white/70 min-w-[800px]">
-                        <thead className="text-xs uppercase bg-white/5 text-white/50 border-b border-white/5">
+                        <thead className="text-xs uppercase bg-theme-surface-hover text-theme-text-muted border-b border-theme-border">
                             <tr>
                                 <th className="px-6 py-4 font-medium">Business / User</th>
                                 <th className="px-6 py-4 font-medium">GST Details</th>
@@ -86,17 +86,17 @@ const PendingKycTable = () => {
                                 <th className="px-6 py-4 font-medium text-center">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-theme-border">
                             {kycRequests.map((req) => (
                                 <tr key={req.id} className="hover:bg-white/[0.02] transition-colors">
                                     <td className="px-6 py-4">
-                                        <div className="font-medium text-white">{req.businessName}</div>
-                                        <div className="text-xs text-white/50">{req.user?.name} ({req.user?.email})</div>
-                                        <div className="text-xs text-white/40 mt-1">Submitted: {new Date(req.createdAt).toLocaleDateString()}</div>
+                                        <div className="font-medium text-theme-text">{req.businessName}</div>
+                                        <div className="text-xs text-theme-text-muted">{req.user?.name} ({req.user?.email})</div>
+                                        <div className="text-xs text-theme-text-muted mt-1">Submitted: {new Date(req.createdAt).toLocaleDateString()}</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-white/90 uppercase">{req.gstNumber}</div>
-                                        <div className="text-xs text-white/50">{req.legalName}</div>
+                                        <div className="text-theme-text uppercase">{req.gstNumber}</div>
+                                        <div className="text-xs text-theme-text-muted">{req.legalName}</div>
                                     </td>
                                     <td className="px-6 py-4">
                                         ₹{req.turnover.toLocaleString()}
@@ -107,20 +107,20 @@ const PendingKycTable = () => {
                                                 <input
                                                     type="text"
                                                     placeholder="Reason for rejection..."
-                                                    className="bg-slate-950 border border-red-500/30 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-red-500"
+                                                    className="bg-slate-950 border border-red-500/30 rounded px-3 py-1.5 text-xs text-theme-text focus:outline-none focus:border-red-500"
                                                     value={rejectReason}
                                                     onChange={(e) => setRejectReason(e.target.value)}
                                                 />
                                                 <div className="flex gap-2 justify-end">
                                                     <button
                                                         onClick={() => { setRejectingId(null); setRejectReason(''); }}
-                                                        className="text-white/50 hover:text-white text-xs px-2"
+                                                        className="text-theme-text-muted hover:text-theme-text text-xs px-2"
                                                     >
                                                         Cancel
                                                     </button>
                                                     <button
                                                         onClick={() => handleReject(req.id)}
-                                                        className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded"
+                                                        className="bg-red-500 hover:bg-red-600 text-theme-text text-xs px-3 py-1 rounded"
                                                     >
                                                         Confirm
                                                     </button>
@@ -130,14 +130,14 @@ const PendingKycTable = () => {
                                             <div className="flex justify-center gap-2">
                                                 <button
                                                     onClick={() => handleApprove(req.id)}
-                                                    className="p-1.5 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white rounded-lg transition-colors border border-emerald-500/20"
+                                                    className="p-1.5 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-theme-text rounded-lg transition-colors border border-emerald-500/20"
                                                     title="Approve Business"
                                                 >
                                                     <CheckCircle size={18} />
                                                 </button>
                                                 <button
                                                     onClick={() => setRejectingId(req.id)}
-                                                    className="p-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-colors border border-red-500/20"
+                                                    className="p-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-theme-text rounded-lg transition-colors border border-red-500/20"
                                                     title="Reject Business"
                                                 >
                                                     <XCircle size={18} />
