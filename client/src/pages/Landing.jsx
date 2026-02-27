@@ -139,86 +139,95 @@ const Landing = () => {
                                     animate="visible"
                                     variants={staggerContainer}
                                 >
-                                    <motion.div variants={fadeInUp} className="eyebrow">
-                                        Next-Gen Invoice Financing
+                                    <motion.div variants={fadeInUp} className="eyebrow flex items-center gap-2 w-fit px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-sm font-semibold text-white/80 hover:shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:border-blue-500/40 transition-all cursor-default mb-6">
+                                        NEXT-GEN INVOICE FINANCING
                                     </motion.div>
 
-                                    <motion.h1 variants={fadeInUp} className="landing-h1">
-                                        Turn Unpaid Invoices Into Instant Working Capital
+                                    <motion.h1 variants={fadeInUp} className="landing-h1 tracking-tight leading-[1.05] text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6 text-white">
+                                        Turn Unpaid Invoices Into <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Instant Working Capital</span>
                                     </motion.h1>
 
-                                    <motion.p variants={fadeInUp} className="landing-text">
+                                    <motion.p variants={fadeInUp} className="landing-text max-w-lg text-white/70 leading-relaxed text-lg mb-8">
                                         FinBridge is a secure, AI-powered marketplace connecting MSMEs with lenders for fast invoice discounting. Risk-free, transparent, and built for growth.
                                     </motion.p>
 
-                                    <motion.div variants={fadeInUp} className="cta-row">
+                                    <motion.div variants={fadeInUp} className="cta-row flex flex-col sm:flex-row items-center gap-4 mb-10 w-full sm:w-auto">
                                         <button
                                             onClick={() => navigate('/register')}
-                                            className="btn-primary flex items-center justify-center gap-2 group"
+                                            className="relative overflow-hidden w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-blue-500 shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] hover:-translate-y-[1px] transition-all duration-300 flex items-center justify-center gap-2 group border border-blue-500/50 hover:border-blue-400 after:content-[''] after:absolute after:inset-0 after:-translate-x-full hover:after:translate-x-[100%] after:bg-gradient-to-r after:from-transparent after:via-white/20 after:to-transparent after:transition-transform after:duration-[1.5s] after:ease-in-out"
                                         >
-                                            Get Started Now
-                                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                            <span className="relative z-10">Get Started Now</span>
+                                            <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
                                         </button>
                                         <button
                                             onClick={() => navigate('/login')}
-                                            className="btn-ghost"
+                                            className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-white bg-white/5 border border-white/20 hover:bg-white/10 hover:border-white/40 transition-colors duration-300 flex items-center justify-center"
                                         >
                                             Login to Platform
                                         </button>
                                     </motion.div>
 
-                                    <motion.div variants={fadeInUp} className="trust-row">
-                                        <div className="trust-item">
-                                            <Shield className="w-5 h-5 text-blue-500" />
-                                            <span>Bank-Grade Security</span>
-                                        </div>
-                                        <div className="trust-item">
-                                            <Zap className="w-5 h-5 text-blue-500" />
-                                            <span>24h Approval</span>
-                                        </div>
+                                    <motion.div variants={fadeInUp} className="trust-row flex flex-wrap items-center gap-3">
+                                        {[
+                                            { text: "Bank-Grade Security", icon: <Shield className="w-4 h-4 text-blue-400" /> },
+                                            { text: "24h Approval", icon: <Zap className="w-4 h-4 text-emerald-400" /> },
+                                            { text: "No Hidden Fees", icon: <CheckCircle className="w-4 h-4 text-blue-400" /> }
+                                        ].map((trust, idx) => (
+                                            <div key={idx} className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-[13px] font-medium text-white/60 hover:bg-white/10 transition-colors">
+                                                {trust.icon}
+                                                <span>{trust.text}</span>
+                                            </div>
+                                        ))}
                                     </motion.div>
                                 </motion.div>
 
                                 {/* Right Visual Column (44%) */}
                                 <motion.div
-                                    className="hero-right"
+                                    className="hero-right relative"
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
                                 >
+                                    {/* Radial Glow Behind Sphere */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] sm:w-[500px] sm:h-[500px] bg-blue-600/20 blur-[80px] sm:blur-[120px] rounded-full pointer-events-none z-0"></div>
+
                                     {/* Visual Frame - Fixed Dimensions */}
-                                    <div className="visualFrame">
+                                    <motion.div
+                                        className="visualFrame relative z-10 w-full h-full"
+                                        animate={{ y: [-8, 8, -8] }}
+                                        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                                    >
                                         <Fake3DSphere />
 
                                         {/* Floating Cards - Absolute within Visual Frame */}
                                         <motion.div
-                                            className="card-invoice"
-                                            animate={{ y: [0, -10, 0] }}
+                                            className="card-invoice bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-xl p-4 min-w-[180px]"
+                                            animate={{ y: [0, -12, 0] }}
                                             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                                         >
-                                            <div className="card-header">
-                                                <div className="card-label">Invoice #4092</div>
-                                                <div className="card-status">Approved</div>
+                                            <div className="card-header flex justify-between items-center mb-2">
+                                                <div className="card-label text-xs font-semibold text-gray-400 uppercase tracking-wider">Invoice #4092</div>
+                                                <div className="card-status text-[10px] uppercase font-bold text-emerald-400 bg-emerald-400/10 px-2.5 py-0.5 rounded-full border border-emerald-400/20">Approved</div>
                                             </div>
-                                            <div className="card-value">$12,450.00</div>
+                                            <div className="card-value text-xl font-black text-white">$12,450.00</div>
                                         </motion.div>
 
                                         <motion.div
-                                            className="card-risk"
-                                            animate={{ y: [0, 10, 0] }}
+                                            className="card-risk bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] rounded-xl p-4 min-w-[200px]"
+                                            animate={{ y: [0, 12, 0] }}
                                             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                                         >
-                                            <div className="flex gap-3 items-center">
-                                                <div className="icon-circle">
-                                                    <Zap size={16} />
+                                            <div className="flex gap-4 items-center">
+                                                <div className="icon-circle w-10 h-10 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shadow-[inset_0_2px_10px_rgba(59,130,246,0.2)]">
+                                                    <Zap size={18} />
                                                 </div>
                                                 <div>
-                                                    <div className="card-label">Risk Score</div>
-                                                    <div className="card-value-sm">A+ (Low Risk)</div>
+                                                    <div className="card-label text-xs font-semibold text-gray-400 uppercase tracking-wider mb-0.5">Risk Score</div>
+                                                    <div className="card-value-sm text-sm font-bold text-white">A+ (Low Risk)</div>
                                                 </div>
                                             </div>
                                         </motion.div>
-                                    </div>
+                                    </motion.div>
                                 </motion.div>
                             </div>
                         </div>
@@ -232,7 +241,7 @@ const Landing = () => {
 
                         <div className="landing-container relative z-10">
                             <div className="text-center mb-16">
-                                <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">Why Choose FinBridge?</h2>
+                                <h2 className="text-5xl sm:text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200 pb-4">Why Choose FinBridge?</h2>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -406,79 +415,128 @@ const Landing = () => {
                     </section>
 
                     {/* Built for MSMEs & Lenders Section */}
-                    <section className="dual-section">
-                        <div className="landing-container">
+                    <section className="relative py-24 overflow-hidden z-20 bg-[#0a111d]">
+                        {/* Background Accents */}
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05)_0%,transparent_70%)] pointer-events-none z-0"></div>
+                        <div className="absolute inset-0 opacity-[0.02] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
+
+                        <div className="landing-container relative z-10">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.6 }}
-                                className="section-header"
+                                className="text-center mb-16"
                             >
-                                <h2 className="section-title">Built for MSMEs & Lenders</h2>
-                                <p className="section-subtitle">Tailored solutions for every stakeholder.</p>
+                                <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-sm">Built for MSMEs & Lenders</h2>
+                                <p className="text-gray-400 text-lg max-w-2xl mx-auto">Tailored solutions for every stakeholder.</p>
                             </motion.div>
 
-                            <div className="dual-grid">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 relative">
+                                {/* Vertical glowing divider (Desktop only) */}
+                                <div className="hidden lg:block absolute left-1/2 top-[5%] bottom-[5%] w-px bg-gradient-to-b from-transparent via-white/10 to-transparent -translate-x-1/2 z-0"></div>
+
                                 {/* MSME Side */}
                                 <motion.div
-                                    initial={{ opacity: 0, x: -30 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
+                                    initial={{ opacity: 0, y: 40 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ duration: 0.6 }}
-                                    className="dual-card msme-card"
+                                    transition={{ duration: 0.5, ease: "easeOut" }}
+                                    className="group relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-10 hover:-translate-y-2 hover:shadow-[0_0_60px_rgba(59,130,246,0.25)] transition-all duration-500 overflow-hidden flex flex-col z-10"
                                 >
-                                    <h3 className="dual-title">For MSMEs</h3>
-                                    <div className="dual-benefits">
-                                        <div className="benefit-item">
-                                            <CheckCircle className="w-5 h-5 text-green-400" />
-                                            <span>Get funded in 24 hours</span>
-                                        </div>
-                                        <div className="benefit-item">
-                                            <CheckCircle className="w-5 h-5 text-green-400" />
-                                            <span>Retain complete invoice ownership</span>
-                                        </div>
-                                        <div className="benefit-item">
-                                            <CheckCircle className="w-5 h-5 text-green-400" />
-                                            <span>No hidden charges or collateral needed</span>
-                                        </div>
+                                    <div className="absolute inset-0 bg-blue-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 pointer-events-none"></div>
+
+                                    {/* Icon Header */}
+                                    <div className="w-14 h-14 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300">
+                                        <FileCheck className="w-7 h-7 text-blue-400" />
                                     </div>
+
+                                    {/* Role Badge */}
+                                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-6 w-fit">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]"></div>
+                                        For MSMEs
+                                    </div>
+
+                                    <div className="flex flex-col gap-4 mb-8 flex-grow">
+                                        {[
+                                            "Get funded in 24 hours",
+                                            "Retain complete invoice ownership",
+                                            "No hidden charges or collateral needed"
+                                        ].map((text, idx) => (
+                                            <div key={idx} className="flex items-start gap-3 text-gray-300">
+                                                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                                                <span className="leading-relaxed">{text}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Micro Stats */}
+                                    <div className="flex flex-wrap gap-2 mb-8">
+                                        {["24h Funding", "0% Hidden Fees", "100% Ownership"].map((stat, idx) => (
+                                            <div key={idx} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">
+                                                {stat}
+                                            </div>
+                                        ))}
+                                    </div>
+
                                     <button
                                         onClick={() => navigate('/register')}
-                                        className="btn-primary mt-8"
+                                        className="mt-auto w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:scale-105 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 relative overflow-hidden group/btn text-[15px]"
                                     >
-                                        Start as MSME
+                                        <span className="relative z-10 block w-full text-center">Start as MSME</span>
+                                        <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-[100%] bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-[1.5s] ease-in-out"></div>
                                     </button>
                                 </motion.div>
 
                                 {/* Lender Side */}
                                 <motion.div
-                                    initial={{ opacity: 0, x: 30 }}
-                                    whileInView={{ opacity: 1, x: 0 }}
+                                    initial={{ opacity: 0, y: 40 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ duration: 0.6 }}
-                                    className="dual-card lender-card"
+                                    transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
+                                    className="group relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 sm:p-10 hover:-translate-y-2 hover:shadow-[0_0_60px_rgba(59,130,246,0.25)] transition-all duration-500 overflow-hidden flex flex-col z-10"
                                 >
-                                    <h3 className="dual-title">For Lenders</h3>
-                                    <div className="dual-benefits">
-                                        <div className="benefit-item">
-                                            <CheckCircle className="w-5 h-5 text-green-400" />
-                                            <span>Pre-screened, low-risk assets</span>
-                                        </div>
-                                        <div className="benefit-item">
-                                            <CheckCircle className="w-5 h-5 text-green-400" />
-                                            <span>Consistent 12-15% annual returns</span>
-                                        </div>
-                                        <div className="benefit-item">
-                                            <CheckCircle className="w-5 h-5 text-green-400" />
-                                            <span>Diversified portfolio management</span>
-                                        </div>
+                                    <div className="absolute inset-0 bg-blue-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 pointer-events-none"></div>
+
+                                    {/* Icon Header */}
+                                    <div className="w-14 h-14 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-6 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300">
+                                        <TrendingUp className="w-7 h-7 text-blue-400" />
                                     </div>
+
+                                    {/* Role Badge */}
+                                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] sm:text-xs font-bold tracking-widest uppercase mb-6 w-fit">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]"></div>
+                                        For Lenders
+                                    </div>
+
+                                    <div className="flex flex-col gap-4 mb-8 flex-grow">
+                                        {[
+                                            "Pre-screened, low-risk assets",
+                                            "Consistent 12-15% annual returns",
+                                            "Diversified portfolio management"
+                                        ].map((text, idx) => (
+                                            <div key={idx} className="flex items-start gap-3 text-gray-300">
+                                                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                                                <span className="leading-relaxed">{text}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Micro Stats */}
+                                    <div className="flex flex-wrap gap-2 mb-8">
+                                        {["12–15% Returns", "AI Risk Filtered", "Diversified Pool"].map((stat, idx) => (
+                                            <div key={idx} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs font-semibold text-gray-300">
+                                                {stat}
+                                            </div>
+                                        ))}
+                                    </div>
+
                                     <button
                                         onClick={() => navigate('/login')}
-                                        className="btn-primary mt-8"
+                                        className="mt-auto w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:scale-105 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 relative overflow-hidden group/btn text-[15px]"
                                     >
-                                        Partner as Lender
+                                        <span className="relative z-10 block w-full text-center">Partner as Lender</span>
+                                        <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-[100%] bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-[1.5s] ease-in-out"></div>
                                     </button>
                                 </motion.div>
                             </div>
