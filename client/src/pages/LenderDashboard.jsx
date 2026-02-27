@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import RiskBadge from '../components/RiskBadge';
+import AgreementModal from '../components/AgreementModal';
 import { useAuth } from '../context/AuthContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
 import toast from 'react-hot-toast';
@@ -590,7 +591,7 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
     );
 };
 
-const InvestmentsSection = ({ myDeals, onFundDeal }) => {
+const InvestmentsSection = ({ myDeals, onFundDeal, onSignAgreement, onStartMeeting }) => {
     const totalInvested = myDeals.reduce((sum, deal) => sum + parseFloat(deal.fundedAmount), 0);
     const expectedReturns = myDeals.reduce((sum, deal) => sum + parseFloat(deal.interestAmount), 0);
     const activePositions = myDeals.filter(d => d.status === 'ACTIVE').length;
@@ -625,7 +626,7 @@ const InvestmentsSection = ({ myDeals, onFundDeal }) => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-white/10 bg-white/5">
-                                {['Invoice ID', 'MSME Name', 'Invested', 'Expected Return', 'Due Date', 'Days Left', 'Action'].map(h => (
+                                {['Invoice ID', 'MSME', 'Invested', 'Due Date', 'Status', 'Action'].map(h => (
                                     <th key={h} className="px-6 py-4 text-xs font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap">{h}</th>
                                 ))}
                             </tr>
@@ -633,45 +634,57 @@ const InvestmentsSection = ({ myDeals, onFundDeal }) => {
                         <tbody className="divide-y divide-white/5">
                             {myDeals.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-white/45">No investments found</td>
+                                    <td colSpan={6} className="px-6 py-12 text-center text-white/45">No investments found</td>
                                 </tr>
                             ) : myDeals.map((deal) => {
                                 const dueDate = new Date(deal.dueDate);
-                                const now = new Date();
-                                const diffTime = dueDate - now;
-                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                                const maxDaysLeft = Math.max(0, diffDays);
-
                                 return (
                                     <tr key={deal.id} className="hover:bg-white/5 transition-colors group">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">
-                                            {deal.invoice?.invoice_number ? `#${deal.invoice.invoice_number}` : `#${deal.invoiceId.substring(0, 6)}`}
+                                            {deal.invoice?.invoice_number ? `#${deal.invoice.invoice_number}` : `#${deal.invoiceId?.substring(0, 6)}`}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{deal.msme?.name || 'Unknown MSME'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                                            {deal.msme?.name || 'Unknown MSME'}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-white">
                                             ₹{Number(deal.fundedAmount).toLocaleString('en-IN')}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-400">
-                                            ₹{Number(deal.interestAmount).toLocaleString('en-IN')}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
                                             {dueDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            {deal.status === 'ACTIVE'
-                                                ? <span className="font-semibold text-white">{maxDaysLeft}d</span>
-                                                : <span className="text-white/45">—</span>}
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                                                deal.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                : deal.status === 'AGREEMENT_PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                : deal.status === 'CLOSED' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                                                : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                            }`}>
+                                                <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                                                {deal.status === 'AGREEMENT_PENDING' ? 'Awaiting Signatures' : deal.status}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            {deal.status === 'ACTIVE' ? (
-                                                <button
-                                                    onClick={() => onFundDeal(deal.id)}
-                                                    className="btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1">
-                                                    <Zap size={13} /> Fund Deal
-                                                </button>
-                                            ) : (
-                                                <InvestmentStatusBadge status={deal.status} />
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                {deal.status === 'AGREEMENT_PENDING' && (
+                                                    <button
+                                                        onClick={() => onSignAgreement(deal.id)}
+                                                        className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/20 transition-all"
+                                                    >
+                                                        Sign Agreement
+                                                    </button>
+                                                )}
+                                                {deal.status === 'ACTIVE' && (
+                                                    <button
+                                                        onClick={() => onStartMeeting(deal.id)}
+                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 border border-purple-500/20 transition-all"
+                                                    >
+                                                        <Video size={12} /> Start Meeting
+                                                    </button>
+                                                )}
+                                                {(deal.status === 'CLOSED' || deal.status === 'DEFAULTED') && (
+                                                    <InvestmentStatusBadge status={deal.status} />
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 );
@@ -684,73 +697,81 @@ const InvestmentsSection = ({ myDeals, onFundDeal }) => {
     );
 };
 
-const MeetingsSection = () => (
-    <div className="space-y-6">
-        <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">Meeting Records</h2>
-            <p className="text-white/45 mt-1">Zoom verification sessions with MSME partners</p>
-        </div>
 
-        {/* Info Banner */}
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
-            <Video size={18} className="text-blue-400 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-white/70">
-                All meetings are recorded for compliance purposes. Recordings are available for 90 days post-session.
-                <span className="text-blue-400 ml-1 cursor-pointer hover:underline">Contact support</span> for extended access.
-            </p>
-        </div>
 
-        {/* Table */}
-        <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="border-b border-white/10 bg-white/5">
-                            {['Invoice ID', 'MSME Name', 'Meeting Date', 'Duration', 'Recording', 'Action'].map(h => (
-                                <th key={h} className="px-6 py-4 text-xs font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap">{h}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {DUMMY_MEETINGS.map((m) => (
-                            <tr key={m.invoiceId + m.meetingDate} className="hover:bg-white/5 transition-colors group">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">#{m.invoiceId}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{m.msmeName}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
-                                    {new Date(m.meetingDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
-                                    <div className="flex items-center gap-1.5">
-                                        <Clock size={13} className="text-white/45" />
-                                        {m.duration}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <RecordingStatusBadge status={m.recordingStatus} />
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <button
-                                        disabled={m.recordingStatus !== 'AVAILABLE'}
-                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 opacity-0 group-hover:opacity-100 ${m.recordingStatus === 'AVAILABLE'
-                                            ? 'border-blue-500/50 text-blue-400 hover:bg-blue-500/10 cursor-pointer'
-                                            : 'border-white/10 text-white/30 cursor-not-allowed'
-                                            }`}
-                                    >
-                                        <Video size={13} />
-                                        {m.recordingStatus === 'AVAILABLE' ? 'View Recording' : 'Processing...'}
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+const MeetingsSection = ({ myDeals }) => {
+    const sessions = myDeals
+        .filter(d => d.callSession)
+        .map(d => ({
+            dealId: d.id,
+            invoiceId: d.invoiceId,
+            msmeName: d.msme?.name || 'Unknown MSME',
+            status: d.callSession.status,
+            startedAt: d.callSession.startedAt,
+            endedAt: d.callSession.endedAt,
+            durationSec: d.callSession.durationSec,
+        }));
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-2xl font-bold text-white tracking-tight">Meeting Records</h2>
+                <p className="text-white/45 mt-1">Verification video sessions with MSME partners</p>
             </div>
-        </div>
 
-        {/* Empty state note */}
-        <p className="text-xs text-white/45 text-center">Showing {DUMMY_MEETINGS.length} meeting records. New sessions are logged automatically upon completion.</p>
-    </div>
-);
+            {/* Info Banner */}
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                <Video size={18} className="text-blue-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-white/70">
+                    All meetings are recorded for compliance purposes. Both parties must be on an ACTIVE deal to start a call.
+                    <span className="text-blue-400 ml-1 cursor-pointer hover:underline">Contact support</span> for extended access.
+                </p>
+            </div>
+
+            {/* Table */}
+            <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                        <thead>
+                            <tr className="border-b border-white/10 bg-white/5">
+                                {['Deal ID', 'MSME Partner', 'Date', 'Duration', 'Status'].map(h => (
+                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-white/45 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {sessions.length === 0 ? (
+                                <tr>
+                                    <td colSpan={5} className="px-6 py-12 text-center text-white/45">
+                                        No meeting records yet. Start a meeting from the My Investments tab.
+                                    </td>
+                                </tr>
+                            ) : sessions.map((s) => (
+                                <tr key={s.dealId} className="hover:bg-white/5 transition-colors">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">#{s.dealId.substring(0, 8)}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{s.msmeName}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
+                                        {s.startedAt ? new Date(s.startedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
+                                        <div className="flex items-center gap-1.5">
+                                            <Clock size={13} className="text-white/45" />
+                                            {s.durationSec ? `${Math.floor(s.durationSec / 60)}m ${s.durationSec % 60}s` : '—'}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <RecordingStatusBadge status={s.status === 'ENDED' ? 'AVAILABLE' : 'PROCESSING'} />
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p className="text-xs text-white/45 text-center">Showing {sessions.length} meeting record(s). Sessions are logged automatically upon completion.</p>
+        </div>
+    );
+};
 
 const AnalyticsSection = () => (
     <div className="space-y-8">
@@ -900,6 +921,7 @@ const LenderDashboard = () => {
     const [myDeals, setMyDeals] = useState([]);
     const [offerForm, setOfferForm] = useState({ amount: '', rate: '' });
     const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
+    const [agreementDealId, setAgreementDealId] = useState(null);
 
     const kycStatus = user?.kycStatus || 'NOT_SUBMITTED';
     const isKycVerified = kycStatus === 'VERIFIED';
@@ -1070,16 +1092,17 @@ const LenderDashboard = () => {
             case 'overview': return <OverviewSection onExploreMarketplace={() => setActiveTab('marketplace')} wallet={wallet} myDeals={myDeals} />;
             case 'marketplace': return isKycVerified
                 ? <MarketplaceSection
-                    onViewInvoice={(inv) => {
-                        setSelectedInvoice(inv);
-                    }}
-                    onFundInvoice={(inv) => {
-                        setFundInvoice(inv);
-                    }}
+                    onViewInvoice={(inv) => { setSelectedInvoice(inv); }}
+                    onFundInvoice={(inv) => { setFundInvoice(inv); }}
                     availableInvoices={availableInvoices} />
                 : <MarketplaceKycBanner />;
-            case 'investments': return <InvestmentsSection myDeals={myDeals} onFundDeal={handleFundDeal} />;
-            case 'meetings': return <MeetingsSection />;
+            case 'investments': return <InvestmentsSection
+                myDeals={myDeals}
+                onFundDeal={handleFundDeal}
+                onSignAgreement={(dealId) => setAgreementDealId(dealId)}
+                onStartMeeting={(dealId) => navigate(`/meeting/${dealId}`)}
+            />;
+            case 'meetings': return <MeetingsSection myDeals={myDeals} />;
             case 'analytics': return <AnalyticsSection />;
             default: return <OverviewSection wallet={wallet} myDeals={myDeals} />;
         }
@@ -1087,6 +1110,19 @@ const LenderDashboard = () => {
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-slate-950">
+            {/* Agreement Modal */}
+            {agreementDealId && (
+                <AgreementModal
+                    dealId={agreementDealId}
+                    onClose={() => setAgreementDealId(null)}
+                    onSigned={async () => {
+                        setAgreementDealId(null);
+                        // Refresh deals
+                        const dealsData = await getMyDeals();
+                        setMyDeals(dealsData);
+                    }}
+                />
+            )}
             {/* Glow blobs — same as MSMEDashboard */}
             <div className="absolute top-0 right-1/4 w-[480px] h-[480px] bg-blue-600 rounded-full -z-10 blur-3xl opacity-[0.12] pointer-events-none" />
             <div className="absolute bottom-1/4 -left-24 w-[400px] h-[400px] bg-cyan-500 rounded-full -z-10 blur-3xl opacity-[0.08] pointer-events-none" />

@@ -206,3 +206,29 @@ export const rejectLender = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getAllRecordings = async (req, res, next) => {
+    try {
+        const recordings = await prisma.callSession.findMany({
+            where: {
+                OR: [
+                    { recordingUrl: { not: null } },
+                    { recordingUrl2: { not: null } }
+                ]
+            },
+            include: {
+                deal: true,
+                lender: { select: { name: true, email: true } },
+                msme: { select: { name: true, email: true } }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        res.status(200).json({
+            success: true,
+            data: recordings
+        });
+    } catch (error) {
+        next(error);
+    }
+};

@@ -21,9 +21,11 @@ import {
     FileSearch,
     Download,
     ChevronRight,
-    Loader2
+    Loader2,
+    Video
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
+import AgreementModal from '../components/AgreementModal';
 import { getInvoiceStats, getInvoices } from '../api/invoiceApi';
 import { getMyWallet } from '../api/walletApi';
 import { getMyOffers, acceptOffer } from '../api/offerApi';
@@ -47,6 +49,7 @@ const MSMEDashboard = () => {
     const [deals, setDeals] = useState([]);
     const [isAcceptingOffer, setIsAcceptingOffer] = useState(false);
     const [isRepayingDeal, setIsRepayingDeal] = useState(false);
+    const [agreementDealId, setAgreementDealId] = useState(null); // controls AgreementModal
 
     const loadDashboardData = async () => {
         try {
@@ -75,11 +78,15 @@ const MSMEDashboard = () => {
     const handleAcceptOffer = async (offerId) => {
         setIsAcceptingOffer(true);
         try {
-            await acceptOffer(offerId);
-            toast.success("Offer accepted successfully! Deal created.");
-            await loadDashboardData(); // Refresh all data
+            const result = await acceptOffer(offerId);
+            toast.success('Offer accepted! Please review and sign the agreement.');
+            await loadDashboardData();
+            // Open agreement modal for the newly created deal
+            if (result?.deal?.id) {
+                setAgreementDealId(result.deal.id);
+            }
         } catch (error) {
-            toast.error(error.message || "Failed to accept offer");
+            toast.error(error.message || 'Failed to accept offer');
         } finally {
             setIsAcceptingOffer(false);
         }
@@ -147,6 +154,14 @@ const MSMEDashboard = () => {
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-slate-950">
+            {/* Agreement Modal */}
+            {agreementDealId && (
+                <AgreementModal
+                    dealId={agreementDealId}
+                    onClose={() => setAgreementDealId(null)}
+                    onSigned={() => { setAgreementDealId(null); loadDashboardData(); }}
+                />
+            )}
             {/* Glow blobs */}
             <div className="absolute top-0 right-1/4 w-[480px] h-[480px] bg-blue-600 rounded-full -z-10 blur-3xl opacity-[0.12] pointer-events-none" />
             <div className="absolute bottom-1/4 -left-24 w-[400px] h-[400px] bg-cyan-500 rounded-full -z-10 blur-3xl opacity-[0.08] pointer-events-none" />
@@ -360,7 +375,7 @@ const MSMEDashboard = () => {
                                                         disabled={isAcceptingOffer}
                                                         className="px-3 py-1.5 text-xs font-semibold rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors disabled:opacity-50"
                                                     >
-                                                        {isAcceptingOffer ? 'Accepting...' : 'Accept Offer'}
+                                                        {isAcceptingOffer ? 'Accepting...' : 'Accept & Sign'}
                                                     </button>
                                                 </td>
                                             </tr>
@@ -407,21 +422,43 @@ const MSMEDashboard = () => {
                                                     {new Date(deal.dueDate).toLocaleDateString('en-IN')}
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
-                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${deal.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
-                                                        {deal.status}
+                                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
+                                                        deal.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                        : deal.status === 'AGREEMENT_PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                        : 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                                                    }`}>
+                                                        {deal.status === 'AGREEMENT_PENDING' ? 'Awaiting Signatures' : deal.status}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
-                                                    {deal.status === 'ACTIVE' && (
-                                                        <button
-                                                            onClick={() => handleRepayDeal(deal.id)}
-                                                            disabled={isRepayingDeal || wallet.availableBalance < deal.totalPayableToLender}
-                                                            className="px-3 py-1.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
-                                                            title={wallet.availableBalance < deal.totalPayableToLender ? "Insufficient wallet balance" : "Repay this deal"}
-                                                        >
-                                                            {isRepayingDeal ? 'Processing...' : 'Repay Deal'}
-                                                        </button>
-                                                    )}
+                                                    <div className="flex items-center gap-2">
+                                                        {deal.status === 'AGREEMENT_PENDING' && (
+                                                            <button
+                                                                onClick={() => setAgreementDealId(deal.id)}
+                                                                className="px-3 py-1.5 text-xs font-semibold rounded bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors"
+                                                            >
+                                                                Sign Agreement
+                                                            </button>
+                                                        )}
+                                                        {deal.status === 'ACTIVE' && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => navigate(`/meeting/${deal.id}`)}
+                                                                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors"
+                                                                >
+                                                                    <Video size={12} /> Join Meeting
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleRepayDeal(deal.id)}
+                                                                    disabled={isRepayingDeal || wallet.availableBalance < deal.totalPayableToLender}
+                                                                    className="px-3 py-1.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+                                                                    title={wallet.availableBalance < deal.totalPayableToLender ? 'Insufficient wallet balance' : 'Repay this deal'}
+                                                                >
+                                                                    {isRepayingDeal ? 'Processing...' : 'Repay Deal'}
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}

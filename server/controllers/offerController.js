@@ -121,7 +121,7 @@ export const acceptOffer = async (req, res) => {
         // 2. Execute Prisma Transaction
         const transactionResult = await prisma.$transaction(async (tx) => {
             // Set offer status to ACCEPTED
-            const acceptedOffer = await tx.fundingOffer.update({
+            await tx.fundingOffer.update({
                 where: { id: offerId },
                 data: { status: 'ACCEPTED' }
             });
@@ -132,7 +132,7 @@ export const acceptOffer = async (req, res) => {
                 data: { status: 'FUNDED' }
             });
 
-            // Handle Rejected Offers and restore locks
+            // Reject all other pending offers and restore their locked funds
             const pendingOffers = await tx.fundingOffer.findMany({
                 where: {
                     invoiceId: offer.invoiceId,
@@ -142,13 +142,10 @@ export const acceptOffer = async (req, res) => {
             });
 
             for (const po of pendingOffers) {
-                // Reject offer
                 await tx.fundingOffer.update({
                     where: { id: po.id },
                     data: { status: 'REJECTED' }
                 });
-
-                // Unlock wallet funds: restore available, reduce locked
                 await tx.wallet.update({
                     where: { userId: po.lenderId },
                     data: {
@@ -158,10 +155,9 @@ export const acceptOffer = async (req, res) => {
                 });
             }
 
-            // Create Deal
-            // totalPayableToLender = fundedAmount + interestAmount
             const totalPayableToLender = parseFloat(offer.fundedAmount) + parseFloat(offer.interestAmount);
 
+            // Create Deal with AGREEMENT_PENDING status — funds stay locked until both sign
             const deal = await tx.deal.create({
                 data: {
                     invoiceId: offer.invoiceId,
@@ -173,35 +169,52 @@ export const acceptOffer = async (req, res) => {
                     platformFee: offer.platformFee,
                     totalPayableToLender: totalPayableToLender,
                     dueDate: updatedInvoice.due_date,
-                    status: 'ACTIVE'
+                    status: 'AGREEMENT_PENDING'
                 }
             });
 
-            // Transfer Funds for ACCEPTED offer: Move from Lender locked to MSME available
-            await tx.wallet.update({
-                where: { userId: offer.lenderId },
+            // Generate agreement terms text
+            const terms = `INVOICE FINANCING AGREEMENT
+
+This Invoice Financing Agreement ("Agreement") is entered into as of ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}.
+
+PARTIES:
+• Lender: Registered lender on FinBridge (ID: ${offer.lenderId})
+• MSME Borrower: MSME entity on FinBridge (ID: ${msmeId})
+
+TERMS:
+1. Funded Amount: ₹${Number(offer.fundedAmount).toLocaleString('en-IN')}
+2. Interest Rate: ${offer.interestRate}% per annum
+3. Interest Amount: ₹${Number(offer.interestAmount).toLocaleString('en-IN')}
+4. Platform Fee: ₹${Number(offer.platformFee).toLocaleString('en-IN')}
+5. Total Repayable to Lender: ₹${Number(totalPayableToLender).toLocaleString('en-IN')}
+6. Due Date: ${new Date(updatedInvoice.due_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+
+OBLIGATIONS:
+• The Lender agrees to disburse the Funded Amount to the MSME upon execution of this Agreement.
+• The MSME agrees to repay the Total Repayable Amount on or before the Due Date.
+• Both parties agree to conduct a verification meeting via FinBridge video call before or after disbursement.
+
+GOVERNING LAW: This Agreement shall be governed by the laws of India.
+
+PLATFORM: FinBridge Invoice Financing Platform. Deal ID: ${deal.id}`;
+
+            // Create Agreement record — both signatures required to activate deal
+            await tx.agreement.create({
                 data: {
-                    lockedBalance: { decrement: parseFloat(offer.fundedAmount) }
-                }
-            });
-
-            await tx.wallet.upsert({
-                where: { userId: msmeId },
-                update: {
-                    availableBalance: { increment: parseFloat(offer.fundedAmount) }
-                },
-                create: {
-                    userId: msmeId,
-                    availableBalance: parseFloat(offer.fundedAmount),
-                    lockedBalance: 0,
-                    totalEarnings: 0
+                    dealId: deal.id,
+                    terms
                 }
             });
 
             return deal;
         });
 
-        res.status(200).json({ message: 'Offer accepted successfully', deal: transactionResult });
+        res.status(200).json({
+            message: 'Offer accepted. Please review and sign the agreement to activate the deal.',
+            deal: transactionResult,
+            requiresAgreement: true
+        });
     } catch (error) {
         console.error('Error in acceptOffer:', error);
         res.status(500).json({ message: 'Server error' });

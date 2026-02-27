@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -35,6 +36,10 @@ model User {
 
   // Wallet
   wallet Wallet?
+
+  // Video Calls
+  callsAsLender CallSession[] @relation("LenderCall")
+  callsAsMsme   CallSession[] @relation("MSMECall")
 
   @@index([email])
   @@map("users")
@@ -198,6 +203,7 @@ enum OfferStatus {
 }
 
 enum DealStatus {
+  AGREEMENT_PENDING
   ACTIVE
   CLOSED
   DEFAULTED
@@ -299,17 +305,63 @@ model Deal {
   platformFee          Decimal    @db.Decimal(15, 2)
   totalPayableToLender Decimal    @db.Decimal(15, 2)
   dueDate              DateTime
-  status               DealStatus @default(ACTIVE)
+  status               DealStatus @default(AGREEMENT_PENDING)
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
-  invoice Invoice @relation(fields: [invoiceId], references: [id])
-  lender  User    @relation("LenderDeals", fields: [lenderId], references: [id])
-  msme    User    @relation("MsmeDeals", fields: [msmeId], references: [id])
+  invoice     Invoice      @relation(fields: [invoiceId], references: [id])
+  lender      User         @relation("LenderDeals", fields: [lenderId], references: [id])
+  msme        User         @relation("MsmeDeals", fields: [msmeId], references: [id])
+  callSession CallSession?
+  agreement   Agreement?
 
   @@index([lenderId])
   @@index([msmeId])
   @@map("deals")
+}
+
+model Agreement {
+  id             String    @id @default(uuid())
+  dealId         String    @unique
+  terms          String    @db.Text
+  msmeSignedAt   DateTime?
+  lenderSignedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@map("agreements")
+}
+
+model CallSession {
+  id          String     @id @default(uuid())
+  dealId      String     @unique
+  lenderId    String
+  msmeId      String
+  status      CallStatus
+  roomToken   String?    // signed ephemeral room token for signaling
+  recordingUrl  String?  // lender's recording upload
+  recordingUrl2 String?  // msme's recording upload
+  startedAt   DateTime?
+  endedAt     DateTime?
+  durationSec Int?
+  createdAt   DateTime   @default(now())
+
+  deal   Deal @relation(fields: [dealId], references: [id])
+  lender User @relation("LenderCall", fields: [lenderId], references: [id])
+  msme   User @relation("MSMECall", fields: [msmeId], references: [id])
+
+  @@index([lenderId])
+  @@index([msmeId])
+  @@map("call_sessions")
+}
+
+enum CallStatus {
+  INITIATED
+  ONGOING
+  ENDED
+  FAILED
 }
 
 model Wallet {
