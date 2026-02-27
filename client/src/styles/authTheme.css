@@ -1,3 +1,4 @@
+/* src/styles/authTheme.css */
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
@@ -185,13 +186,25 @@ body {
 
 /* Typography & Brand */
 .brand-name {
-    font-size: 3rem;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+    font-size: 5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, #ffffff 15%, #bfdbfe 55%, #3b82f6 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
+    margin: 0;
+    line-height: 1.1;
+    filter: drop-shadow(0 8px 20px rgba(59, 130, 246, 0.35));
+    transition: all 0.4s ease;
+}
+
+.brand-name:hover {
+    filter: drop-shadow(0 12px 28px rgba(59, 130, 246, 0.55));
+    background: linear-gradient(135deg, #ffffff 25%, #93c5fd 65%, #2563eb 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .brand-tagline {
@@ -274,6 +287,8 @@ body {
 
 .input-wrapper {
     position: relative;
+    color: var(--muted);
+    transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Use direct child selector to avoid impacting eye icon inside button */
@@ -282,10 +297,25 @@ body {
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--muted);
-    transition: color 0.2s;
+    color: inherit;
+    transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
     z-index: 2;
+}
+
+/* Change wrapper color and input style when focused */
+.input-wrapper:focus-within {
+    color: #1f2937;
+}
+
+.input-wrapper:focus-within .form-input {
+    background: #ffffff;
+    color: #1f2937;
+    border-color: var(--accent);
+}
+
+.input-wrapper:focus-within .eye-icon {
+    color: inherit;
 }
 
 .form-input {
@@ -308,13 +338,7 @@ body {
 
 .form-input:focus {
     outline: none;
-    border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    background: rgba(15, 23, 42, 0.8);
-}
-
-.form-input:focus+svg {
-    color: var(--accent);
 }
 
 /* Select */
@@ -331,24 +355,21 @@ select.form-input {
     transform: translateY(-50%);
     background: none;
     border: none;
-    padding: 0;
-    color: var(--muted);
+    padding: 0.25rem;
+    color: inherit;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.2s;
+    transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 10;
-    /* Ensure clickable */
-    padding: 0.25rem;
-    /* Touch area */
     border-radius: 50%;
 }
 
 .eye-icon:hover {
-    color: #fff;
     background-color: rgba(255, 255, 255, 0.05);
 }
+
 
 /* Button */
 .btn-primary {
