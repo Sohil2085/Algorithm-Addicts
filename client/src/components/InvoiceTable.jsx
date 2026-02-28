@@ -19,7 +19,7 @@ const statusPill = (status) => {
     return 'bg-white/10 text-white/50 border border-white/10';
 };
 
-const InvoiceTable = ({ invoices, onCreate }) => {
+const InvoiceTable = ({ invoices, onCreate, showFundButton = false }) => {
     const { user } = useAuth();
     const [selectedInvoice, setSelectedInvoice] = useState(null);
     const [selectedInvoiceForFund, setSelectedInvoiceForFund] = useState(null);
@@ -147,12 +147,13 @@ const InvoiceTable = ({ invoices, onCreate }) => {
                         setIsViewOpen(false);
                         setSelectedInvoice(null);
                     }}
-                    onFund={isLender ? () => {
+                    onFund={showFundButton ? () => {
                         setIsViewOpen(false);
                         setSelectedInvoice(null);
                         setSelectedInvoiceForFund(selectedInvoice);
                         setIsFundOpen(true);
                     } : undefined}
+                    showFundButton={showFundButton}
                 />
             )}
         </>
