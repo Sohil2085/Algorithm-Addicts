@@ -247,3 +247,74 @@ export const getAllDeals = async (req, res, next) => {
         next(error);
     }
 };
+
+export const verifyLenderChecklist = async (req, res, next) => {
+    try {
+        const userId = req.params.id;
+        const {
+            isRbiVerified,
+            isMcaVerified,
+            isPanVerified,
+            isBankVerified,
+            verificationRemark
+        } = req.body;
+
+        const profile = await prisma.lenderProfile.findUnique({
+            where: { userId }
+        });
+
+        if (!profile) {
+            return res.status(404).json({ success: false, message: 'Lender profile not found' });
+        }
+
+        const { lenderType } = profile;
+        let isVerified = false;
+
+        // Determine isVerified based on lenderType
+        if (lenderType === 'BANK' || lenderType === 'NBFC') {
+            isVerified = Boolean(isRbiVerified) && Boolean(isBankVerified);
+        } else if (lenderType === 'REGISTERED_COMPANY' || lenderType === 'OTHER_FINANCIAL_ENTITY') {
+            isVerified = Boolean(isMcaVerified) && Boolean(isBankVerified);
+        } else if (lenderType === 'INDIVIDUAL_INVESTOR') {
+            isVerified = Boolean(isPanVerified) && Boolean(isBankVerified);
+        }
+
+        const updatedProfile = await prisma.$transaction(async (tx) => {
+            const up = await tx.lenderProfile.update({
+                where: { userId },
+                data: {
+                    isRbiVerified: Boolean(isRbiVerified),
+                    isMcaVerified: Boolean(isMcaVerified),
+                    isPanVerified: Boolean(isPanVerified),
+                    isBankVerified: Boolean(isBankVerified),
+                    verificationRemark: verificationRemark || null,
+                    isVerified
+                }
+            });
+
+            // Sync user's kycStatus if lender verified successfully
+            if (isVerified && profile.verificationStatus !== 'VERIFIED') {
+                await tx.user.update({
+                    where: { id: userId },
+                    data: { kycStatus: 'VERIFIED' }
+                });
+                // Update the lenderProfile status to verified too to be consistent
+                await tx.lenderProfile.update({
+                    where: { userId },
+                    data: { verificationStatus: 'VERIFIED' }
+                });
+            }
+
+            return up;
+        });
+
+        res.status(200).json({
+            success: true,
+            message: isVerified ? 'Lender fully verified.' : 'Lender checklist updated.',
+            data: updatedProfile
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};

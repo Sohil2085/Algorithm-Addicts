@@ -17,18 +17,30 @@ import {
     DollarSign,
     FileText,
     ShieldAlert,
-    Plus,
     FileSearch,
+    Plus,
     Download,
     ChevronRight,
     Loader2,
+<<<<<<< HEAD
     Video,
+=======
+    Eye,
+    X,
+    Building2,
+    Hash,
+    MapPin,
+    ShieldCheck,
+    User,
+    Calendar
+>>>>>>> 538aa729ac5e1f80bfb61dbd5c5552a9d563db6e
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
+import VerifiedBadge from '../components/VerifiedBadge';
 import { getInvoiceStats, getInvoices } from '../api/invoiceApi';
 import { getMyWallet } from '../api/walletApi';
 import { getMyOffers, acceptOffer } from '../api/offerApi';
-import { getMyDeals, repayDeal } from '../api/dealApi';
+import { getMyDeals, repayDeal, signAgreement, downloadAgreement } from '../api/dealApi';
 import { useAuth } from '../context/AuthContext';
 import { FeatureGuard } from '../context/FeatureContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
@@ -50,6 +62,35 @@ const MSMEDashboard = () => {
     const [callStatuses, setCallStatuses] = useState({}); // { dealId: 'INITIATED' | 'ENDED' | etc }
     const [isAcceptingOffer, setIsAcceptingOffer] = useState(false);
     const [isRepayingDeal, setIsRepayingDeal] = useState(false);
+
+    // Lender Profile Modal State
+    const [selectedLender, setSelectedLender] = useState(null);
+    const [isSigningAgreement, setIsSigningAgreement] = useState(null);
+    const [isDownloadingAgreement, setIsDownloadingAgreement] = useState(null);
+
+    const handleSignAgreement = async (dealId) => {
+        setIsSigningAgreement(dealId);
+        try {
+            await signAgreement(dealId);
+            toast.success("Agreement signed successfully");
+            await loadDashboardData();
+        } catch (error) {
+            toast.error(error.message || "Failed to sign agreement");
+        } finally {
+            setIsSigningAgreement(null);
+        }
+    };
+
+    const handleDownloadAgreement = async (dealId) => {
+        setIsDownloadingAgreement(dealId);
+        try {
+            await downloadAgreement(dealId);
+        } catch (error) {
+            toast.error(error.message || "Failed to download agreement");
+        } finally {
+            setIsDownloadingAgreement(null);
+        }
+    };
 
     const loadDashboardData = async () => {
         try {
@@ -380,13 +421,21 @@ const MSMEDashboard = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
-                                                    <button
-                                                        onClick={() => handleAcceptOffer(offer.id)}
-                                                        disabled={isAcceptingOffer}
-                                                        className="px-3 py-1.5 text-xs font-semibold rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors disabled:opacity-50"
-                                                    >
-                                                        {isAcceptingOffer ? 'Accepting...' : 'Accept Offer'}
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => setSelectedLender(offer.lender)}
+                                                            className="px-3 py-1.5 text-xs font-semibold rounded bg-slate-500/20 text-theme-text-muted hover:bg-slate-500/30 hover:text-theme-text transition-colors flex items-center gap-1.5"
+                                                        >
+                                                            <Eye size={13} /> View
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleAcceptOffer(offer.id)}
+                                                            disabled={isAcceptingOffer}
+                                                            className="px-3 py-1.5 text-xs font-semibold rounded bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors disabled:opacity-50"
+                                                        >
+                                                            {isAcceptingOffer ? 'Accepting...' : 'Accept Offer'}
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -404,7 +453,7 @@ const MSMEDashboard = () => {
                                 <table className="w-full text-left">
                                     <thead>
                                         <tr className="border-b border-theme-border">
-                                            {['Invoice ID', 'Funded Amount', 'Interest', 'Platform Fee', 'Due Date', 'Status', 'Actions'].map(h => (
+                                            {['Invoice ID', 'Funded Amount', 'Interest', 'Platform Fee', 'Due Date', 'Agreement', 'Status', 'Actions'].map(h => (
                                                 <th key={h} className="px-4 py-3 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
                                             ))}
                                         </tr>
@@ -412,7 +461,7 @@ const MSMEDashboard = () => {
                                     <tbody className="divide-y divide-theme-border">
                                         {deals.length === 0 ? (
                                             <tr>
-                                                <td colSpan={7} className="px-4 py-8 text-center text-theme-text-muted text-sm">No deals found</td>
+                                                <td colSpan={8} className="px-4 py-8 text-center text-theme-text-muted text-sm">No deals found</td>
                                             </tr>
                                         ) : deals.map((deal) => (
                                             <tr key={deal.id} className="hover:bg-theme-surface-hover transition-colors">
@@ -430,6 +479,31 @@ const MSMEDashboard = () => {
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap text-sm text-theme-text-muted">
                                                     {new Date(deal.dueDate).toLocaleDateString('en-IN')}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    <div className="flex flex-col gap-1 items-start">
+                                                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${deal.lenderSigned && deal.msmeSigned ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                            {deal.lenderSigned && deal.msmeSigned ? 'SIGNED' : 'PENDING'}
+                                                        </span>
+                                                        <div className="flex gap-2 mt-1">
+                                                            <button
+                                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDownloadAgreement(deal.id); }}
+                                                                disabled={isDownloadingAgreement === deal.id}
+                                                                className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline"
+                                                            >
+                                                                Download
+                                                            </button>
+                                                            {!deal.msmeSigned && (
+                                                                <button
+                                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleSignAgreement(deal.id); }}
+                                                                    disabled={isSigningAgreement === deal.id}
+                                                                    className="text-[10px] text-emerald-400 hover:text-emerald-300 hover:underline"
+                                                                >
+                                                                    {isSigningAgreement === deal.id ? 'Signing...' : 'Sign'}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
                                                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${deal.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
@@ -552,6 +626,150 @@ const MSMEDashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Lender Profile Modal */}
+            {selectedLender && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setSelectedLender(null)} />
+                    <div className="relative w-full max-w-lg bg-theme-surface border border-theme-border rounded-2xl shadow-2xl flex flex-col animate-fade-in-up">
+
+                        {/* Header */}
+                        <div className="p-5 border-b border-theme-border flex items-start justify-between bg-gradient-to-r from-blue-900/20 to-transparent rounded-t-2xl">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                    <Briefcase size={20} />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-xl font-bold text-theme-text leading-tight w-64 truncate">
+                                            {selectedLender.kyc?.organizationName || selectedLender.name}
+                                        </h2>
+                                        {selectedLender.kyc?.isVerified && <VerifiedBadge size={16} />}
+                                    </div>
+                                    <p className="text-sm text-theme-text-muted mt-0.5 capitalize">
+                                        {selectedLender.kyc?.lenderType?.replace(/_/g, ' ') || 'Investor Profile'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button onClick={() => setSelectedLender(null)} className="p-1.5 rounded-lg hover:bg-white/10 text-theme-text-muted hover:text-theme-text transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="p-6">
+                            <h3 className="text-sm font-semibold text-theme-text uppercase tracking-wider mb-4 text-blue-400 flex items-center gap-2">
+                                <ShieldCheck size={16} /> Verified Profile Details
+                            </h3>
+
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex flex-col p-3 rounded-lg bg-theme-surface-hover border border-theme-border">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Hash size={13} className="text-theme-text-muted" />
+                                            <p className="text-xs text-theme-text-muted">Entity / User Name</p>
+                                        </div>
+                                        <p className="text-sm font-medium text-theme-text truncate">{selectedLender.kyc?.organizationName || selectedLender.name}</p>
+                                    </div>
+
+                                    {selectedLender.kyc?.contactPersonName && (
+                                        <div className="flex flex-col p-3 rounded-lg bg-theme-surface-hover border border-theme-border">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <User size={13} className="text-theme-text-muted" />
+                                                <p className="text-xs text-theme-text-muted">Contact Person</p>
+                                            </div>
+                                            <p className="text-sm font-medium text-theme-text">{selectedLender.kyc.contactPersonName}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedLender.kyc?.gstNumber && (
+                                        <div className="flex flex-col p-3 rounded-lg bg-theme-surface-hover border border-theme-border">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Hash size={13} className="text-theme-text-muted" />
+                                                <p className="text-xs text-theme-text-muted">GST Number</p>
+                                            </div>
+                                            <p className="text-sm font-medium text-theme-text font-mono truncate">{selectedLender.kyc.gstNumber}</p>
+                                        </div>
+                                    )}
+
+                                    {selectedLender.kyc?.capitalRange && (
+                                        <div className="flex flex-col p-3 rounded-lg bg-theme-surface-hover border border-theme-border">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <DollarSign size={13} className="text-emerald-500/80" />
+                                                <p className="text-xs text-theme-text-muted">Capital Range</p>
+                                            </div>
+                                            <p className="text-sm font-medium text-emerald-400">{selectedLender.kyc.capitalRange}</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {(selectedLender.kyc?.panNumber) && (
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-theme-surface-hover border border-theme-border">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-theme-bg flex items-center justify-center text-theme-text-muted border border-theme-border">
+                                                <Hash size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-theme-text-muted">PAN Record</p>
+                                                <p className="text-sm font-medium text-theme-text tracking-wider">{selectedLender.kyc?.panNumber || 'Available'}</p>
+                                            </div>
+                                        </div>
+                                        {selectedLender.kyc?.isPanVerified ? (
+                                            <span className="text-xs font-semibold bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded">Verified</span>
+                                        ) : (
+                                            <span className="text-xs font-semibold bg-amber-500/10 text-amber-500 px-2 py-1 rounded">Pending</span>
+                                        )}
+                                    </div>
+                                )}
+
+                                {selectedLender.kyc?.rbiLicenseNumber && (
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-theme-surface-hover border border-emerald-500/20">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                                                <Building2 size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-emerald-400/80">RBI License Number</p>
+                                                <p className="text-sm font-medium text-emerald-400 tracking-wider font-mono">{selectedLender.kyc.rbiLicenseNumber}</p>
+                                            </div>
+                                        </div>
+                                        {selectedLender.kyc?.isRbiVerified && <span className="text-xs font-semibold bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded">Verified</span>}
+                                    </div>
+                                )}
+
+                                {selectedLender.kyc?.registrationNumber && (
+                                    <div className="flex items-center justify-between p-3 rounded-lg bg-theme-surface-hover border border-theme-border">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-theme-bg flex items-center justify-center text-theme-text-muted border border-theme-border">
+                                                <Hash size={14} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-theme-text-muted">Entity Registration ID</p>
+                                                <p className="text-sm font-medium text-theme-text tracking-wider font-mono">{selectedLender.kyc.registrationNumber}</p>
+                                            </div>
+                                        </div>
+                                        {selectedLender.kyc?.isMcaVerified && <span className="text-xs font-semibold bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded">Verified</span>}
+                                    </div>
+                                )}
+
+                                {selectedLender.kyc?.riskPreference && (
+                                    <div className="flex flex-col gap-1 p-3 rounded-lg bg-theme-surface-hover border border-theme-border">
+                                        <span className="text-xs text-theme-text-muted">Lender Funding Strategy</span>
+                                        <p className="text-sm text-theme-text">{selectedLender.kyc?.riskPreference} Focus</p>
+                                    </div>
+                                )}
+                            </div>
+
+                        </div>
+
+                        <div className="p-4 border-t border-theme-border bg-theme-surface-hover rounded-b-2xl text-center">
+                            <p className="text-xs text-theme-text-muted flex items-center justify-center gap-2">
+                                <ShieldCheck size={14} className="text-blue-400" /> FinBridge validates lender credentials for secure operations.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

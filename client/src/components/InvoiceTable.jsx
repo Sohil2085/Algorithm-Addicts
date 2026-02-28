@@ -128,13 +128,19 @@ const InvoiceTable = ({ invoices, onCreate, showFundButton = false }) => {
                                             </button>
                                             {isLender && (
                                                 <button
+                                                    disabled={user?.kycStatus !== 'VERIFIED'}
+                                                    title={user?.kycStatus !== 'VERIFIED' ? 'Complete verification to fund invoices' : ''}
                                                     onClick={(e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
+                                                        if (user?.kycStatus !== 'VERIFIED') return;
                                                         setSelectedInvoiceForFund(invoice);
                                                         setIsFundOpen(true);
                                                     }}
-                                                    className="h-9 px-3 rounded-lg text-sm font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-white/10 hover:border-white/20 transition-colors"
+                                                    className={`h-9 px-3 rounded-lg text-sm font-medium transition-colors ${user?.kycStatus === 'VERIFIED'
+                                                            ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 hover:bg-white/10 hover:border-white/20 cursor-pointer'
+                                                            : 'text-emerald-400/50 bg-emerald-500/5 border border-emerald-500/10 cursor-not-allowed opacity-60'
+                                                        }`}
                                                 >
                                                     Fund
                                                 </button>
