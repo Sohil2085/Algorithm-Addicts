@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../components/admin/AdminLayout';
 import { getAllDeals } from '../api/adminApi';
-import { repayDeal } from '../api/dealApi';
+import { repayDeal, downloadAgreement } from '../api/dealApi';
 import toast from 'react-hot-toast';
 import { RefreshCw, PlayCircle } from 'lucide-react';
 
@@ -9,6 +9,18 @@ const AdminDealPage = () => {
     const [deals, setDeals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [processingId, setProcessingId] = useState(null);
+    const [isDownloadingAgreement, setIsDownloadingAgreement] = useState(null);
+
+    const handleDownloadAgreement = async (dealId) => {
+        setIsDownloadingAgreement(dealId);
+        try {
+            await downloadAgreement(dealId);
+        } catch (error) {
+            toast.error(error.message || "Failed to download agreement");
+        } finally {
+            setIsDownloadingAgreement(null);
+        }
+    };
 
     const fetchDeals = async () => {
         try {
@@ -79,6 +91,7 @@ const AdminDealPage = () => {
                                 <th className="p-4 font-medium">Lender</th>
                                 <th className="p-4 font-medium">MSME</th>
                                 <th className="p-4 font-medium text-right">Funded Amount</th>
+                                <th className="p-4 font-medium">Agreement</th>
                                 <th className="p-4 font-medium">Status</th>
                                 <th className="p-4 font-medium text-center">Action</th>
                             </tr>
@@ -86,11 +99,11 @@ const AdminDealPage = () => {
                         <tbody className="divide-y divide-slate-800">
                             {loading && !processingId && deals.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="p-8 text-center text-slate-400">Loading deals...</td>
+                                    <td colSpan="7" className="p-8 text-center text-slate-400">Loading deals...</td>
                                 </tr>
                             ) : deals.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="p-8 text-center text-slate-400">No deals found in the system.</td>
+                                    <td colSpan="7" className="p-8 text-center text-slate-400">No deals found in the system.</td>
                                 </tr>
                             ) : (
                                 deals.map(deal => (
@@ -108,6 +121,20 @@ const AdminDealPage = () => {
                                             ₹{parseFloat(deal.fundedAmount || 0).toLocaleString()}
                                         </td>
                                         <td className="p-4">
+                                            <div className="flex flex-col gap-1 items-start">
+                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${deal.lenderSigned && deal.msmeSigned ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                    {deal.lenderSigned && deal.msmeSigned ? 'SIGNED' : 'PENDING'}
+                                                </span>
+                                                <button
+                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDownloadAgreement(deal.id); }}
+                                                    disabled={isDownloadingAgreement === deal.id}
+                                                    className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline mt-1"
+                                                >
+                                                    Download
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td className="p-4">
                                             <span className={getStatusBadge(deal.status)}>
                                                 {deal.status}
                                             </span>
@@ -118,8 +145,8 @@ const AdminDealPage = () => {
                                                     onClick={() => handleRepay(deal.id)}
                                                     disabled={processingId === deal.id}
                                                     className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${processingId === deal.id
-                                                            ? 'bg-blue-600/50 text-white cursor-not-allowed'
-                                                            : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg hover:shadow-blue-500/20 active:scale-95'
+                                                        ? 'bg-blue-600/50 text-white cursor-not-allowed'
+                                                        : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg hover:shadow-blue-500/20 active:scale-95'
                                                         }`}
                                                 >
                                                     {processingId === deal.id ? (
