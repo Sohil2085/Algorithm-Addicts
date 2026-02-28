@@ -17,5 +17,6 @@ router.patch('/lender/:id/approve', adminController.approveLender);
 router.patch('/lender/:id/reject', adminController.rejectLender);
 
 router.get('/deals', adminController.getAllDeals);
+router.get('/calls/recordings', adminController.getAllRecordings);
 
 export default router;

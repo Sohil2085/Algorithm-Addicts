@@ -36,6 +36,10 @@ model User {
   // Wallet
   wallet Wallet?
 
+  // Video Calls
+  callsAsLender CallSession[] @relation("LenderCall")
+  callsAsMsme   CallSession[] @relation("MSMECall")
+
   @@index([email])
   @@map("users")
 }
@@ -306,6 +310,7 @@ model Deal {
   invoice Invoice @relation(fields: [invoiceId], references: [id])
   lender  User    @relation("LenderDeals", fields: [lenderId], references: [id])
   msme    User    @relation("MsmeDeals", fields: [msmeId], references: [id])
+  callSession CallSession?
 
   @@index([lenderId])
   @@index([msmeId])
@@ -324,4 +329,34 @@ model Wallet {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("wallets")
+}
+
+model CallSession {
+  id            String     @id @default(uuid())
+  dealId        String     @unique
+  lenderId      String
+  msmeId        String
+  status        CallStatus
+  roomToken     String?    // signed ephemeral JWT for signaling
+  recordingUrl  String?    // lender recording path
+  recordingUrl2 String?    // msme recording path
+  startedAt     DateTime?
+  endedAt       DateTime?
+  durationSec   Int?
+  createdAt     DateTime   @default(now())
+
+  deal   Deal @relation(fields: [dealId], references: [id])
+  lender User @relation("LenderCall", fields: [lenderId], references: [id])
+  msme   User @relation("MSMECall", fields: [msmeId], references: [id])
+
+  @@index([lenderId])
+  @@index([msmeId])
+  @@map("call_sessions")
+}
+
+enum CallStatus {
+  INITIATED
+  ONGOING
+  ENDED
+  FAILED
 }

@@ -23,6 +23,7 @@ import AdminKycPage from './pages/AdminKycPage';
 import AdminLenderKycPage from './pages/AdminLenderKycPage';
 import LenderOnboardingPage from './pages/LenderOnboardingPage';
 import AdminDealPage from './pages/AdminDealPage';
+import MeetingRoom from './pages/MeetingRoom';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading, isAuthenticated } = useAuth();
@@ -198,6 +199,13 @@ function App() {
               <Route path="/profile" element={
                 <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
                   <Profile />
+                </ProtectedRoute>
+              } />
+
+              {/* Meeting Room */}
+              <Route path="/meeting/:dealId" element={
+                <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
+                  <MeetingRoom />
                 </ProtectedRoute>
               } />
 
