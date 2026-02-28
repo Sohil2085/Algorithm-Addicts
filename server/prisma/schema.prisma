@@ -203,6 +203,11 @@ enum DealStatus {
   DEFAULTED
 }
 
+enum AgreementStatus {
+  PENDING
+  SIGNED
+}
+
 enum RiskLevel {
   LOW
   MEDIUM
@@ -305,11 +310,18 @@ model Deal {
   fundedAmount         Decimal    @db.Decimal(15, 2)
   interestAmount       Decimal    @db.Decimal(15, 2)
   platformFee          Decimal    @db.Decimal(15, 2)
-  totalPayableToLender Decimal    @db.Decimal(15, 2)
+  totalPayableToLender Decimal         @db.Decimal(15, 2)
   dueDate              DateTime
-  status               DealStatus @default(ACTIVE)
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
+  status               DealStatus      @default(ACTIVE)
+
+  lenderSigned         Boolean         @default(false)
+  msmeSigned           Boolean         @default(false)
+  buyerSigned          Boolean         @default(false)
+  agreementSignedAt    DateTime?
+  agreementStatus      AgreementStatus @default(PENDING)
+
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
 
   invoice Invoice @relation(fields: [invoiceId], references: [id])
   lender  User    @relation("LenderDeals", fields: [lenderId], references: [id])

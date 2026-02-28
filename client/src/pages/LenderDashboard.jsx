@@ -24,7 +24,7 @@ import toast from 'react-hot-toast';
 import { getAvailableInvoices } from '../api/invoiceApi';
 import { getMyWallet } from '../api/walletApi';
 import { createOffer } from '../api/offerApi';
-import { getMyDeals, fundDeal } from '../api/dealApi';
+import { getMyDeals, fundDeal, signAgreement, downloadAgreement } from '../api/dealApi';
 import '../styles/landing.css';
 // ─── Static Dummy Data ────────────────────────────────────────────────────────
 // TODO: Replace with API calls when backend bidding endpoints are ready
@@ -592,7 +592,7 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
     );
 };
 
-const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal }) => {
+const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal, onSignAgreement, isSigningAgreement, onDownloadAgreement, isDownloadingAgreement }) => {
     const totalInvested = myDeals.reduce((sum, deal) => sum + parseFloat(deal.fundedAmount), 0);
     const expectedReturns = myDeals.reduce((sum, deal) => sum + parseFloat(deal.interestAmount), 0);
     const activePositions = myDeals.filter(d => d.status === 'ACTIVE').length;
@@ -627,7 +627,7 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal }) => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-theme-border bg-theme-surface-hover">
-                                {['Invoice ID', 'MSME Name', 'Invested', 'Expected Return', 'Due Date', 'Days Left', 'Action'].map(h => (
+                                {['Invoice ID', 'MSME Name', 'Invested', 'Expected Return', 'Due Date', 'Days Left', 'Agreement', 'Action'].map(h => (
                                     <th key={h} className="px-6 py-4 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
                                 ))}
                             </tr>
@@ -635,7 +635,7 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal }) => {
                         <tbody className="divide-y divide-theme-border">
                             {myDeals.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-theme-text-muted">No investments found</td>
+                                    <td colSpan={8} className="px-6 py-12 text-center text-theme-text-muted">No investments found</td>
                                 </tr>
                             ) : myDeals.map((deal) => {
                                 const dueDate = new Date(deal.dueDate);
@@ -663,6 +663,31 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal }) => {
                                             {deal.status === 'ACTIVE'
                                                 ? <span className="font-semibold text-theme-text">{maxDaysLeft}d</span>
                                                 : <span className="text-theme-text-muted">—</span>}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex flex-col gap-1 items-start">
+                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${deal.lenderSigned && deal.msmeSigned ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                    {deal.lenderSigned && deal.msmeSigned ? 'SIGNED' : 'PENDING'}
+                                                </span>
+                                                <div className="flex gap-2 mt-1">
+                                                    <button
+                                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDownloadAgreement(deal.id); }}
+                                                        disabled={isDownloadingAgreement === deal.id}
+                                                        className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline"
+                                                    >
+                                                        Download
+                                                    </button>
+                                                    {!deal.lenderSigned && (
+                                                        <button
+                                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSignAgreement(deal.id); }}
+                                                            disabled={isSigningAgreement === deal.id}
+                                                            className="text-[10px] text-emerald-400 hover:text-emerald-300 hover:underline"
+                                                        >
+                                                            {isSigningAgreement === deal.id ? 'Signing...' : 'Sign'}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {deal.status === 'ACTIVE' ? (
@@ -905,6 +930,33 @@ const LenderDashboard = () => {
     const [offerForm, setOfferForm] = useState({ amount: '', rate: '' });
     const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
     const [isSubmittingDeal, setIsSubmittingDeal] = useState(false);
+    const [isSigningAgreement, setIsSigningAgreement] = useState(null);
+    const [isDownloadingAgreement, setIsDownloadingAgreement] = useState(null);
+
+    const handleSignAgreement = async (dealId) => {
+        setIsSigningAgreement(dealId);
+        try {
+            await signAgreement(dealId);
+            toast.success("Agreement signed successfully");
+            const dealsData = await getMyDeals();
+            setMyDeals(dealsData);
+        } catch (error) {
+            toast.error(error.message || "Failed to sign agreement");
+        } finally {
+            setIsSigningAgreement(null);
+        }
+    };
+
+    const handleDownloadAgreement = async (dealId) => {
+        setIsDownloadingAgreement(dealId);
+        try {
+            await downloadAgreement(dealId);
+        } catch (error) {
+            toast.error(error.message || "Failed to download agreement");
+        } finally {
+            setIsDownloadingAgreement(null);
+        }
+    };
 
     const kycStatus = user?.kycStatus || 'NOT_SUBMITTED';
     const isKycVerified = kycStatus === 'VERIFIED';
@@ -1089,7 +1141,15 @@ const LenderDashboard = () => {
                 : <MarketplaceKycBanner />;
             case 'investments': return (
                 <FeatureGuard featureKey="DEAL_EXECUTION_MODULE">
-                    <InvestmentsSection myDeals={myDeals} onFundDeal={handleFundDeal} isSubmittingDeal={isSubmittingDeal} />
+                    <InvestmentsSection
+                        myDeals={myDeals}
+                        onFundDeal={handleFundDeal}
+                        isSubmittingDeal={isSubmittingDeal}
+                        onSignAgreement={handleSignAgreement}
+                        isSigningAgreement={isSigningAgreement}
+                        onDownloadAgreement={handleDownloadAgreement}
+                        isDownloadingAgreement={isDownloadingAgreement}
+                    />
                 </FeatureGuard>
             );
             case 'meetings': return <MeetingsSection />;
