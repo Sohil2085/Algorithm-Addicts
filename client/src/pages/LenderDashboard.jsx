@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import RiskBadge from '../components/RiskBadge';
+import VerifiedBadge from '../components/VerifiedBadge';
 import { useAuth } from '../context/AuthContext';
 import { FeatureGuard } from '../context/FeatureContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
@@ -1201,9 +1202,12 @@ const LenderDashboard = () => {
                                 <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
                                 Lender Dashboard
                             </div>
-                            <h1 className="text-4xl font-semibold text-theme-text tracking-tight">
+                            <h1 className="text-4xl font-semibold text-theme-text tracking-tight flex items-center gap-3">
                                 Welcome back,{' '}
-                                <span className="bg-gradient-to-r from-sky-400 to-blue-600 bg-clip-text text-transparent">{user?.name || 'Test Lender'}</span>
+                                <span className="bg-gradient-to-r from-sky-400 to-blue-600 bg-clip-text text-transparent flex items-center gap-2">
+                                    {user?.name || 'Test Lender'}
+                                    {isKycVerified && <VerifiedBadge size={28} className="translate-y-0.5" />}
+                                </span>
                             </h1>
                             <p className="text-theme-text-muted mt-2 text-sm">Here's what's happening with your investments today.</p>
                         </div>

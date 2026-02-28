@@ -253,6 +253,14 @@ model LenderProfile {
   // Verification
   verificationStatus VerificationStatus @default(NOT_SUBMITTED)
   adminRemark        String?
+  // Backend fields for verification
+  isRbiVerified      Boolean            @default(false)
+  isMcaVerified      Boolean            @default(false)
+  isPanVerified      Boolean            @default(false)
+  isBankVerified     Boolean            @default(false)
+  verificationRemark String?
+  isVerified         Boolean            @default(false)
+
   // Performance Metrics
   totalFundedAmount  Float              @default(0)
   totalDealsFunded   Int                @default(0)

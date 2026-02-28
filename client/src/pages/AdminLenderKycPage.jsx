@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPendingLenderKyc, approveLenderKyc, rejectLenderKyc } from '../api/adminApi';
+import { getPendingLenderKyc, approveLenderKyc, rejectLenderKyc, verifyLenderChecklist } from '../api/adminApi';
 import toast from 'react-hot-toast';
 import {
     CheckCircle, XCircle, Search, Building2, ExternalLink,
     ArrowLeft, Calendar, MapPin, Hash, User, ShieldCheck, FileText, Briefcase
 } from 'lucide-react';
 import AdminLayout from '../components/admin/AdminLayout';
+import VerifiedBadge from '../components/VerifiedBadge';
 
 const AdminLenderKycPage = () => {
     const navigate = useNavigate();
@@ -16,6 +17,26 @@ const AdminLenderKycPage = () => {
     const [rejectingId, setRejectingId] = useState(null);
     const [rejectReason, setRejectReason] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [checklistData, setChecklistData] = useState({
+        isRbiVerified: false,
+        isMcaVerified: false,
+        isPanVerified: false,
+        isBankVerified: false,
+        verificationRemark: ''
+    });
+    const [submittingChecklist, setSubmittingChecklist] = useState(false);
+
+    useEffect(() => {
+        if (selectedRequest) {
+            setChecklistData({
+                isRbiVerified: selectedRequest.isRbiVerified || false,
+                isMcaVerified: selectedRequest.isMcaVerified || false,
+                isPanVerified: selectedRequest.isPanVerified || false,
+                isBankVerified: selectedRequest.isBankVerified || false,
+                verificationRemark: selectedRequest.adminRemark || ''
+            });
+        }
+    }, [selectedRequest]);
 
     useEffect(() => {
         fetchAllKyc();
@@ -65,6 +86,20 @@ const AdminLenderKycPage = () => {
             setRejectReason('');
         } catch (error) {
             toast.error(typeof error === 'string' ? error : "Rejection failed");
+        }
+    };
+
+    const handleChecklistSubmit = async () => {
+        if (!selectedRequest) return;
+        setSubmittingChecklist(true);
+        try {
+            const data = await verifyLenderChecklist(selectedRequest.userId, checklistData);
+            toast.success(data.message || 'Lender verified');
+            await fetchAllKyc();
+        } catch (error) {
+            toast.error(typeof error === 'string' ? error : 'Failed to save checklist');
+        } finally {
+            setSubmittingChecklist(false);
         }
     };
 
@@ -124,7 +159,10 @@ const AdminLenderKycPage = () => {
                                         className={`w-full text-left p-4 transition-colors hover:bg-white/[0.04] ${selectedRequest?.id === req.id ? 'bg-blue-500/10 border-l-2 border-blue-500' : 'border-l-2 border-transparent'}`}
                                     >
                                         <div className="flex justify-between items-start mb-1">
-                                            <span className="font-semibold text-theme-text truncate max-w-[180px]">{req.organizationName || req.user?.name}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-semibold text-theme-text truncate max-w-[150px]">{req.organizationName || req.user?.name}</span>
+                                                {req.isVerified && <VerifiedBadge size={14} />}
+                                            </div>
                                             {req.verificationStatus === 'IN_REVIEW' && <span className="text-xs bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded-full whitespace-nowrap">Pending</span>}
                                         </div>
                                         <div className="text-xs text-theme-text-muted truncate flex items-center gap-1 mt-1">
@@ -154,7 +192,10 @@ const AdminLenderKycPage = () => {
                                             <Briefcase size={24} />
                                         </div>
                                         <div>
-                                            <h2 className="text-2xl font-bold text-theme-text">{selectedRequest.organizationName || selectedRequest.user?.name}</h2>
+                                            <div className="flex items-center gap-2">
+                                                <h2 className="text-2xl font-bold text-theme-text">{selectedRequest.organizationName || selectedRequest.user?.name}</h2>
+                                                {selectedRequest.isVerified && <VerifiedBadge size={20} />}
+                                            </div>
                                             <p className="text-theme-text-muted text-sm">Category: {selectedRequest.lenderType.replace(/_/g, ' ')}</p>
                                         </div>
                                     </div>
@@ -208,6 +249,94 @@ const AdminLenderKycPage = () => {
                                     <div>
                                         <h3 className="text-blue-400 font-semibold mb-1">Verify Lender Identity</h3>
                                         <p className="text-theme-text-muted text-sm mb-3">Ensure that RBI Licenses, PAN Details, and corporate registration IDs perfectly match official financial records.</p>
+                                    </div>
+                                </div>
+
+                                {/* Verification Checklist */}
+                                <div>
+                                    <h3 className="text-lg font-semibold text-theme-text mb-4 border-b border-theme-border pb-2">Verification Checklist</h3>
+                                    <div className="space-y-4">
+                                        {(selectedRequest.lenderType === 'BANK' || selectedRequest.lenderType === 'NBFC') && (
+                                            <div className="flex items-center justify-between bg-theme-bg p-3 rounded-xl border border-theme-border">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={checklistData.isRbiVerified}
+                                                        onChange={(e) => setChecklistData(prev => ({ ...prev, isRbiVerified: e.target.checked }))}
+                                                        className="w-4 h-4 rounded text-blue-500 bg-theme-surface border-theme-border"
+                                                    />
+                                                    <span className="text-theme-text text-sm">RBI License Verified</span>
+                                                </div>
+                                                <a href={selectedRequest.lenderType === 'BANK' ? "https://www.rbi.org.in/scripts/banklinks.aspx" : "https://rbi.org.in/Scripts/BS_NBFCList.aspx"} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs flex items-center gap-1">
+                                                    Check RBI <ExternalLink size={12} />
+                                                </a>
+                                            </div>
+                                        )}
+
+                                        {(selectedRequest.lenderType === 'REGISTERED_COMPANY' || selectedRequest.lenderType === 'OTHER_FINANCIAL_ENTITY') && (
+                                            <div className="flex items-center justify-between bg-theme-bg p-3 rounded-xl border border-theme-border">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={checklistData.isMcaVerified}
+                                                        onChange={(e) => setChecklistData(prev => ({ ...prev, isMcaVerified: e.target.checked }))}
+                                                        className="w-4 h-4 rounded text-blue-500 bg-theme-surface border-theme-border"
+                                                    />
+                                                    <span className="text-theme-text text-sm">
+                                                        {selectedRequest.lenderType === 'REGISTERED_COMPANY' ? 'MCA Registration Verified' : 'Registration Verified'}
+                                                    </span>
+                                                </div>
+                                                <a href="https://www.mca.gov.in/content/mca/global/en/mca/master-data/MDS.html" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs flex items-center gap-1">
+                                                    Check MCA <ExternalLink size={12} />
+                                                </a>
+                                            </div>
+                                        )}
+
+                                        {selectedRequest.lenderType === 'INDIVIDUAL_INVESTOR' && (
+                                            <div className="flex items-center justify-between bg-theme-bg p-3 rounded-xl border border-theme-border">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={checklistData.isPanVerified}
+                                                        onChange={(e) => setChecklistData(prev => ({ ...prev, isPanVerified: e.target.checked }))}
+                                                        className="w-4 h-4 rounded text-blue-500 bg-theme-surface border-theme-border"
+                                                    />
+                                                    <span className="text-theme-text text-sm">PAN Verified</span>
+                                                </div>
+                                                <a href="https://eportal.incometax.gov.in/iec/foservices/#/pre-login/verify-your-pan" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs flex items-center gap-1 whitespace-nowrap">
+                                                    Verify PAN <ExternalLink size={12} />
+                                                </a>
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-center gap-3 bg-theme-bg p-3 rounded-xl border border-theme-border">
+                                            <input
+                                                type="checkbox"
+                                                checked={checklistData.isBankVerified}
+                                                onChange={(e) => setChecklistData(prev => ({ ...prev, isBankVerified: e.target.checked }))}
+                                                className="w-4 h-4 rounded text-blue-500 bg-theme-surface border-theme-border"
+                                            />
+                                            <span className="text-theme-text text-sm">Bank Account Verified</span>
+                                        </div>
+
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-theme-text-muted text-sm">Verification Remark</label>
+                                            <textarea
+                                                value={checklistData.verificationRemark}
+                                                onChange={(e) => setChecklistData(prev => ({ ...prev, verificationRemark: e.target.value }))}
+                                                className="w-full bg-theme-bg border border-theme-border text-theme-text rounded-xl p-3 text-sm focus:outline-none focus:border-blue-500 h-24"
+                                                placeholder="Add any specific remarks here..."
+                                            />
+                                        </div>
+
+                                        <button
+                                            onClick={handleChecklistSubmit}
+                                            disabled={submittingChecklist}
+                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                                        >
+                                            {submittingChecklist ? <span className="animate-spin border-2 border-white/20 border-t-white w-4 h-4 rounded-full" /> : <ShieldCheck size={18} />}
+                                            {selectedRequest.isVerified ? 'Update Verification' : 'Save & Verify Lender'}
+                                        </button>
                                     </div>
                                 </div>
 
