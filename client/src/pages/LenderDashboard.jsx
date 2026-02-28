@@ -17,6 +17,7 @@ import {
 import StatCard from '../components/StatCard';
 import RiskBadge from '../components/RiskBadge';
 import VerifiedBadge from '../components/VerifiedBadge';
+import AgreementActions from '../components/AgreementActions';
 import { useAuth } from '../context/AuthContext';
 import { FeatureGuard } from '../context/FeatureContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
@@ -518,7 +519,9 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
                         <thead>
                             <tr className="border-b border-theme-border bg-theme-surface-hover">
                                 {['Invoice ID', 'MSME Name', 'Amount', 'Due Date', 'Credit Score', 'Risk Level', 'Exp. Return', 'Actions'].map(h => (
-                                    <th key={h} className="px-6 py-4 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
+                                    <th key={h} className={`px-6 py-4 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap ${h === 'Actions' ? 'text-right pr-30' : ''}`}>
+                                        {h}
+                                    </th>
                                 ))}
                             </tr>
                         </thead>
@@ -560,7 +563,7 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
                                             <span className="text-sm font-semibold text-emerald-400">{expReturn}%</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center justify-end gap-2">
+                                            <div className="flex items-center justify-end pr-10 gap-2">
                                                 <button
                                                     onClick={(e) => {
                                                         e.preventDefault();
@@ -665,29 +668,13 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal, onSignAgree
                                                 : <span className="text-theme-text-muted">—</span>}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex flex-col gap-1 items-start">
-                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${deal.lenderSigned && deal.msmeSigned ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
-                                                    {deal.lenderSigned && deal.msmeSigned ? 'SIGNED' : 'PENDING'}
-                                                </span>
-                                                <div className="flex gap-2 mt-1">
-                                                    <button
-                                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDownloadAgreement(deal.id); }}
-                                                        disabled={isDownloadingAgreement === deal.id}
-                                                        className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline"
-                                                    >
-                                                        Download
-                                                    </button>
-                                                    {!deal.lenderSigned && (
-                                                        <button
-                                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSignAgreement(deal.id); }}
-                                                            disabled={isSigningAgreement === deal.id}
-                                                            className="text-[10px] text-emerald-400 hover:text-emerald-300 hover:underline"
-                                                        >
-                                                            {isSigningAgreement === deal.id ? 'Signing...' : 'Sign'}
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
+                                            <AgreementActions
+                                                isSigned={deal.lenderSigned && deal.msmeSigned}
+                                                isDownloading={isDownloadingAgreement === deal.id}
+                                                isSigning={isSigningAgreement === deal.id}
+                                                onDownload={() => onDownloadAgreement(deal.id)}
+                                                onSign={() => onSignAgreement(deal.id)}
+                                            />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {deal.status === 'ACTIVE' ? (
