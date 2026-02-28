@@ -12,7 +12,7 @@ export const FeatureProvider = ({ children }) => {
     const fetchFeatures = async () => {
         try {
             // Using standard axios here since api.js might not be exporting perfectly for this independent context
-            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://algorithm-addicts.onrender.com/api' : 'http://localhost:5000/api');
             const response = await axios.get(`${API_BASE_URL}/features`, {
                 headers: {
                     Authorization: `Bearer ${token || localStorage.getItem('token')}`

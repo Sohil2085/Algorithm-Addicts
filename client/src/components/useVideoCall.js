@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://algorithm-addicts.onrender.com' : 'http://localhost:5000');
 
 const TURN_URL = import.meta.env.VITE_TURN_URL;
 const TURN_USERNAME = import.meta.env.VITE_TURN_USERNAME;
@@ -20,12 +20,12 @@ const ICE_CONFIG = {
     // Optional TURN for tough NATs (recommended to set via env)
     ...(TURN_URL
       ? [
-          {
-            urls: TURN_URL,
-            username: TURN_USERNAME,
-            credential: TURN_CREDENTIAL,
-          },
-        ]
+        {
+          urls: TURN_URL,
+          username: TURN_USERNAME,
+          credential: TURN_CREDENTIAL,
+        },
+      ]
       : []),
   ],
   iceCandidatePoolSize: 4,

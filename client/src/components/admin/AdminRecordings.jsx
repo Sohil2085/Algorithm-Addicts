@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Video, Download, Clock, Calendar, Users, AlertCircle } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://algorithm-addicts.onrender.com' : 'http://localhost:5000');
 
 export default function AdminRecordings() {
   const [recordings, setRecordings] = useState([]);
