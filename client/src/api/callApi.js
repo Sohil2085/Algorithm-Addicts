@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://algorithm-addicts.onrender.com' : 'http://localhost:5000');
 
 const getHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -31,7 +31,7 @@ export const getMultipleCallStatuses = async (dealIds) => {
   // Execute all status requests in parallel
   const promises = dealIds.map(id => getCallStatus(id).catch(() => ({ success: false, data: { status: 'UNKNOWN' } })));
   const results = await Promise.all(promises);
-  
+
   // Return a map of dealId -> status
   const statusMap = {};
   dealIds.forEach((id, index) => {
