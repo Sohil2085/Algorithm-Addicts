@@ -518,22 +518,24 @@ const MSMEDashboard = () => {
                                                             >
                                                                 {isRepayingDeal ? 'Processing...' : 'Repay Deal'}
                                                             </button>
-                                                            {['INITIATED', 'ONGOING'].includes(callStatuses[deal.id]) ? (
-                                                                <button
-                                                                    onClick={() => window.open(`/meeting/${deal.id}`, '_blank')}
-                                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 transition-all focus:ring-2 focus:ring-violet-400 focus:outline-none"
-                                                                >
-                                                                    <Video size={13} /> Join Call
-                                                                </button>
-                                                            ) : (
-                                                                <button
-                                                                    disabled
-                                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50"
-                                                                    title="Wait for Lender to start the meeting"
-                                                                >
-                                                                    <Video size={13} className="opacity-50" /> Wait for Lender
-                                                                </button>
-                                                            )}
+                                                            <FeatureGuard featureKey="COMMUNICATION_MODULE">
+                                                                {['INITIATED', 'ONGOING'].includes(callStatuses[deal.id]) ? (
+                                                                    <button
+                                                                        onClick={() => window.open(`/meeting/${deal.id}`, '_blank')}
+                                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 transition-all focus:ring-2 focus:ring-violet-400 focus:outline-none"
+                                                                    >
+                                                                        <Video size={13} /> Join Call
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        disabled
+                                                                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50"
+                                                                        title="Wait for Lender to start the meeting"
+                                                                    >
+                                                                        <Video size={13} className="opacity-50" /> Wait for Lender
+                                                                    </button>
+                                                                )}
+                                                            </FeatureGuard>
                                                         </div>
                                                     )}
                                                 </td>

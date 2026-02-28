@@ -166,7 +166,9 @@ const Navbar = () => {
                             <FeatureGuard featureKey="WALLET_MODULE">
                                 <NavLink to="/wallet" className={linkClass}>Wallet</NavLink>
                             </FeatureGuard>
-                            <NavLink to="/analytics" className={linkClass}>Analytics</NavLink>
+                            <FeatureGuard featureKey="ANALYTICS_MODULE">
+                                <NavLink to="/analytics" className={linkClass}>Analytics</NavLink>
+                            </FeatureGuard>
                             <NavLink
                                 to="/lender/kyc"
                                 className={({ isActive }) =>
@@ -213,7 +215,9 @@ const Navbar = () => {
                             <FeatureGuard featureKey="WALLET_MODULE">
                                 <NavLink to="/wallet" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Wallet</NavLink>
                             </FeatureGuard>
-                            <NavLink to="/analytics" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Analytics</NavLink>
+                            <FeatureGuard featureKey="ANALYTICS_MODULE">
+                                <NavLink to="/analytics" className={linkClass} onClick={() => setIsMobileMenuOpen(false)}>Analytics</NavLink>
+                            </FeatureGuard>
                             <NavLink
                                 to="/lender/kyc"
                                 onClick={() => setIsMobileMenuOpen(false)}
