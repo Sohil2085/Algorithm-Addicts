@@ -22,9 +22,6 @@ import {
     Download,
     ChevronRight,
     Loader2,
-<<<<<<< HEAD
-    Video,
-=======
     Eye,
     X,
     Building2,
@@ -32,9 +29,7 @@ import {
     MapPin,
     ShieldCheck,
     User,
-    Calendar,
-    PenLine
->>>>>>> 538aa729ac5e1f80bfb61dbd5c5552a9d563db6e
+    Calendar
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import VerifiedBadge from '../components/VerifiedBadge';
@@ -46,37 +41,6 @@ import { useAuth } from '../context/AuthContext';
 import { FeatureGuard } from '../context/FeatureContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
 import toast from 'react-hot-toast';
-
-const AgreementActions = ({ status, onDownload, onSign, canDownload, canSign, isDownloading, isSigning }) => {
-    return (
-        <div className="flex flex-col gap-2 items-start" onClick={(e) => e.stopPropagation()}>
-            <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-wider ${status === 'SIGNED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}>
-                {status}
-            </span>
-            <div className="flex items-center gap-2 justify-start min-w-[140px]">
-                <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDownload(); }}
-                    disabled={!canDownload || isDownloading}
-                    aria-label="Download agreement PDF"
-                    title="Download agreement PDF"
-                    className="flex items-center justify-center w-8 h-8 rounded-lg text-xs font-medium transition-all duration-200 border border-white/10 bg-white/5 hover:bg-white/10 text-theme-text-muted hover:text-theme-text disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <Download size={14} />
-                </button>
-                <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSign(); }}
-                    disabled={!canSign || isSigning}
-                    aria-label="Open e-sign flow"
-                    title={!canSign ? "Already signed" : "Open e-sign flow"}
-                    className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-all duration-200 ${canSign ? 'bg-blue-600/80 hover:bg-blue-600 text-white shadow-[0_0_20px_rgba(59,130,246,0.25)]' : 'bg-theme-surface border border-theme-border text-theme-text-muted opacity-50 cursor-not-allowed'}`}
-                >
-                    <PenLine size={14} />
-                    {isSigning ? 'Signing...' : (canSign ? 'Sign' : 'Signed')}
-                </button>
-            </div>
-        </div>
-    );
-};
 
 const MSMEDashboard = () => {
     const navigate = useNavigate();
@@ -90,7 +54,6 @@ const MSMEDashboard = () => {
     const [wallet, setWallet] = useState({ availableBalance: 0, lockedBalance: 0, totalEarnings: 0 });
     const [offers, setOffers] = useState([]);
     const [deals, setDeals] = useState([]);
-    const [callStatuses, setCallStatuses] = useState({}); // { dealId: 'INITIATED' | 'ENDED' | etc }
     const [isAcceptingOffer, setIsAcceptingOffer] = useState(false);
     const [isRepayingDeal, setIsRepayingDeal] = useState(false);
 
@@ -135,15 +98,6 @@ const MSMEDashboard = () => {
             setWallet(walletData || { availableBalance: 0, lockedBalance: 0, totalEarnings: 0 });
             setOffers(offersData || []);
             setDeals(dealsData || []);
-
-            // Fetch initial call statuses for active deals
-            if (dealsData && dealsData.length > 0) {
-                const activeDealIds = dealsData.filter(d => d.status === 'ACTIVE').map(d => d.id);
-                if (activeDealIds.length > 0) {
-                    const statuses = await getMultipleCallStatuses(activeDealIds);
-                    setCallStatuses(statuses);
-                }
-            }
         } catch (error) {
             console.error('Error loading dashboard data:', error);
         } finally {
@@ -155,19 +109,6 @@ const MSMEDashboard = () => {
     useEffect(() => {
         loadDashboardData();
     }, [user?.kycStatus]);
-
-    // Listen for custom event from the global notification hook to instantly unlock the button
-    useEffect(() => {
-        const handleMeetingStarted = (e) => {
-            const { dealId } = e.detail;
-            setCallStatuses(prev => ({
-                ...prev,
-                [dealId]: 'INITIATED'
-            }));
-        };
-        window.addEventListener('meeting:started:local', handleMeetingStarted);
-        return () => window.removeEventListener('meeting:started:local', handleMeetingStarted);
-    }, []);
 
     const handleAcceptOffer = async (offerId) => {
         setIsAcceptingOffer(true);
@@ -512,15 +453,29 @@ const MSMEDashboard = () => {
                                                     {new Date(deal.dueDate).toLocaleDateString('en-IN')}
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
-                                                    <AgreementActions
-                                                        status={deal.lenderSigned && deal.msmeSigned ? 'SIGNED' : 'PENDING'}
-                                                        onDownload={() => handleDownloadAgreement(deal.id)}
-                                                        onSign={() => handleSignAgreement(deal.id)}
-                                                        canDownload={true}
-                                                        canSign={!deal.msmeSigned}
-                                                        isDownloading={isDownloadingAgreement === deal.id}
-                                                        isSigning={isSigningAgreement === deal.id}
-                                                    />
+                                                    <div className="flex flex-col gap-1 items-start">
+                                                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${deal.lenderSigned && deal.msmeSigned ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                            {deal.lenderSigned && deal.msmeSigned ? 'SIGNED' : 'PENDING'}
+                                                        </span>
+                                                        <div className="flex gap-2 mt-1">
+                                                            <button
+                                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDownloadAgreement(deal.id); }}
+                                                                disabled={isDownloadingAgreement === deal.id}
+                                                                className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline"
+                                                            >
+                                                                Download
+                                                            </button>
+                                                            {!deal.msmeSigned && (
+                                                                <button
+                                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleSignAgreement(deal.id); }}
+                                                                    disabled={isSigningAgreement === deal.id}
+                                                                    className="text-[10px] text-emerald-400 hover:text-emerald-300 hover:underline"
+                                                                >
+                                                                    {isSigningAgreement === deal.id ? 'Signing...' : 'Sign'}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
                                                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${deal.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
@@ -529,32 +484,14 @@ const MSMEDashboard = () => {
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
                                                     {deal.status === 'ACTIVE' && (
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <button
-                                                                onClick={() => handleRepayDeal(deal.id)}
-                                                                disabled={isRepayingDeal || wallet.availableBalance < deal.totalPayableToLender}
-                                                                className="px-3 py-1.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
-                                                                title={wallet.availableBalance < deal.totalPayableToLender ? "Insufficient wallet balance" : "Repay this deal"}
-                                                            >
-                                                                {isRepayingDeal ? 'Processing...' : 'Repay Deal'}
-                                                            </button>
-                                                            {['INITIATED', 'ONGOING'].includes(callStatuses[deal.id]) ? (
-                                                                <button
-                                                                    onClick={() => window.open(`/meeting/${deal.id}`, '_blank')}
-                                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 transition-all focus:ring-2 focus:ring-violet-400 focus:outline-none"
-                                                                >
-                                                                    <Video size={13} /> Join Call
-                                                                </button>
-                                                            ) : (
-                                                                <button
-                                                                    disabled
-                                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50"
-                                                                    title="Wait for Lender to start the meeting"
-                                                                >
-                                                                    <Video size={13} className="opacity-50" /> Wait for Lender
-                                                                </button>
-                                                            )}
-                                                        </div>
+                                                        <button
+                                                            onClick={() => handleRepayDeal(deal.id)}
+                                                            disabled={isRepayingDeal || wallet.availableBalance < deal.totalPayableToLender}
+                                                            className="px-3 py-1.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+                                                            title={wallet.availableBalance < deal.totalPayableToLender ? "Insufficient wallet balance" : "Repay this deal"}
+                                                        >
+                                                            {isRepayingDeal ? 'Processing...' : 'Repay Deal'}
+                                                        </button>
                                                     )}
                                                 </td>
                                             </tr>
