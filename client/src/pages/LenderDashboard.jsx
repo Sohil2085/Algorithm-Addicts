@@ -20,6 +20,8 @@ import VerifiedBadge from '../components/VerifiedBadge';
 import { useAuth } from '../context/AuthContext';
 import { FeatureGuard } from '../context/FeatureContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
+// Temporary fallback until meeting recordings API is integrated
+const getRecordings = async () => ({ success: false, data: null });
 import toast from 'react-hot-toast';
 import { getAvailableInvoices } from '../api/invoiceApi';
 import { getMyWallet } from '../api/walletApi';
@@ -28,19 +30,18 @@ import { getMyDeals, fundDeal, signAgreement, downloadAgreement } from '../api/d
 import '../styles/landing.css';
 // ─── Static Dummy Data ────────────────────────────────────────────────────────
 // TODO: Replace with API calls when backend bidding endpoints are ready
-
 const DUMMY_PORTFOLIO_TREND = [
-    { month: 'Sep', invested: 180000, returns: 12600 },
-    { month: 'Oct', invested: 240000, returns: 18200 },
-    { month: 'Nov', invested: 310000, returns: 24800 },
-    { month: 'Dec', invested: 275000, returns: 22000 },
-    { month: 'Jan', invested: 420000, returns: 35700 },
-    { month: 'Feb', invested: 510000, returns: 45900 },
+    { month: 'Sep', invested: 0, returns: 0 },
+    { month: 'Oct', invested: 0, returns: 0 },
+    { month: 'Nov', invested: 0, returns: 0 },
+    { month: 'Dec', invested: 0, returns: 0 },
+    { month: 'Jan', invested: 0, returns: 0 },
+    { month: 'Feb', invested: 0, returns: 0 },
 ];
 
 const DUMMY_RISK_DISTRIBUTION = [
-    { name: 'Low Risk', value: 54, color: '#22c55e' },
-    { name: 'Medium Risk', value: 31, color: '#f59e0b' },
+    { name: 'Low Risk', value: 50, color: '#22c55e' },
+    { name: 'Medium Risk', value: 35, color: '#f59e0b' },
     { name: 'High Risk', value: 15, color: '#ef4444' },
 ];
 
@@ -50,27 +51,7 @@ const DUMMY_DEFAULT_PROB = [
     { tier: 'HIGH', probability: 21.7 },
 ];
 
-const DUMMY_AVAILABLE_INVOICES = [
-    { id: 'a3f9b1', msmeName: 'Apex Textiles Pvt. Ltd.', amount: 480000, dueDate: '2026-03-15', creditScore: 84, riskLevel: 'LOW', expectedReturn: 9.2 },
-    { id: 'b7d2c4', msmeName: 'Nova Steel Works', amount: 125000, dueDate: '2026-03-08', creditScore: 61, riskLevel: 'MEDIUM', expectedReturn: 13.5 },
-    { id: 'c1e8a5', msmeName: 'Sunrise Agro Foods', amount: 92000, dueDate: '2026-02-28', creditScore: 43, riskLevel: 'HIGH', expectedReturn: 19.8 },
-    { id: 'd6f3b9', msmeName: 'BlueLine Logistics', amount: 670000, dueDate: '2026-04-01', creditScore: 91, riskLevel: 'LOW', expectedReturn: 8.1 },
-    { id: 'e2a7d1', msmeName: 'Crestwood Electronics', amount: 215000, dueDate: '2026-03-22', creditScore: 73, riskLevel: 'MEDIUM', expectedReturn: 11.9 },
-    { id: 'f9c4e6', msmeName: 'Vega Pharma Supplies', amount: 340000, dueDate: '2026-03-30', creditScore: 88, riskLevel: 'LOW', expectedReturn: 8.7 },
-];
 
-const DUMMY_MY_INVESTMENTS = [
-    { id: 'a3f9b1', msmeName: 'Apex Textiles Pvt. Ltd.', invested: 200000, interestRate: 9.2, expectedReturn: 18400, dueDate: '2026-03-15', daysRemaining: 23, status: 'ACTIVE' },
-    { id: 'd6f3b9', msmeName: 'BlueLine Logistics', invested: 350000, interestRate: 8.1, expectedReturn: 28350, dueDate: '2026-04-01', daysRemaining: 40, status: 'ACTIVE' },
-    { id: 'g4h2i7', msmeName: 'Kiran Auto Parts', invested: 90000, interestRate: 14.5, expectedReturn: 13050, dueDate: '2026-01-20', daysRemaining: 0, status: 'SETTLED' },
-    { id: 'h5j3k8', msmeName: 'Delta Garments', invested: 60000, interestRate: 22.0, expectedReturn: 13200, dueDate: '2026-01-05', daysRemaining: 0, status: 'DEFAULTED' },
-];
-
-const DUMMY_MEETINGS = [
-    { invoiceId: 'a3f9b1', msmeName: 'Apex Textiles Pvt. Ltd.', meetingDate: '2026-02-18', duration: '32 min', recordingStatus: 'AVAILABLE' },
-    { invoiceId: 'b7d2c4', msmeName: 'Nova Steel Works', meetingDate: '2026-02-19', duration: '21 min', recordingStatus: 'PROCESSING' },
-    { invoiceId: 'e2a7d1', msmeName: 'Crestwood Electronics', meetingDate: '2026-02-15', duration: '45 min', recordingStatus: 'AVAILABLE' },
-];
 
 const DUMMY_SECTOR_DATA = [
     { name: 'Textiles', value: 35, color: '#3b82f6' },
@@ -89,36 +70,11 @@ const DUMMY_ROI_BENCHMARK = [
     { month: 'Feb', portfolio: 12.4, benchmark: 7.2 },
 ];
 
-const DUMMY_INVOICE_DETAILS = {
-    'a3f9b1': {
-        founded: '2015',
-        employees: '120-150',
-        location: 'Surat, Gujarat',
-        gstin: '24AAACA1234A1Z5',
-        sector: 'Textiles',
-        description: 'Manufacturer of high-quality cotton and synthetic fabrics for export markets.',
-        financials: { revenue: '₹42 Cr', profit: '₹3.8 Cr', yoyGrowth: '+12%' },
-        documents: ['Invoice-INV-2026-001.pdf', 'E-Way-Bill-827364.pdf', 'Purchase-Order.pdf'],
-        fraudCheck: { status: 'PASSED', score: 98, flags: [] },
-        repaymentHistory: { onTime: 95, late: 5, default: 0 }
-    },
-    'b7d2c4': {
-        founded: '2018',
-        employees: '40-60',
-        location: 'Pune, Maharashtra',
-        gstin: '27AABCN5678B1Z2',
-        sector: 'Manufacturing',
-        description: 'Specialized steel components for automotive industry.',
-        financials: { revenue: '₹18 Cr', profit: '₹1.2 Cr', yoyGrowth: '+8%' },
-        documents: ['Invoice-9928.pdf', 'Delivery-Challan.pdf'],
-        fraudCheck: { status: 'WARNING', score: 82, flags: ['Address verification pending'] },
-        repaymentHistory: { onTime: 88, late: 12, default: 0 }
-    }
-};
+
 
 // ─── Helper Components ────────────────────────────────────────────────────────
 
-const PremiumStatCard = ({ title, value, icon: Icon, trend, trendValue }) => {
+const PremiumStatCard = ({ title, value, icon: Icon, trendValue }) => {
     return (
         <div className="rounded-2xl bg-theme-elevated/20 backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-theme-elevated/40 hover:border-theme-border-focus hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between">
             <div className="flex justify-between items-start mb-4">
@@ -183,29 +139,29 @@ const TABS = [
 const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
     if (!invoice) return null;
 
-    const isMock = invoice.expectedReturn !== undefined && !invoice.original;
-    const dummyDetails = isMock ? (DUMMY_INVOICE_DETAILS[invoice.id] || DUMMY_INVOICE_DETAILS['a3f9b1']) : null;
-
     // Extract real info based on backend structure
-    const kyc = !isMock && invoice.original?.user?.kyc ? invoice.original.user.kyc : {};
-    const msmeName = kyc.businessName || kyc.legalName || invoice.msmeName || 'Unknown MSME';
-    const sector = !isMock ? 'General Sector' : dummyDetails.sector;
-    const location = kyc.stateCode ? `State Code: ${kyc.stateCode}` : (isMock ? dummyDetails.location : 'India');
-    const revenueStr = kyc.turnover ? `₹${(kyc.turnover / 100000).toFixed(1)}L` : (isMock ? dummyDetails.financials.revenue : 'N/A');
+    const kyc = invoice.original?.user?.kyc || {};
+    const msmeName = invoice.msmeName || kyc.businessName || kyc.legalName || 'Unknown MSME';
+    const sector = 'General Sector'; 
+    const location = kyc.stateCode ? `State Code: ${kyc.stateCode}` : 'India';
+    const revenueStr = kyc.turnover ? `₹${(kyc.turnover / 100000).toFixed(1)}L` : 'N/A';
     const expectedReturnStr = invoice.expectedReturn || (invoice.riskLevel === 'HIGH' ? 18.5 : invoice.riskLevel === 'MEDIUM' ? 14.0 : 9.5);
 
     // Fraud checks formatting
     const isFraudWarning = invoice.fraudScore > 20;
     const fraudStatusText = isFraudWarning ? 'WARNING' : 'PASSED';
 
-    let fraudFlags = isMock ? dummyDetails.fraudCheck.flags : [];
-    if (!isMock && invoice.breakdown?.fraudChecks) {
+    let fraudFlags = [];
+    if (invoice.breakdown?.fraudChecks) {
         fraudFlags = Object.entries(invoice.breakdown.fraudChecks)
             .filter(([k, v]) => !v)
             .map(([k]) => k.replace(/_/g, ' '));
+    } else if (invoice.original?.fraud_flags?.length > 0) {
+        fraudFlags = invoice.original.fraud_flags.map(f => f.reason);
     }
 
-    const docs = isMock ? dummyDetails.documents : ['Invoice_Copy.pdf', 'GST_Certificate.pdf'];
+    const docs = ['Invoice_Copy.pdf'];
+    if (kyc.gstCertificateUrl) docs.push('GST_Certificate.pdf');
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -348,9 +304,55 @@ const InvoiceDetailPanel = ({ invoice, onClose, onFundInvoice }) => {
 // ─── Section Components ───────────────────────────────────────────────────────
 
 const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
-    const totalInvested = myDeals.reduce((sum, deal) => sum + parseFloat(deal.fundedAmount), 0);
+    const totalInvested = myDeals.reduce((sum, deal) => sum + parseFloat(deal.fundedAmount || 0), 0);
     const activeDeals = myDeals.filter(d => d.status === 'ACTIVE').length;
-    const totalReturns = myDeals.reduce((sum, deal) => sum + parseFloat(deal.interestAmount), 0);
+    const totalReturns = myDeals.reduce((sum, deal) => sum + parseFloat(deal.interestAmount || 0), 0);
+
+    const portfolioTrend = React.useMemo(() => {
+        if (!myDeals.length) return DUMMY_PORTFOLIO_TREND;
+        
+        const trendMap = {};
+        myDeals.forEach(deal => {
+            const date = new Date(deal.createdAt);
+            const monthStr = date.toLocaleString('default', { month: 'short' });
+            if (!trendMap[monthStr]) {
+                trendMap[monthStr] = { month: monthStr, invested: 0, returns: 0, _sort: date.getTime() };
+            }
+            trendMap[monthStr].invested += parseFloat(deal.fundedAmount || 0);
+            trendMap[monthStr].returns += parseFloat(deal.interestAmount || 0);
+        });
+        
+        return Object.values(trendMap).sort((a,b) => a._sort - b._sort).slice(-6);
+    }, [myDeals]);
+
+    const riskDistribution = React.useMemo(() => {
+        if (!myDeals.length) return DUMMY_RISK_DISTRIBUTION;
+        
+        const counts = { 'LOW': 0, 'MEDIUM': 0, 'HIGH': 0 };
+        let hasValidRisk = false;
+        myDeals.forEach(deal => {
+            const risk = deal.invoice?.risk_analysis?.creditRiskBand;
+            if (risk && counts[risk] !== undefined) {
+                counts[risk]++;
+                hasValidRisk = true;
+            } else {
+                counts['MEDIUM']++; // fallback
+            }
+        });
+        
+        if (!hasValidRisk && myDeals.length === 0) return DUMMY_RISK_DISTRIBUTION;
+        const total = myDeals.length;
+
+        return [
+            { name: 'Low Risk', value: Math.round((counts['LOW']/total)*100), color: '#22c55e' },
+            { name: 'Medium Risk', value: Math.round((counts['MEDIUM']/total)*100), color: '#f59e0b' },
+            { name: 'High Risk', value: Math.round((counts['HIGH']/total)*100), color: '#ef4444' }
+        ];
+    }, [myDeals]);
+
+    const dominantRisk = React.useMemo(() => {
+        return [...riskDistribution].sort((a,b) => b.value - a.value)[0];
+    }, [riskDistribution]);
 
     return (
         <div className="space-y-8">
@@ -375,7 +377,7 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
                     </div>
                     <div className="h-64">
                         <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                            <LineChart data={DUMMY_PORTFOLIO_TREND}>
+                            <LineChart data={portfolioTrend}>
                                 <defs>
                                     <linearGradient id="investedGrad" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
@@ -413,12 +415,12 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
                         <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                             <PieChart>
                                 <Pie
-                                    data={DUMMY_RISK_DISTRIBUTION}
+                                    data={riskDistribution}
                                     cx="50%" cy="50%"
                                     innerRadius={52} outerRadius={78}
                                     paddingAngle={4} dataKey="value"
                                 >
-                                    {DUMMY_RISK_DISTRIBUTION.map((entry, i) => (
+                                    {riskDistribution.map((entry, i) => (
                                         <Cell key={i} fill={entry.color} />
                                     ))}
                                 </Pie>
@@ -429,12 +431,12 @@ const OverviewSection = ({ onExploreMarketplace, wallet, myDeals }) => {
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-xl font-bold text-theme-text">54%</span>
-                            <span className="text-xs text-theme-text-muted">Low Risk</span>
+                            <span className="text-xl font-bold text-theme-text">{dominantRisk.value}%</span>
+                            <span className="text-xs text-theme-text-muted">{dominantRisk.name}</span>
                         </div>
                     </div>
                     <div className="flex flex-col gap-2 mt-2">
-                        {DUMMY_RISK_DISTRIBUTION.map((item) => (
+                        {riskDistribution.map((item) => (
                             <div key={item.name} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
@@ -810,7 +812,73 @@ const MeetingsSection = ({ myDeals }) => {
     );
 };
 
-const AnalyticsSection = () => (
+const AnalyticsSection = ({ myDeals = [] }) => {
+    const stats = React.useMemo(() => {
+        if (!myDeals.length) return {
+            avgCredit: '0', defaultRate: '0%', avgReturn: '0%',
+            sectorData: DUMMY_SECTOR_DATA, roiData: DUMMY_ROI_BENCHMARK
+        };
+
+        let totalCredit = 0;
+        let creditCount = 0;
+        let defaulted = 0;
+        let totalInvested = 0;
+        let totalReturns = 0;
+        const stateCounts = {};
+        const roiMap = {};
+
+        myDeals.forEach(deal => {
+            if (deal.invoice?.risk_analysis?.creditScore) {
+                totalCredit += deal.invoice.risk_analysis.creditScore;
+                creditCount++;
+            }
+            if (deal.status === 'DEFAULTED') defaulted++;
+            
+            totalInvested += parseFloat(deal.fundedAmount || 0);
+            totalReturns += parseFloat(deal.interestAmount || 0);
+
+            const state = deal.msme?.kyc?.stateCode || 'Other';
+            stateCounts[state] = (stateCounts[state] || 0) + 1;
+
+            const date = new Date(deal.createdAt);
+            const monthStr = date.toLocaleString('default', { month: 'short' });
+            if (!roiMap[monthStr]) {
+                roiMap[monthStr] = { month: monthStr, invested: 0, returns: 0, _sort: date.getTime() };
+            }
+            roiMap[monthStr].invested += parseFloat(deal.fundedAmount || 0);
+            roiMap[monthStr].returns += parseFloat(deal.interestAmount || 0);
+        });
+
+        const avgCredit = creditCount > 0 ? (totalCredit / creditCount).toFixed(1) : '—';
+        const defaultRate = ((defaulted / myDeals.length) * 100).toFixed(1) + '%';
+        const avgReturn = totalInvested > 0 ? ((totalReturns / totalInvested) * 100).toFixed(1) + '%' : '0%';
+
+        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#8b5cf6', '#ef4444'];
+        const sectorData = Object.entries(stateCounts)
+            .sort((a,b) => b[1] - a[1])
+            .map(([name, val], i) => ({
+                name: `State: ${name}`,
+                value: Math.round((val / myDeals.length) * 100),
+                color: colors[i % colors.length]
+            }));
+
+        const roiData = Object.values(roiMap).sort((a,b) => a._sort - b._sort).map((m) => {
+            const mRoi = m.invested > 0 ? (m.returns / m.invested) * 100 : 0;
+            const dummy = DUMMY_ROI_BENCHMARK.find(d => d.month === m.month);
+            return {
+                month: m.month,
+                portfolio: parseFloat(mRoi.toFixed(1)),
+                benchmark: dummy ? dummy.benchmark : 6.8
+            };
+        });
+
+        const finalRoiData = roiData.length > 0 ? roiData : DUMMY_ROI_BENCHMARK;
+        const finalSectorData = sectorData.length > 0 ? sectorData : DUMMY_SECTOR_DATA;
+
+        return { avgCredit, defaultRate, avgReturn, sectorData: finalSectorData, roiData: finalRoiData };
+    }, [myDeals]);
+
+    return (
     <div className="space-y-8">
         <div>
             <h2 className="text-2xl font-bold text-theme-text tracking-tight">Risk Analytics</h2>
@@ -820,9 +888,9 @@ const AnalyticsSection = () => (
         {/* Summary Stat Blocks */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-                { label: 'Average Credit Score', value: '76.8', sub: 'Across all funded invoices', color: '#3b82f6' },
-                { label: 'Default Rate', value: '8.3%', sub: 'Historical portfolio average', color: '#ef4444' },
-                { label: 'Avg. Return Rate', value: '11.2%', sub: 'Annualised across all investments', color: '#10b981' },
+                { label: 'Average Credit Score', value: stats.avgCredit, sub: 'Across all funded invoices', color: '#3b82f6' },
+                { label: 'Default Rate', value: stats.defaultRate, sub: 'Historical portfolio average', color: '#ef4444' },
+                { label: 'Avg. Return Rate', value: stats.avgReturn, sub: 'Annualised across all investments', color: '#10b981' },
             ].map(stat => (
                 <div key={stat.label} className="rounded-2xl bg-theme-surface-hover backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 text-center transition-all duration-300 hover:bg-theme-surface-hover hover:border-theme-border hover:-translate-y-0.5">
                     <div className="text-3xl font-extrabold mb-2" style={{ color: stat.color }}>{stat.value}</div>
@@ -861,20 +929,20 @@ const AnalyticsSection = () => (
 
             {/* Portfolio Allocation Pie - NOW SECTOR WISE */}
             <div className="rounded-2xl bg-theme-elevated/20 backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] p-6 transition-all duration-300 hover:bg-theme-elevated/40 hover:border-theme-border-focus min-w-0">
-                <h3 className="text-lg font-semibold text-theme-text mb-1">Sector Allocation</h3>
-                <p className="text-xs text-theme-text-muted mb-6">Investment distribution by industry</p>
+                <h3 className="text-lg font-semibold text-theme-text mb-1">State Allocation</h3>
+                <p className="text-xs text-theme-text-muted mb-6">Investment distribution by region</p>
                 <div className="h-56 relative">
                     <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                         <PieChart>
                             <Pie
-                                data={DUMMY_SECTOR_DATA}
+                                data={stats.sectorData}
                                 cx="50%" cy="50%"
                                 outerRadius={80}
                                 paddingAngle={3}
                                 dataKey="value"
                                 stroke="none"
                             >
-                                {DUMMY_SECTOR_DATA.map((entry, i) => (
+                                {stats.sectorData.map((entry, i) => (
                                     <Cell key={i} fill={entry.color} />
                                 ))}
                             </Pie>
@@ -886,7 +954,7 @@ const AnalyticsSection = () => (
                     </ResponsiveContainer>
                 </div>
                 <div className="flex flex-wrap gap-3 mt-2 justify-center">
-                    {DUMMY_SECTOR_DATA.map(item => (
+                    {stats.sectorData.map(item => (
                         <div key={item.name} className="flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                             <span className="text-xs text-theme-text-muted">{item.name}</span>
@@ -910,7 +978,7 @@ const AnalyticsSection = () => (
             </div>
             <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
-                    <LineChart data={DUMMY_ROI_BENCHMARK}>
+                    <LineChart data={stats.roiData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
                         <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                         <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
@@ -943,7 +1011,8 @@ const AnalyticsSection = () => (
             </div>
         </div>
     </div>
-);
+    );
+};
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
@@ -1182,7 +1251,7 @@ const LenderDashboard = () => {
                 </FeatureGuard>
             );
             case 'meetings': return <MeetingsSection myDeals={myDeals} />;
-            case 'analytics': return <AnalyticsSection />;
+            case 'analytics': return <AnalyticsSection myDeals={myDeals} />;
             default: return <OverviewSection wallet={wallet} myDeals={myDeals} />;
         }
     };

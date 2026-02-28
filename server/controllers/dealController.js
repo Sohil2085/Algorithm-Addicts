@@ -11,9 +11,21 @@ export const getMyDeals = async (req, res) => {
         const deals = await prisma.deal.findMany({
             where: whereClause,
             include: {
-                invoice: { select: { invoice_number: true, due_date: true, amount: true } },
+                invoice: { 
+                    select: { 
+                        invoice_number: true, 
+                        due_date: true, 
+                        amount: true,
+                        risk_analysis: true
+                    } 
+                },
                 lender: { select: { name: true } },
-                msme: { select: { name: true } }
+                msme: { 
+                    select: { 
+                        name: true,
+                        kyc: true
+                    } 
+                }
             }
         });
 
