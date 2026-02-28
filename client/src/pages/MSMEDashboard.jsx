@@ -22,9 +22,7 @@ import {
     Download,
     ChevronRight,
     Loader2,
-<<<<<<< HEAD
     Video,
-=======
     Eye,
     X,
     Building2,
@@ -33,7 +31,6 @@ import {
     ShieldCheck,
     User,
     Calendar
->>>>>>> 538aa729ac5e1f80bfb61dbd5c5552a9d563db6e
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import VerifiedBadge from '../components/VerifiedBadge';
