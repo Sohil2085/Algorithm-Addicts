@@ -63,6 +63,15 @@ export const rejectLenderKyc = async (id, adminRemark) => {
     }
 };
 
+export const verifyLenderChecklist = async (id, checklistData) => {
+    try {
+        const response = await api.patch(`/admin/lender/${id}/verify`, checklistData);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.message || 'Failed to verify lender';
+    }
+};
+
 export const getAllDeals = async () => {
     try {
         const response = await api.get('/admin/deals');

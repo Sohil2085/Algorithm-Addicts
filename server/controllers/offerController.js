@@ -10,12 +10,27 @@ export const getMyOffers = async (req, res) => {
                 status: 'PENDING'
             },
             include: {
-                lender: { select: { id: true, name: true } },
+                lender: {
+                    select: {
+                        id: true,
+                        name: true,
+                        lenderProfile: true
+                    }
+                },
                 invoice: { select: { id: true, amount: true, invoice_number: true } }
             }
         });
 
-        res.status(200).json(offers);
+        // Map LenderProfile to kyc for the frontend
+        const mappedOffers = offers.map(offer => {
+            if (offer.lender && offer.lender.lenderProfile) {
+                offer.lender.kyc = offer.lender.lenderProfile;
+                delete offer.lender.lenderProfile;
+            }
+            return offer;
+        });
+
+        res.status(200).json(mappedOffers);
     } catch (error) {
         console.error('Error fetching offers:', error);
         res.status(500).json({ message: 'Server error retrieving offers' });
