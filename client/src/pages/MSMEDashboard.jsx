@@ -22,7 +22,6 @@ import {
     Download,
     ChevronRight,
     Loader2,
-    Video,
     Eye,
     X,
     Building2,
@@ -42,7 +41,6 @@ import { useAuth } from '../context/AuthContext';
 import { FeatureGuard } from '../context/FeatureContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
 import toast from 'react-hot-toast';
-import { getMultipleCallStatuses } from '../api/callApi';
 
 const MSMEDashboard = () => {
     const navigate = useNavigate();
@@ -56,7 +54,6 @@ const MSMEDashboard = () => {
     const [wallet, setWallet] = useState({ availableBalance: 0, lockedBalance: 0, totalEarnings: 0 });
     const [offers, setOffers] = useState([]);
     const [deals, setDeals] = useState([]);
-    const [callStatuses, setCallStatuses] = useState({}); // { dealId: 'INITIATED' | 'ENDED' | etc }
     const [isAcceptingOffer, setIsAcceptingOffer] = useState(false);
     const [isRepayingDeal, setIsRepayingDeal] = useState(false);
 
@@ -101,15 +98,6 @@ const MSMEDashboard = () => {
             setWallet(walletData || { availableBalance: 0, lockedBalance: 0, totalEarnings: 0 });
             setOffers(offersData || []);
             setDeals(dealsData || []);
-
-            // Fetch initial call statuses for active deals
-            if (dealsData && dealsData.length > 0) {
-                const activeDealIds = dealsData.filter(d => d.status === 'ACTIVE').map(d => d.id);
-                if (activeDealIds.length > 0) {
-                    const statuses = await getMultipleCallStatuses(activeDealIds);
-                    setCallStatuses(statuses);
-                }
-            }
         } catch (error) {
             console.error('Error loading dashboard data:', error);
         } finally {
@@ -121,19 +109,6 @@ const MSMEDashboard = () => {
     useEffect(() => {
         loadDashboardData();
     }, [user?.kycStatus]);
-
-    // Listen for custom event from the global notification hook to instantly unlock the button
-    useEffect(() => {
-        const handleMeetingStarted = (e) => {
-            const { dealId } = e.detail;
-            setCallStatuses(prev => ({
-                ...prev,
-                [dealId]: 'INITIATED'
-            }));
-        };
-        window.addEventListener('meeting:started:local', handleMeetingStarted);
-        return () => window.removeEventListener('meeting:started:local', handleMeetingStarted);
-    }, []);
 
     const handleAcceptOffer = async (offerId) => {
         setIsAcceptingOffer(true);
@@ -509,32 +484,14 @@ const MSMEDashboard = () => {
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
                                                     {deal.status === 'ACTIVE' && (
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <button
-                                                                onClick={() => handleRepayDeal(deal.id)}
-                                                                disabled={isRepayingDeal || wallet.availableBalance < deal.totalPayableToLender}
-                                                                className="px-3 py-1.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
-                                                                title={wallet.availableBalance < deal.totalPayableToLender ? "Insufficient wallet balance" : "Repay this deal"}
-                                                            >
-                                                                {isRepayingDeal ? 'Processing...' : 'Repay Deal'}
-                                                            </button>
-                                                            {['INITIATED', 'ONGOING'].includes(callStatuses[deal.id]) ? (
-                                                                <button
-                                                                    onClick={() => window.open(`/meeting/${deal.id}`, '_blank')}
-                                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 transition-all focus:ring-2 focus:ring-violet-400 focus:outline-none"
-                                                                >
-                                                                    <Video size={13} /> Join Call
-                                                                </button>
-                                                            ) : (
-                                                                <button
-                                                                    disabled
-                                                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50"
-                                                                    title="Wait for Lender to start the meeting"
-                                                                >
-                                                                    <Video size={13} className="opacity-50" /> Wait for Lender
-                                                                </button>
-                                                            )}
-                                                        </div>
+                                                        <button
+                                                            onClick={() => handleRepayDeal(deal.id)}
+                                                            disabled={isRepayingDeal || wallet.availableBalance < deal.totalPayableToLender}
+                                                            className="px-3 py-1.5 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+                                                            title={wallet.availableBalance < deal.totalPayableToLender ? "Insufficient wallet balance" : "Repay this deal"}
+                                                        >
+                                                            {isRepayingDeal ? 'Processing...' : 'Repay Deal'}
+                                                        </button>
                                                     )}
                                                 </td>
                                             </tr>
