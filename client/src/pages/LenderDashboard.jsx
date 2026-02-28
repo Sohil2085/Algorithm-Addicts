@@ -678,13 +678,22 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal, onSignAgree
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {deal.status === 'ACTIVE' ? (
-                                                <button
-                                                    onClick={() => onFundDeal(deal.id)}
-                                                    disabled={isSubmittingDeal}
-                                                    className={`btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1 ${isSubmittingDeal ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                                    {isSubmittingDeal ? <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Zap size={13} />}
-                                                    {isSubmittingDeal ? 'Processing...' : 'Fund Deal'}
-                                                </button>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => onFundDeal(deal.id)}
+                                                        disabled={isSubmittingDeal}
+                                                        className={`btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1 ${isSubmittingDeal ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                        {isSubmittingDeal ? <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Zap size={13} />}
+                                                        {isSubmittingDeal ? 'Processing...' : 'Fund Deal'}
+                                                    </button>
+                                                    <FeatureGuard featureKey="COMMUNICATION_MODULE">
+                                                        <button
+                                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(`/meeting/${deal.id}`, '_blank'); }}
+                                                            className="px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 transition-all box-border">
+                                                            <Video size={13} /> Join Call
+                                                        </button>
+                                                    </FeatureGuard>
+                                                </div>
                                             ) : (
                                                 <InvestmentStatusBadge status={deal.status} />
                                             )}
