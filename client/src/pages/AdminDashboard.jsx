@@ -3,6 +3,7 @@ import KPICard from '../components/admin/KPICard';
 import RecentActivity from '../components/admin/RecentActivity';
 import RiskAlerts from '../components/admin/RiskAlerts';
 import AdminTables from '../components/admin/AdminTables';
+import AdminRecordings from '../components/admin/AdminRecordings';
 import {
     Building2,
     Briefcase,
@@ -159,6 +160,11 @@ const AdminDashboard = () => {
             {/* Tables Section */}
             <section className="admin-section">
                 <AdminTables />
+            </section>
+
+            {/* Call Recordings Section */}
+            <section className="admin-section">
+                <AdminRecordings />
             </section>
         </AdminLayout>
     );

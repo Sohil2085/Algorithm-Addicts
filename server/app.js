@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
 import authRoutes from './routes/auth.routes.js';
 import invoiceRoutes from './routes/invoiceRoutes.js';
 import kycRoutes from './routes/kyc.routes.js';
@@ -9,10 +11,16 @@ import featureRoutes from './routes/feature.routes.js';
 import offerRoutes from './routes/offerRoutes.js';
 import dealRoutes from './routes/dealRoutes.js';
 import walletRoutes from './routes/walletRoutes.js';
+import callRoutes from './routes/callRoutes.js';
 import errorHandler from './middleware/error.middleware.js';
 import cookieParser from 'cookie-parser';
 
 const app = express();
+
+// Serve uploaded recordings statically
+const uploadPath = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
+app.use('/uploads', express.static(uploadPath));
 
 // Middleware
 app.set("trust proxy", 1); // 🔥 Required for Render
@@ -47,6 +55,7 @@ app.use('/api/features', featureRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/deal', dealRoutes);
 app.use('/api/wallet', walletRoutes);
+app.use('/api/call', callRoutes);
 
 // Root route
 app.get('/', (req, res) => {

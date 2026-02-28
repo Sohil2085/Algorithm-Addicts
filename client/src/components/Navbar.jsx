@@ -6,6 +6,7 @@ import ProfileBadge from './ProfileBadge';
 import ThemeToggle from './ThemeToggle';
 import { Menu, X, ShieldCheck } from 'lucide-react';
 import '../styles/landing.css';
+import { useNotificationSocket } from './useNotificationSocket.jsx';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -13,6 +14,10 @@ const Navbar = () => {
     const location = useLocation();
     const isLanding = location.pathname === '/';
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Initialize Global Notification Socket if user is logged in
+    const token = localStorage.getItem('token');
+    useNotificationSocket(token && user ? token : null);
 
     // Close mobile menu on route change
     useEffect(() => {

@@ -211,6 +211,7 @@ html::-webkit-scrollbar-thumb:hover {
     border: none;
     transition: all 0.2s ease;
     cursor: pointer;
+    box-sizing: border-box; /* ADDED to fix height calculations combined with padding */
 }
 
 .btn-primary:hover {
