@@ -192,9 +192,11 @@ function App() {
                 </FeatureGuard>
               } />
               <Route path="/analytics" element={
-                <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
-                  <Analytics />
-                </ProtectedRoute>
+                <FeatureGuard featureKey="ANALYTICS_MODULE">
+                  <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
+                    <Analytics />
+                  </ProtectedRoute>
+                </FeatureGuard>
               } />
               <Route path="/profile" element={
                 <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
@@ -204,9 +206,11 @@ function App() {
 
               {/* Meeting Room */}
               <Route path="/meeting/:dealId" element={
-                <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
-                  <MeetingRoom />
-                </ProtectedRoute>
+                <FeatureGuard featureKey="COMMUNICATION_MODULE">
+                  <ProtectedRoute allowedRoles={['MSME', 'LENDER']}>
+                    <MeetingRoom />
+                  </ProtectedRoute>
+                </FeatureGuard>
               } />
 
               {/* Default Redirect */}

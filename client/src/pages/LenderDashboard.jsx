@@ -1300,6 +1300,46 @@ const LenderDashboard = () => {
                             {TABS.map(tab => {
                                 const Icon = tab.icon;
                                 const isActive = activeTab === tab.id;
+                                if (tab.id === 'meetings') {
+                                    return (
+                                        <FeatureGuard featureKey="COMMUNICATION_MODULE" key={tab.id}>
+                                            <button
+                                                onClick={() => setActiveTab(tab.id)}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap relative ${isActive
+                                                    ? 'text-theme-text bg-theme-elevated/40 border border-theme-border'
+                                                    : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated/20 border border-transparent'
+                                                    }`}
+                                            >
+                                                <Icon size={15} />
+                                                {tab.label}
+                                                {isActive && (
+                                                    <div className="absolute -bottom-[9px] left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-blue-400 rounded-t-full shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
+                                                )}
+                                            </button>
+                                        </FeatureGuard>
+                                    );
+                                }
+
+                                if (tab.id === 'analytics') {
+                                    return (
+                                        <FeatureGuard featureKey="ANALYTICS_MODULE" key={tab.id}>
+                                            <button
+                                                onClick={() => setActiveTab(tab.id)}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap relative ${isActive
+                                                    ? 'text-theme-text bg-theme-elevated/40 border border-theme-border'
+                                                    : 'text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated/20 border border-transparent'
+                                                    }`}
+                                            >
+                                                <Icon size={15} />
+                                                {tab.label}
+                                                {isActive && (
+                                                    <div className="absolute -bottom-[9px] left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-blue-400 rounded-t-full shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
+                                                )}
+                                            </button>
+                                        </FeatureGuard>
+                                    );
+                                }
+
                                 return (
                                     <button
                                         key={tab.id}

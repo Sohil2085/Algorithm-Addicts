@@ -15,6 +15,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getAdminStats } from '../api/adminApi';
+import { FeatureGuard } from '../context/FeatureContext';
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
@@ -163,9 +164,11 @@ const AdminDashboard = () => {
             </section>
 
             {/* Call Recordings Section */}
-            <section className="admin-section">
-                <AdminRecordings />
-            </section>
+            <FeatureGuard featureKey="COMMUNICATION_MODULE">
+                <section className="admin-section">
+                    <AdminRecordings />
+                </section>
+            </FeatureGuard>
         </AdminLayout>
     );
 };
