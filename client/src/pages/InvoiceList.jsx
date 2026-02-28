@@ -13,6 +13,8 @@ const InvoiceList = () => {
     const [loading, setLoading] = useState(true);
     const [fadingOut, setFadingOut] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [riskFilter, setRiskFilter] = useState('ALL');
+    const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
     useEffect(() => {
         fetchInvoices();
@@ -33,10 +35,14 @@ const InvoiceList = () => {
         }
     };
 
-    const filteredInvoices = invoices.filter(invoice =>
-        invoice.buyerGstin?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        invoice.id?.toString().includes(searchTerm)
-    );
+    const filteredInvoices = invoices.filter(invoice => {
+        const matchSearch = invoice.buyerGstin?.toLowerCase().includes(searchTerm.toLowerCase()) || invoice.id?.toString().includes(searchTerm);
+
+        const rawRisk = (invoice.riskLevel || '').toUpperCase().replace(' RISK', '').trim();
+        const matchRisk = riskFilter === 'ALL' || rawRisk === riskFilter;
+
+        return matchSearch && matchRisk;
+    });
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-theme-bg">
@@ -74,13 +80,30 @@ const InvoiceList = () => {
                             className="w-full bg-theme-surface-hover border border-theme-border rounded-xl pl-9 pr-4 py-2.5 text-theme-text text-sm placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400/60 transition disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                     </div>
-                    <button
-                        disabled={loading}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-theme-border bg-theme-surface-hover text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-active transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
-                    >
-                        <Filter size={15} />
-                        <span>Filter</span>
-                    </button>
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                            disabled={loading}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-theme-border bg-theme-surface-hover text-theme-text-muted hover:text-theme-text hover:bg-theme-surface-active transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none"
+                        >
+                            <Filter size={15} />
+                            <span>{riskFilter === 'ALL' ? 'Filter' : `${riskFilter} RISK`}</span>
+                        </button>
+
+                        {showFilterDropdown && (
+                            <div className="absolute right-0 top-full mt-2 w-48 bg-theme-bg border border-theme-border rounded-xl shadow-2xl shadow-black/20 overflow-hidden z-20 animate-in fade-in slide-in-from-top-2">
+                                {['ALL', 'LOW', 'MEDIUM', 'HIGH', 'VERY HIGH', 'CRITICAL'].map((r) => (
+                                    <button
+                                        key={r}
+                                        onClick={() => { setRiskFilter(r); setShowFilterDropdown(false); }}
+                                        className={`w-full text-left px-4 py-2 text-sm transition-colors ${riskFilter === r ? 'bg-blue-500/10 text-blue-400 font-medium' : 'text-theme-text-muted hover:bg-theme-surface-hover hover:text-theme-text'}`}
+                                    >
+                                        {r === 'ALL' ? 'All Risks' : `${r} Risk`}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* ── Table area ─ swap skeleton vs real ──────────────────── */}

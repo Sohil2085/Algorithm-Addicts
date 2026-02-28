@@ -5,18 +5,19 @@ import { useAuth } from '../context/AuthContext';
 import InvoiceViewDialog from './InvoiceViewDialog';
 
 const riskPill = (level) => {
-    const l = (level || '').toLowerCase();
-    if (l === 'low' || l === 'safe') return 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20';
-    if (l === 'medium') return 'bg-amber-500/15 text-amber-300 border border-amber-500/20';
-    if (l === 'high' || l === 'critical risk') return 'bg-rose-500/15 text-rose-300 border border-rose-500/20';
-    return 'bg-white/10 text-white/50 border border-white/10';
+    const l = (level || '').toLowerCase().replace(' risk', '').trim();
+    if (l === 'low' || l === 'safe') return 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-300 border border-emerald-500/20';
+    if (l === 'medium') return 'bg-amber-500/15 text-amber-500 dark:text-amber-300 border border-amber-500/20';
+    if (l === 'high') return 'bg-red-400/10 text-red-500 dark:text-red-400 border border-red-400/20';
+    if (l === 'very high' || l === 'critical') return 'bg-red-600/15 text-red-600 dark:text-red-500 border border-red-600/20';
+    return 'bg-theme-surface-hover text-theme-text-muted border border-theme-border';
 };
 
 const statusPill = (status) => {
-    if (status === 'VERIFIED') return 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20';
-    if (status === 'PENDING') return 'bg-amber-500/15 text-amber-300 border border-amber-500/20';
-    if (status === 'REJECTED') return 'bg-rose-500/15 text-rose-300 border border-rose-500/20';
-    return 'bg-white/10 text-white/50 border border-white/10';
+    if (status === 'VERIFIED') return 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-300 border border-emerald-500/20';
+    if (status === 'PENDING') return 'bg-amber-500/15 text-amber-500 dark:text-amber-300 border border-amber-500/20';
+    if (status === 'REJECTED') return 'bg-rose-500/15 text-rose-500 dark:text-rose-300 border border-rose-500/20';
+    return 'bg-theme-surface-hover text-theme-text-muted border border-theme-border';
 };
 
 const InvoiceTable = ({ invoices, onCreate, showFundButton = false }) => {
@@ -30,12 +31,12 @@ const InvoiceTable = ({ invoices, onCreate, showFundButton = false }) => {
 
     if (!invoices || invoices.length === 0) {
         return (
-            <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-12 text-center">
-                <div className="mx-auto h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                    <ShieldAlert className="text-white/30" size={22} />
+            <div className="rounded-2xl border border-theme-border bg-theme-surface backdrop-blur-xl p-12 text-center shadow-lg shadow-theme-border/10">
+                <div className="mx-auto h-12 w-12 rounded-2xl bg-theme-surface-hover border border-theme-border flex items-center justify-center mb-4">
+                    <ShieldAlert className="text-theme-text-muted" size={22} />
                 </div>
-                <h3 className="text-base font-medium text-white mb-1">No invoices found</h3>
-                <p className="text-white/40 text-sm mb-6">Get started by creating your first invoice.</p>
+                <h3 className="text-base font-medium text-theme-text mb-1">No invoices found</h3>
+                <p className="text-theme-text-muted text-sm mb-6">Get started by creating your first invoice.</p>
                 {onCreate && (
                     <button
                         onClick={onCreate}
@@ -51,52 +52,60 @@ const InvoiceTable = ({ invoices, onCreate, showFundButton = false }) => {
 
     return (
         <>
-            <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden">
+            <div className="rounded-2xl border border-theme-border bg-theme-surface backdrop-blur-xl overflow-hidden shadow-lg shadow-theme-border/10">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left min-w-[900px]">
                         <thead>
-                            <tr className="border-b border-white/10 bg-white/5">
-                                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Invoice ID</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Buyer GSTIN</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Amount</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Date</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Credit Score</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Risk</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest">Status</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-widest text-right">Actions</th>
+                            <tr className="border-b border-theme-border bg-theme-surface-hover text-theme-text-muted">
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-widest">Invoice ID</th>
+                                {showFundButton && <th className="px-6 py-4 text-xs font-semibold uppercase tracking-widest">MSME Name</th>}
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-widest">Buyer GSTIN</th>
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-widest">Amount</th>
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-widest">Date</th>
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-widest">Credit Score</th>
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-widest">Risk</th>
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-widest">Status</th>
+                                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/[0.05]">
+                        <tbody className="divide-y divide-theme-border">
                             {invoices.map((invoice) => (
-                                <tr key={invoice.id} className="hover:bg-white/5 transition-colors">
+                                <tr key={invoice.id} className="hover:bg-theme-surface-hover transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm font-mono font-medium text-white/80">#{invoice.id.toString().slice(-6)}</span>
+                                        <span className="text-sm font-mono font-medium text-theme-text">#{invoice.id.toString().slice(-6)}</span>
+                                    </td>
+                                    {showFundButton && (
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-sm text-theme-text-muted">{invoice.original?.user?.kyc?.businessName || invoice.original?.user?.kyc?.legalName || invoice.msmeName || invoice.user?.kyc?.businessName || invoice.user?.kyc?.legalName || 'N/A'}</span>
+                                        </td>
+                                    )}
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className="text-sm text-theme-text-muted font-mono">{invoice.buyerGstin}</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm text-white/60 font-mono">{invoice.buyerGstin}</span>
+                                        <span className="text-sm font-semibold text-theme-text">₹{Number(invoice.amount).toLocaleString()}</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm font-semibold text-white">₹{Number(invoice.amount).toLocaleString()}</span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm text-white/50">{new Date(invoice.createdAt).toLocaleDateString()}</span>
+                                        <span className="text-sm text-theme-text-muted">{new Date(invoice.createdAt).toLocaleDateString()}</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-14 bg-white/10 rounded-full h-1 overflow-hidden">
+                                            <div className="w-14 bg-theme-border rounded-full h-1 overflow-hidden">
                                                 <div
-                                                    className={`h-1 rounded-full ${invoice.creditScore >= 80 ? 'bg-emerald-400' :
-                                                        invoice.creditScore >= 50 ? 'bg-amber-400' : 'bg-rose-400'
+                                                    className={`h-1 rounded-full ${invoice.creditScore >= 80 ? 'bg-emerald-500' :
+                                                        invoice.creditScore >= 50 ? 'bg-amber-500' : 'bg-rose-500'
                                                         }`}
                                                     style={{ width: `${invoice.creditScore}%` }}
                                                 />
                                             </div>
-                                            <span className="text-xs text-white/40 tabular-nums">{invoice.creditScore}</span>
+                                            <span className="text-xs text-theme-text-muted tabular-nums font-medium">{invoice.creditScore}</span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`inline-flex items-center text-xs font-medium px-2.5 py-1 rounded-full capitalize ${riskPill(invoice.riskLevel)}`}>
-                                            {(invoice.riskLevel || 'N/A').toLowerCase()}
+                                            {(invoice.riskLevel || 'N/A').toLowerCase().includes('risk')
+                                                ? (invoice.riskLevel || 'N/A').toLowerCase()
+                                                : `${(invoice.riskLevel || 'N/A').toLowerCase()} risk`}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">

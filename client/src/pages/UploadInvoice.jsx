@@ -140,7 +140,7 @@ const UploadInvoice = () => {
                                             name="dueDate"
                                             value={formData.dueDate}
                                             onChange={handleChange}
-                                            className="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-theme-text text-sm focus:outline-none focus:ring-2 focus:ring-theme-border-focus focus:border-theme-border-hover transition"
+                                            className="w-full bg-theme-bg border border-theme-border rounded-xl px-4 py-3 text-theme-text text-sm focus:outline-none focus:ring-2 focus:ring-theme-border-focus focus:border-theme-border-hover transition [color-scheme:light] dark:[color-scheme:dark]"
                                             required
                                         />
                                         <p className="mt-1.5 text-xs text-theme-text-muted">Invoice payment due date</p>

@@ -1,16 +1,28 @@
 import React, { useState } from 'react';
 import { X, Download, Loader2 } from 'lucide-react';
 import { downloadInvoicePDF } from '../utils/invoicePdf';
+import { useAuth } from '../context/AuthContext';
 
 export default function InvoiceViewDialog({ invoice, onClose, onFund, showFundButton = false }) {
+  const { user } = useAuth();
   const [isDownloading, setIsDownloading] = useState(false);
 
   if (!invoice) return null;
 
+  // Compute the MSME name by falling back through nested payload fields or the active user if they are an MSME
+  const msmeName =
+    invoice.msmeName ||
+    invoice.original?.user?.kyc?.businessName ||
+    invoice.original?.user?.kyc?.legalName ||
+    invoice.user?.kyc?.businessName ||
+    invoice.user?.kyc?.legalName ||
+    (user?.role === 'MSME' ? (user.kyc?.businessName || user.kyc?.legalName || user.name) : null) ||
+    'N/A';
+
   const handleDownload = async () => {
     try {
       setIsDownloading(true);
-      await downloadInvoicePDF(invoice);
+      await downloadInvoicePDF({ ...invoice, msmeName });
     } catch (error) {
       console.error('Failed to generate PDF:', error);
       // Fallback alert if something goes wrong
@@ -57,7 +69,7 @@ export default function InvoiceViewDialog({ invoice, onClose, onFund, showFundBu
 
               <div>
                 <span className="text-xs text-theme-text-muted uppercase tracking-wider font-medium">MSME Name</span>
-                <div className="text-theme-text font-semibold text-base mt-1">{invoice.msmeName || 'N/A'}</div>
+                <div className="text-theme-text font-semibold text-base mt-1">{msmeName}</div>
               </div>
 
               <div>
