@@ -4,9 +4,63 @@ import { getPendingKyc, approveKyc, rejectKyc } from '../api/adminApi';
 import toast from 'react-hot-toast';
 import {
     CheckCircle, XCircle, Search, Building2, ExternalLink,
-    ArrowLeft, Calendar, MapPin, Hash, User, ShieldCheck, FileText
+    ArrowLeft, Calendar, MapPin, Hash, User, ShieldCheck, FileText, Copy, Check
 } from 'lucide-react';
 import AdminLayout from '../components/admin/AdminLayout';
+
+const InlineCopyButton = ({ textToCopy, label }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async () => {
+        if (!textToCopy || textToCopy === 'Not Provided') return;
+        try {
+            if (navigator?.clipboard?.writeText) {
+                await navigator.clipboard.writeText(textToCopy);
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try { document.execCommand('copy'); } catch (err) { }
+                textArea.remove();
+            }
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1200);
+        } catch (err) { }
+    };
+
+    const isDisabled = !textToCopy || textToCopy === 'Not Provided';
+
+    return (
+        <button
+            onClick={(e) => { e.stopPropagation(); handleCopy(); }}
+            disabled={isDisabled}
+            aria-label={label ? `Copy ${label}` : 'Copy'}
+            title={isDisabled ? 'No value' : 'Copy'}
+            className={`
+                group relative flex items-center justify-center w-8 h-8 rounded-lg outline-none transition-all duration-200
+                border border-transparent hover:border-theme-border
+                ${isDisabled
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:bg-theme-surface hover:shadow-[0_0_10px_rgba(59,130,246,0.2)] focus:ring-2 focus:ring-blue-500/40 text-theme-text-muted hover:text-blue-400'
+                }
+            `}
+        >
+            <div className="relative flex items-center justify-center">
+                {copied ? <Check size={16} className="text-emerald-400 animate-in zoom-in spin-in-12 duration-200" /> : <Copy size={16} className="transition-transform group-hover:scale-110" />}
+            </div>
+            {copied && (
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-theme-surface border border-theme-border text-xs px-2 py-1 rounded shadow-lg text-theme-text whitespace-nowrap animate-in fade-in slide-in-from-bottom-1 pointer-events-none z-10">
+                    Copied!
+                </span>
+            )}
+        </button>
+    );
+};
 
 const AdminKycPage = () => {
     const navigate = useNavigate();
@@ -238,11 +292,17 @@ const AdminKycPage = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                         <div className="space-y-1">
                                             <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><Hash size={12} /> GST Number</span>
-                                            <p className="text-theme-text font-mono text-lg tracking-wider">{selectedRequest.gstNumber}</p>
+                                            <div className="flex justify-between items-center gap-2">
+                                                <p className="text-theme-text font-mono text-lg tracking-wider">{selectedRequest.gstNumber}</p>
+                                                <InlineCopyButton textToCopy={selectedRequest.gstNumber} label="GST Number" />
+                                            </div>
                                         </div>
                                         <div className="space-y-1">
                                             <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><Hash size={12} /> PAN Number</span>
-                                            <p className="text-theme-text font-mono text-lg tracking-wider">{selectedRequest.panNumber}</p>
+                                            <div className="flex justify-between items-center gap-2">
+                                                <p className="text-theme-text font-mono text-lg tracking-wider">{selectedRequest.panNumber}</p>
+                                                <InlineCopyButton textToCopy={selectedRequest.panNumber} label="PAN Number" />
+                                            </div>
                                         </div>
                                         <div className="space-y-1">
                                             <span className="text-theme-text-muted text-xs flex items-center gap-1.5"><Calendar size={12} /> Business Start Date</span>
