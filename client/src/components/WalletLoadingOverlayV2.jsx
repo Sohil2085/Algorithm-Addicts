@@ -37,7 +37,7 @@ const WalletLoadingOverlayV2 = () => {
                         <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 shadow-[0_0_12px_rgba(255,200,0,0.35)] opacity-70"></div>
 
                         {/* Dot 3: Bottom Left */}
-                        <div className="absolute bottom-[10%] left-[10%] -translate-x-1/2 translate-y-1/2 h-3 w-3 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 shadow-[0_0_12px_rgba(255,200,0,0.35)] opacity-40"></div>
+                        <div className="absolute bottom-[14.6%] left-[14.6%] -translate-x-1/2 translate-y-1/2 h-3 w-3 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-600 shadow-[0_0_12px_rgba(255,200,0,0.35)] opacity-40"></div>
                     </div>
 
                     {/* Center Wallet Badge */}

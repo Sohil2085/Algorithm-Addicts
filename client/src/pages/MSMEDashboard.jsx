@@ -40,6 +40,7 @@ import { getMyDeals, repayDeal, signAgreement, downloadAgreement } from '../api/
 import { useAuth } from '../context/AuthContext';
 import { FeatureGuard } from '../context/FeatureContext';
 import FinbridgeLoading from '../components/FinbridgeLoading';
+import AgreementActions from '../components/AgreementActions';
 import toast from 'react-hot-toast';
 
 const MSMEDashboard = () => {
@@ -453,29 +454,13 @@ const MSMEDashboard = () => {
                                                     {new Date(deal.dueDate).toLocaleDateString('en-IN')}
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
-                                                    <div className="flex flex-col gap-1 items-start">
-                                                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${deal.lenderSigned && deal.msmeSigned ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
-                                                            {deal.lenderSigned && deal.msmeSigned ? 'SIGNED' : 'PENDING'}
-                                                        </span>
-                                                        <div className="flex gap-2 mt-1">
-                                                            <button
-                                                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDownloadAgreement(deal.id); }}
-                                                                disabled={isDownloadingAgreement === deal.id}
-                                                                className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline"
-                                                            >
-                                                                Download
-                                                            </button>
-                                                            {!deal.msmeSigned && (
-                                                                <button
-                                                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleSignAgreement(deal.id); }}
-                                                                    disabled={isSigningAgreement === deal.id}
-                                                                    className="text-[10px] text-emerald-400 hover:text-emerald-300 hover:underline"
-                                                                >
-                                                                    {isSigningAgreement === deal.id ? 'Signing...' : 'Sign'}
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                    <AgreementActions
+                                                        isSigned={deal.lenderSigned && deal.msmeSigned}
+                                                        isDownloading={isDownloadingAgreement === deal.id}
+                                                        isSigning={isSigningAgreement === deal.id}
+                                                        onDownload={() => handleDownloadAgreement(deal.id)}
+                                                        onSign={() => handleSignAgreement(deal.id)}
+                                                    />
                                                 </td>
                                                 <td className="px-4 py-3 whitespace-nowrap">
                                                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${deal.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>
