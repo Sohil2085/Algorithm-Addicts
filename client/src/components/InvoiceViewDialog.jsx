@@ -1,8 +1,24 @@
-import React from 'react';
-import { X, Download } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Download, Loader2 } from 'lucide-react';
+import { downloadInvoicePDF } from '../utils/invoicePdf';
 
 export default function InvoiceViewDialog({ invoice, onClose, onFund, showFundButton = false }) {
+  const [isDownloading, setIsDownloading] = useState(false);
+
   if (!invoice) return null;
+
+  const handleDownload = async () => {
+    try {
+      setIsDownloading(true);
+      await downloadInvoicePDF(invoice);
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+      // Fallback alert if something goes wrong
+      alert('Failed to generate invoice PDF. Please try again later.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 animate-in fade-in zoom-in-95">
@@ -105,10 +121,13 @@ export default function InvoiceViewDialog({ invoice, onClose, onFund, showFundBu
         {/* Footer */}
         <footer className="flex items-center justify-between p-6 border-t border-theme-border/50 bg-theme-surface/30">
           <button
-            className="py-2.5 px-5 rounded-xl bg-theme-surface-hover border border-theme-border text-theme-text-muted hover:bg-theme-surface hover:text-theme-text transition-all flex items-center gap-2 shadow-sm font-medium text-sm"
-            onClick={() => {/* TODO: Download PDF logic */ }}
+            className={`py-2.5 px-5 rounded-xl border border-theme-border flex items-center gap-2 shadow-sm font-medium text-sm transition-all
+                ${isDownloading ? 'bg-theme-surface-hover/50 text-theme-text-muted cursor-not-allowed' : 'bg-theme-surface-hover text-theme-text-muted hover:bg-theme-surface hover:text-theme-text'}`}
+            onClick={handleDownload}
+            disabled={isDownloading}
           >
-            <Download size={16} /> Download PDF
+            {isDownloading ? <Loader2 size={16} className="animate-spin text-blue-400" /> : <Download size={16} />}
+            {isDownloading ? 'Downloading...' : 'Download PDF'}
           </button>
 
           <div className="flex items-center gap-3">
