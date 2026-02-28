@@ -12,7 +12,7 @@ import {
     Video, Clock, CheckCircle, XCircle, BarChart2,
     ChevronRight, X, FileText, Download, ExternalLink,
     Building, AlertOctagon, Calendar, PieChart as PieChartIcon,
-    ArrowUpRight, ArrowDownRight, ShieldCheck, LockKeyhole, PenLine
+    ArrowUpRight, ArrowDownRight, ShieldCheck, LockKeyhole
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
 import RiskBadge from '../components/RiskBadge';
@@ -591,36 +591,6 @@ const MarketplaceSection = ({ onViewInvoice, onFundInvoice, availableInvoices = 
         </div>
     );
 };
-const AgreementActions = ({ status, onDownload, onSign, canDownload, canSign, isDownloading, isSigning }) => {
-    return (
-        <div className="flex flex-col gap-2 items-start" onClick={(e) => e.stopPropagation()}>
-            <span className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-wider ${status === 'SIGNED' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'}`}>
-                {status}
-            </span>
-            <div className="flex items-center gap-2 justify-start min-w-[140px]">
-                <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDownload(); }}
-                    disabled={!canDownload || isDownloading}
-                    aria-label="Download agreement PDF"
-                    title="Download agreement PDF"
-                    className="flex items-center justify-center w-8 h-8 rounded-lg text-xs font-medium transition-all duration-200 border border-white/10 bg-white/5 hover:bg-white/10 text-theme-text-muted hover:text-theme-text disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    <Download size={14} />
-                </button>
-                <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSign(); }}
-                    disabled={!canSign || isSigning}
-                    aria-label="Open e-sign flow"
-                    title={!canSign ? "Already signed" : "Open e-sign flow"}
-                    className={`flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium transition-all duration-200 ${canSign ? 'bg-blue-600/80 hover:bg-blue-600 text-white shadow-[0_0_20px_rgba(59,130,246,0.25)]' : 'bg-theme-surface border border-theme-border text-theme-text-muted opacity-50 cursor-not-allowed'}`}
-                >
-                    <PenLine size={14} />
-                    {isSigning ? 'Signing...' : (canSign ? 'Sign' : 'Signed')}
-                </button>
-            </div>
-        </div>
-    );
-};
 
 const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal, onSignAgreement, isSigningAgreement, onDownloadAgreement, isDownloadingAgreement }) => {
     const totalInvested = myDeals.reduce((sum, deal) => sum + parseFloat(deal.fundedAmount), 0);
@@ -695,32 +665,39 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal, onSignAgree
                                                 : <span className="text-theme-text-muted">—</span>}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <AgreementActions
-                                                status={deal.lenderSigned && deal.msmeSigned ? 'SIGNED' : 'PENDING'}
-                                                onDownload={() => onDownloadAgreement(deal.id)}
-                                                onSign={() => onSignAgreement(deal.id)}
-                                                canDownload={true}
-                                                canSign={!deal.lenderSigned}
-                                                isDownloading={isDownloadingAgreement === deal.id}
-                                                isSigning={isSigningAgreement === deal.id}
-                                            />
+                                            <div className="flex flex-col gap-1 items-start">
+                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${deal.lenderSigned && deal.msmeSigned ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                    {deal.lenderSigned && deal.msmeSigned ? 'SIGNED' : 'PENDING'}
+                                                </span>
+                                                <div className="flex gap-2 mt-1">
+                                                    <button
+                                                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDownloadAgreement(deal.id); }}
+                                                        disabled={isDownloadingAgreement === deal.id}
+                                                        className="text-[10px] text-blue-400 hover:text-blue-300 hover:underline"
+                                                    >
+                                                        Download
+                                                    </button>
+                                                    {!deal.lenderSigned && (
+                                                        <button
+                                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSignAgreement(deal.id); }}
+                                                            disabled={isSigningAgreement === deal.id}
+                                                            className="text-[10px] text-emerald-400 hover:text-emerald-300 hover:underline"
+                                                        >
+                                                            {isSigningAgreement === deal.id ? 'Signing...' : 'Sign'}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {deal.status === 'ACTIVE' ? (
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => onFundDeal(deal.id)}
-                                                        disabled={isSubmittingDeal}
-                                                        className={`btn-primary !h-[32px] !py-[0] !px-3 text-[13px] font-semibold rounded-lg flex items-center justify-center gap-1.5 box-border ${isSubmittingDeal ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                                        {isSubmittingDeal ? <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Zap size={14} />}
-                                                        {isSubmittingDeal ? 'Processing...' : 'Fund Deal'}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => window.open(`/meeting/${deal.id}`, '_blank')}
-                                                        className="!h-[32px] !py-[0] !px-3 text-[13px] font-semibold rounded-lg flex items-center justify-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 transition-all box-border">
-                                                        <Video size={14} /> Join Call
-                                                    </button>
-                                                </div>
+                                                <button
+                                                    onClick={() => onFundDeal(deal.id)}
+                                                    disabled={isSubmittingDeal}
+                                                    className={`btn-primary px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1 ${isSubmittingDeal ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                    {isSubmittingDeal ? <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Zap size={13} />}
+                                                    {isSubmittingDeal ? 'Processing...' : 'Fund Deal'}
+                                                </button>
                                             ) : (
                                                 <InvestmentStatusBadge status={deal.status} />
                                             )}
@@ -736,95 +713,73 @@ const InvestmentsSection = ({ myDeals, onFundDeal, isSubmittingDeal, onSignAgree
     );
 };
 
-const MeetingsSection = ({ myDeals }) => {
-    const activeDeals = myDeals.filter(d => d.status === 'ACTIVE');
-    const [recordings, setRecordings] = useState({});
-
-    useEffect(() => {
-        const fetchRecordings = async () => {
-            const newRecordings = {};
-            for (const deal of activeDeals) {
-                try {
-                    const res = await getRecordings(deal.id);
-                    if (res?.success && res.data?.lenderRecordingUrl) {
-                        newRecordings[deal.id] = res.data.lenderRecordingUrl;
-                    }
-                } catch (e) {
-                    // ignore if no recording/session exists
-                }
-            }
-            setRecordings(newRecordings);
-        };
-        if (activeDeals.length > 0) {
-            fetchRecordings();
-        }
-    }, [activeDeals.length]);
-
-    return (
-        <div className="space-y-6">
-            <div>
-                <h2 className="text-2xl font-bold text-theme-text tracking-tight">Meeting Records</h2>
-                <p className="text-theme-text-muted mt-1">Join live video verification sessions with your MSME partners and view past recordings</p>
-            </div>
-
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                <Video size={18} className="text-blue-400 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-theme-text-muted">
-                    Each active deal allows a 1-on-1 video call with the MSME. You can record the session, and it will appear here for download.
-                </p>
-            </div>
-
-            {activeDeals.length === 0 ? (
-                <div className="text-center py-16 text-theme-text-muted text-sm">
-                    No active deals available for video calls right now.
-                </div>
-            ) : (
-                <div className="rounded-2xl bg-theme-surface-hover border border-theme-border overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="border-b border-theme-border bg-theme-surface-hover">
-                                    {['MSME', 'Deal Amount', 'Due Date', 'Status', 'Action'].map(h => (
-                                        <th key={h} className="px-6 py-4 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-theme-border">
-                                {activeDeals.map(deal => (
-                                    <tr key={deal.id} className="hover:bg-theme-surface-hover transition-colors">
-                                        <td className="px-6 py-4 text-sm font-medium text-theme-text">{deal.msme?.name || 'MSME'}</td>
-                                        <td className="px-6 py-4 text-sm text-theme-text-muted">₹{Number(deal.fundedAmount).toLocaleString('en-IN')}</td>
-                                        <td className="px-6 py-4 text-sm text-theme-text-muted">{new Date(deal.dueDate).toLocaleDateString('en-IN')}</td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Active</span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                {recordings[deal.id] ? (
-                                                    <a
-                                                        href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${recordings[deal.id]}`}
-                                                        download
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 border border-blue-500/30 transition-all"
-                                                    >
-                                                        <Download size={12} /> Download Recording
-                                                    </a>
-                                                ) : (
-                                                    <span className="text-xs text-theme-text-muted italic">No recording available</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
+const MeetingsSection = () => (
+    <div className="space-y-6">
+        <div>
+            <h2 className="text-2xl font-bold text-theme-text tracking-tight">Meeting Records</h2>
+            <p className="text-theme-text-muted mt-1">Zoom verification sessions with MSME partners</p>
         </div>
-    );
-};
+
+        {/* Info Banner */}
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <Video size={18} className="text-blue-400 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-theme-text-muted">
+                All meetings are recorded for compliance purposes. Recordings are available for 90 days post-session.
+                <span className="text-blue-400 ml-1 cursor-pointer hover:underline">Contact support</span> for extended access.
+            </p>
+        </div>
+
+        {/* Table */}
+        <div className="rounded-2xl bg-theme-surface-hover backdrop-blur-xl border border-theme-border shadow-[0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden">
+            <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                    <thead>
+                        <tr className="border-b border-theme-border bg-theme-surface-hover">
+                            {['Invoice ID', 'MSME Name', 'Meeting Date', 'Duration', 'Recording', 'Action'].map(h => (
+                                <th key={h} className="px-6 py-4 text-xs font-semibold text-theme-text-muted uppercase tracking-wider whitespace-nowrap">{h}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-theme-border">
+                        {DUMMY_MEETINGS.map((m) => (
+                            <tr key={m.invoiceId + m.meetingDate} className="hover:bg-theme-surface-hover transition-colors group">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-400">#{m.invoiceId}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-theme-text">{m.msmeName}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-text-muted">
+                                    {new Date(m.meetingDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-theme-text-muted">
+                                    <div className="flex items-center gap-1.5">
+                                        <Clock size={13} className="text-theme-text-muted" />
+                                        {m.duration}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <RecordingStatusBadge status={m.recordingStatus} />
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <button
+                                        disabled={m.recordingStatus !== 'AVAILABLE'}
+                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 opacity-0 group-hover:opacity-100 ${m.recordingStatus === 'AVAILABLE'
+                                            ? 'border-blue-500/50 text-blue-400 hover:bg-blue-500/10 cursor-pointer'
+                                            : 'border-theme-border text-theme-text-muted cursor-not-allowed'
+                                            }`}
+                                    >
+                                        <Video size={13} />
+                                        {m.recordingStatus === 'AVAILABLE' ? 'View Recording' : 'Processing...'}
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {/* Empty state note */}
+        <p className="text-xs text-theme-text-muted text-center">Showing {DUMMY_MEETINGS.length} meeting records. New sessions are logged automatically upon completion.</p>
+    </div>
+);
 
 const AnalyticsSection = () => (
     <div className="space-y-8">
@@ -1197,7 +1152,7 @@ const LenderDashboard = () => {
                     />
                 </FeatureGuard>
             );
-            case 'meetings': return <MeetingsSection myDeals={myDeals} />;
+            case 'meetings': return <MeetingsSection />;
             case 'analytics': return <AnalyticsSection />;
             default: return <OverviewSection wallet={wallet} myDeals={myDeals} />;
         }
